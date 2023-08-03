@@ -1,6 +1,3 @@
-## image here from images/hawk-eye.png
-
-
 ![HAWK Eye](images/banner.png)
 
 # 🦅 HAWK Eye - Highly Advanced Watchful Keeper Eye
