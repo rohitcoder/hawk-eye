@@ -1,4 +1,4 @@
-![HAWK Eye](images/banner.png)
+![HAWK Eye](assets/banner.png)
 
 # 🦅 HAWK Eye - Highly Advanced Watchful Keeper Eye
 
@@ -6,6 +6,9 @@ HAWK Eye is a powerful and versatile CLI (Command-Line Interface) tool designed 
 
 ### Why "HAWK Eye"?
 The name "HAWK Eye" captures the essence of a Highly Advanced Watchful Keeper. Like the keen vision of a hawk, this tool enables you to monitor and safeguard your data with precision and accuracy, ensuring data privacy and security.
+
+## HAWK Eye in Action
+[![HAWK Eye Demo](assets/vid-preview.png)](assets/preview.mp4)
 
 ## Key features
 
@@ -16,6 +19,7 @@ The name "HAWK Eye" captures the essence of a Highly Advanced Watchful Keeper. L
 - ``--debug`` flag enables printing of all debugging output for comprehensive troubleshooting.
 - Save output in JSON format using the --json flag and specify a file name like --json output.json.
 - Proudly crafted with love and a sense of humor to make your security journey enjoyable and stress-free.
+
 ## Installation
 
 HAWK Eye is a Python-based CLI tool that can be installed using the following steps:
