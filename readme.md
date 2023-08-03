@@ -11,7 +11,8 @@ The name "HAWK Eye" captures the essence of a Highly Advanced Watchful Keeper. L
 
 See how this works on Youtube - https://youtu.be/LuPXE7UJKOY
 
-[![HAWK Eye Demo](assets/vid-preview.png)](assets/preview.mp4)
+![HAWK Eye Demo](assets/preview.png)
+![HAWK Eye Demo](assets/preview2.png)
 
 ## Key features
 
