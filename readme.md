@@ -7,7 +7,7 @@ HAWK Eye is a powerful and versatile CLI (Command-Line Interface) tool designed 
 ### Why "HAWK Eye"?
 The name "HAWK Eye" captures the essence of a Highly Advanced Watchful Keeper. Like the keen vision of a hawk, this tool enables you to monitor and safeguard your data with precision and accuracy, ensuring data privacy and security.
 
-## Key fatures
+## Key features
 
 - Swiftly scans multiple data sources (S3, MySQL, Redis, Firebase, filesystem, and GCS) for PII data and malware exposure.
 - Advanced algorithms and deep scanning capabilities provide thorough security auditing.
@@ -16,6 +16,24 @@ The name "HAWK Eye" captures the essence of a Highly Advanced Watchful Keeper. L
 - ``--debug`` flag enables printing of all debugging output for comprehensive troubleshooting.
 - Save output in JSON format using the --json flag and specify a file name like --json output.json.
 - Proudly crafted with love and a sense of humor to make your security journey enjoyable and stress-free.
+## Installation
+
+HAWK Eye is a Python-based CLI tool that can be installed using the following steps:
+
+1. Clone the HAWK Eye repository to your local machine.
+   ```bash
+   git clone https://github.com/rohitcoder/hawk-eye.git
+   ```
+2. Navigate to the HAWK Eye directory.
+3. Run the following command to install the required dependencies:
+   ```bash
+   pip3 install -r requirements.txt
+   ```
+4. Create a connection.yml file in the root directory and add your connection profiles (see the "How to Configure HAWK Eye Connections" section for details).
+5. Run the following command to install HAWK Eye:
+   ```bash
+   python3 main.py
+   ```
 
 ## Usage
 To unleash the power of HAWK Eye, simply follow the steps mentioned in the "Usage" section of the "README.md" file.
@@ -72,7 +90,7 @@ Note: If you don't provide any command, it will run all commands (firebase, fs, 
       </tr>
       <tr>
          <td>--json</td>
-         <td>Provide --json file name to save output in json file like ``--json output.json``</td>
+         <td>Provide --json file name to save output in json file like --json output.json</td>
       </tr>
    </tbody>
 </table>
@@ -166,6 +184,15 @@ We welcome contributions from the open-source community to enhance HAWK Eye's ca
 9. After approval, your contributions will be merged into the main codebase.
 
 Join the HAWK Eye community and contribute to data source security worldwide. For any questions or assistance, feel free to open an issue on the repository.
+
+## Donation
+
+If you find HAWK Eye useful and would like to support the project, please consider making a donation. All 100% of the donations will be distributed to charities focused on education welfare and animal help.
+
+#### How to Donate
+You can make a donation directly to the charities of your choice and let us know about it by pinging us on [LinkedIn](https://linkedin.com/in/rohitcoder) or [Twitter](https://twitter.com/rohitcoder). We would love to express our gratitude for your generosity and support.
+
+Your donations will play a significant role in making a positive impact in the lives of those in need. Thank you for considering supporting our cause!
 
 
 
