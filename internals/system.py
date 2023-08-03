@@ -49,8 +49,8 @@ def print_banner():
                 (_/ .  ~(   /'     "~"--,Y   -=b-. _)               + [bold yellow]H[/bold yellow].[bold yellow]A[/bold yellow].[bold yellow]W[/bold yellow].[bold yellow]K[/bold yellow] [bold yellow]Eye[/bold yellow] - [bold blue]Highly Advanced Watchful Keeper Eye[/bold blue] +
                 (_/ .  \  :           / l      c"~o \               + ================================================== +
                     \ /    `.    .     .^   \_.-~"~--.  )                 
-                    (_/ .   `  /     /       !       )/   
-                    / / _.   '.   .':      /        '                     Security Automation Tool by [bold red]@rohitcoder[/bold red]
+                    (_/ .   `  /     /       !       )/                   Hunt for Secrets & PII Data, like never before!
+                    / / _.   '.   .':      /        '                           A Tool by [bold red]Rohit Kumar (@rohitcoder)[/bold red]
                     ~(_/ .   /    _  `  .-<_                                    
                         /_/ . ' .-~" `.  / \  \          ,z=.
                         ~( /   '  :   | K   "-.~-.______//
