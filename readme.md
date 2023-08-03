@@ -190,7 +190,7 @@ Join the HAWK Eye community and contribute to data source security worldwide. Fo
 If you find HAWK Eye useful and would like to support the project, please consider making a donation. All 100% of the donations will be distributed to charities focused on education welfare and animal help.
 
 #### How to Donate
-You can make a donation directly to the charities of your choice and let us know about it by pinging us on [LinkedIn](https://linkedin.com/in/rohitcoder) or [Twitter](https://twitter.com/rohitcoder). We would love to express our gratitude for your generosity and support.
+Feel free to make a donation directly to the charities of your choice or send it to us, and we'll ensure it reaches the deserving causes. Just reach out to us on [LinkedIn](https://linkedin.com/in/rohitcoder) or [Twitter](https://twitter.com/rohitcoder) to let us know about your contribution. Your generosity and support mean the world to us, and we can't wait to express our heartfelt gratitude.
 
 Your donations will play a significant role in making a positive impact in the lives of those in need. Thank you for considering supporting our cause!
 

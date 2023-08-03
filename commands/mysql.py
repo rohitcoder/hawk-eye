@@ -9,6 +9,7 @@ from rich.table import Table
 console = Console()
 
 def connect_mysql(host, port, user, password, database):
+    print("try")
     try:
         conn = mysql.connector.connect(
             host=host,
@@ -70,6 +71,7 @@ def check_data_patterns(conn, patterns, profile_name, database_name):
     return results
 
 def execute(args):
+    print("okey")
     results = []
     system.print_info(f"Running Checks for MySQL Sources")
     with open('connection.yml', 'r') as file:

@@ -25,7 +25,8 @@ def load_command_module(command):
     try:
         module = importlib.import_module(f"{COMMANDS_PACKAGE}.{command}")
         return module
-    except ImportError as e:
+    except Exception as e:
+        print(e)
         print(f"Command '{command}' is not supported. {e} ")
         sys.exit(1)
 
