@@ -1,0 +1,77 @@
+import argparse
+import redis
+import yaml
+import re
+from internals import system
+from rich.console import Console
+
+
+console = Console()
+
+def connect_redis(host, port):
+    try:
+        r = redis.Redis(host=host, port=port)
+        if r.ping():
+            console.print(f"[Info] Redis instance at {host}:{port} is accessible")
+            return r
+        else:
+            console.print(f"[bold red]❌ Redis instance at {host}:{port} is not accessible")
+    except Exception as e:
+        console.print(f"[bold red]❌ Redis instance at {host}:{port} is not accessible with error: {e}")
+
+def get_patterns_from_file(file_path):
+    with open(file_path, 'r') as file:
+        patterns = yaml.safe_load(file)
+        return patterns
+
+def check_data_patterns(redis_instance, patterns, profile_name, host):
+
+    results = []
+    keys = redis_instance.keys('*')
+    for key in keys:
+        data = redis_instance.get(key)
+        if data:
+            data_str = data.decode('utf-8')
+            matches = system.match_strings(data_str)
+            if matches:
+                for match in matches:
+                    results.append({
+                        'host': host,
+                        'key': key.decode('utf-8'),
+                        'pattern_name': match['pattern_name'],
+                        'matches': match['matches'],
+                        'sample_text': match['sample_text'],
+                        'profile': profile_name,
+                        'data_source': 'redis'
+                    })
+    return results
+
+def execute(args):
+    results = []
+    with open('connection.yml', 'r') as file:
+        connections = yaml.safe_load(file)
+
+    if 'sources' in connections:
+        sources_config = connections['sources']
+        redis_config = sources_config.get('redis')
+
+        if redis_config:
+            fingerprint_file = 'fingerprint.yml'
+            patterns = get_patterns_from_file(fingerprint_file)
+
+            for profile_name, config in redis_config.items():
+                host = config.get('host')
+                port = config.get('port', 6379)
+
+                if host:
+                    redis_instance = connect_redis(host, port)
+                    if redis_instance:
+                        results = check_data_patterns(redis_instance, patterns, profile_name, host)
+                        redis_instance.close()
+                else:
+                    console.print(f"Incomplete Redis configuration for key: {profile_name}")
+        else:
+            console.print("No Redis connection details found in connection.yml")
+    else:
+        console.print("No 'sources' section found in connection.yml")
+    return results

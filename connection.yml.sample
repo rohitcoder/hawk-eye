@@ -1,0 +1,26 @@
+sources:
+  redis:
+    redis1:
+      host: 127.0.0.1
+  s3:
+    s3_1:
+      access_key: AKIA6GWXXKEWXXXXXXX
+      secret_key: xxxxxxxxxxxjLIjtZfORj+xxjCQEa9VJvexxx
+      bucket_name: test-bucket
+  firebase:
+    firebase1:
+      credentials_file: /home/rohitcoder//credential_file.json
+      bucket_name: example_bucket.appspot.com
+      exclude_patterns:
+        - .pdf
+        - .docx
+      exclude_names:
+        - private
+        - confidential
+  mysql:
+    mysql1:
+      host: localhost
+      port: 8889
+      user: root
+      password: root
+      database: test_db
