@@ -1,16 +1,29 @@
 sources:
   redis:
-    redis1:
-      host: 127.0.0.1
+    redis_example:
+      host: YOUR_REDIS_HOST
   s3:
-    s3_1:
-      access_key: AKIA6GWXXKEWXXXXXXX
-      secret_key: xxxxxxxxxxxjLIjtZfORj+xxjCQEa9VJvexxx
-      bucket_name: test-bucket
+    s3_example:
+      access_key: YOUR_S3_ACCESS_KEY
+      secret_key: YOUR_S3_SECRET_KEY
+      bucket_name: YOUR_S3_BUCKET_NAME
+      cache: true
+  gcs:
+    gcs_example:
+      credentials_file: /path/to/your/credential_file.json
+      bucket_name: YOUR_GCS_BUCKET_NAME
+      cache: true
+      exclude_patterns:
+        - .pdf
+        - .docx
+      exclude_names:
+        - private
+        - confidential
   firebase:
-    firebase1:
-      credentials_file: /home/rohitcoder//credential_file.json
-      bucket_name: example_bucket.appspot.com
+    firebase_example:
+      credentials_file: /path/to/your/credential_file.json
+      bucket_name: YOUR_FIREBASE_BUCKET_NAME
+      cache: true
       exclude_patterns:
         - .pdf
         - .docx
@@ -18,9 +31,18 @@ sources:
         - private
         - confidential
   mysql:
-    mysql1:
-      host: localhost
-      port: 8889
-      user: root
-      password: root
-      database: test_db
+    mysql_example:
+      host: YOUR_MYSQL_HOST
+      port: YOUR_MYSQL_PORT
+      user: YOUR_MYSQL_USERNAME
+      password: YOUR_MYSQL_PASSWORD
+      database: YOUR_MYSQL_DATABASE_NAME
+  fs:
+    fs_example:
+      path: /path/to/your/filesystem/directory
+      exclude_patterns:
+        - .pdf
+        - .docx
+      exclude_names:
+        - private
+        - confidential

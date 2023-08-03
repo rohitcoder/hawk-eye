@@ -1,4 +1,9 @@
-# HAWK Eye - HAWK Eye - Highly Advanced Watchful Keeper Eye
+## image here from images/hawk-eye.png
+
+
+![HAWK Eye](images/banner.png)
+
+# 🦅 HAWK Eye - Highly Advanced Watchful Keeper Eye
 
 HAWK Eye is a powerful and versatile CLI (Command-Line Interface) tool designed to be your vigilant watchkeeper, guarding against potential data breaches and cyber threats across various platforms. Inspired by the precision and vision of majestic birds of prey, HAWK Eye swiftly scans multiple data sources, including S3, MySQL, Redis, Firebase, filesystem, and Google Cloud buckets (GCS), for Personally Identifiable Information (PII) and secrets.
 
@@ -17,6 +22,127 @@ The name "HAWK Eye" captures the essence of a Highly Advanced Watchful Keeper. L
 
 ## Usage
 To unleash the power of HAWK Eye, simply follow the steps mentioned in the "Usage" section of the "README.md" file.
+
+### Options
+Note: If you don't provide any command, it will run all commands (firebase, fs, gcs, mysql, redis, s3) by default.
+<table>
+   <thead>
+      <tr>
+         <th>Option</th>
+         <th>Description</th>
+      </tr>
+   </thead>
+   <tbody>
+      <tr>
+         <td>
+           firebase
+         </td>
+         <td>Scan Firebase profiles for PII and secrets data.</td>
+      </tr>
+      <tr>
+         <td>
+            fs
+            <commit_id>
+         </td>
+         <td>Scan filesystem profiles for PII and secrets data.</td>
+      </tr>
+      <tr>
+         <td>
+            gcs
+         </td>
+         <td>Scan GCS (Google Cloud Storage) profiles for PII and secrets data.</td>
+      </tr>
+      <tr>
+         <td>
+            mysql
+         <td>Scan MySQL profiles for PII and secrets data.</td>
+      </tr>
+      <tr>
+         <td>
+            redis
+         </td>
+         <td>Scan Redis profiles for PII and secrets data.</td>
+      </tr>
+      <tr>
+         <td>
+            s3
+          </td>
+         <td>Scan S3 profiles for PII and secrets data.</td>
+      </tr>
+      <tr>
+         <td>--debug</td>
+         <td>Enable Debug mode.</td>
+      </tr>
+      <tr>
+         <td>--json</td>
+         <td>Provide --json file name to save output in json file like ``--json output.json``</td>
+      </tr>
+   </tbody>
+</table>
+
+## How to Configure HAWK Eye Connections (Profiles in connection.yml)
+
+HAWK Eye uses a YAML file to store connection profiles for various data sources. The connection.yml file is located in the config directory. You can add new profiles to this file to enable HAWK Eye to scan additional data sources. The following sections describe the process for adding new profiles to the connection.yml file.
+
+### Your connection fille will look like this
+
+```yaml
+sources:
+  redis:
+    redis1:
+      host: 127.0.0.1
+
+  s3:
+    s3_1:
+      access_key: YOUR_S3_ACCESS_KEY
+      secret_key: YOUR_S3_SECRET_KEY
+      bucket_name: YOUR_S3_BUCKET_NAME
+      cache: True
+
+  gcs:
+    gcs1:
+      credentials_file: /Users/rohitcoder/Downloads/credential_file.json
+      bucket_name: test-proj.appspot.com
+      cache: True
+      exclude_patterns:
+        - .pdf
+        - .docx
+      exclude_names:
+        - private
+        - confidential
+
+  firebase:
+    firebase1:
+      credentials_file: /Users/rohitcoder/Downloads/credential_file.json
+      bucket_name: test-proj.appspot.com
+      cache: True
+      exclude_patterns:
+        - .pdf
+        - .docx
+      exclude_names:
+        - private
+        - confidential
+
+  mysql:
+    mysql1:
+      host: localhost
+      port: 8889
+      user: YOUR_MYSQL_USERNAME
+      password: YOUR_MYSQL_PASSWORD
+      database: YOUR_MYSQL_DATABASE_NAME
+
+  fs:
+    fs1:
+      path: /Users/rohitcoder/Desktop/Projects/pii-search/data/google_cloud_storage/
+      exclude_patterns:
+        - .pdf
+        - .docx
+      exclude_names:
+        - private
+        - confidential
+```
+
+You can add or remove profiles from the connection.yml file as needed. You can also configure only one or two data sources if you don't need to scan all of them.
 
 ## Adding New Commands
 HAWK Eye's extensibility empowers developers to contribute new security commands. Here's how:
