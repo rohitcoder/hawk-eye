@@ -207,6 +207,4 @@ Your donations will play a significant role in making a positive impact in the l
 ## 💪 Contributors
 We extend our heartfelt appreciation to all contributors who continuously improve this tool! Your efforts are essential in strengthening the security landscape. 🙏
 
-<a href="https://github.com/rohitcoder/hawk-eye/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=rohitcoder/hawk-eye" />
-</a>
+![Contributors](https://contrib.rocks/image?repo=rohitcoder/hawk-eye?1=2)
