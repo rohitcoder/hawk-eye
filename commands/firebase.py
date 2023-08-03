@@ -14,7 +14,7 @@ def connect_firebase(credentials_file, bucket_name):
         cred = credentials.Certificate(credentials_file)
         firebase_admin.initialize_app(cred)
         bucket = storage.bucket(bucket_name)
-        system.print_debug(f"Connected to Firebase bucket: {bucket_name}")
+        system.print_info(f"Connected to Firebase bucket: {bucket_name}")
         return bucket
     except Exception as e:
         print(f"Failed to connect to Firebase bucket: {e}")

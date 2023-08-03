@@ -18,12 +18,12 @@ def connect_mysql(host, port, user, password, database):
             database=database
         )
         if conn.is_connected():
-            console.print(f"[blue][DEBUG][/blue] Connected to MySQL database at [bold]{host}[/bold]")
+            system.print_info(f"Connected to MySQL database at {host}")
             return conn
         else:
-            console.print(f"[bold red]❌ Failed[/bold red] to connect to MySQL database at [bold]{host}[/bold]")
+            system.print_error(f"Failed to connect to MySQL database at {host}")
     except Exception as e:
-        console.print(f"[bold red]❌ Failed[/bold red] to connect to MySQL database at [bold]{host}[/bold] with error: {e}")
+        system.print_error(f"Failed to connect to MySQL database at {host} with error: {e}")
 
 def get_patterns_from_file(file_path):
     with open(file_path, 'r') as file:
@@ -91,15 +91,15 @@ def execute(args):
                 database = config.get('database')
 
                 if host and user and password and database:
-                    console.print(f"[blue][DEBUG][/blue] Checking MySQL Profile [bold]'{key}'[/bold] and database [bold]'{database}'[/bold]")
+                    system.print_info(f"Checking MySQL Profile {key} and database {database}")
                     conn = connect_mysql(host, port, user, password, database)
                     if conn:
                         results = check_data_patterns(conn, patterns, key, database)
                         conn.close()
                 else:
-                    console.print(f"Incomplete MySQL configuration for key: {key}")
+                    system.print_error(f"Incomplete MySQL configuration for key: {key}")
         else:
-            console.print("No MySQL connection details found in connection.yml")
+            system.print_error("No MySQL connection details found in connection.yml")
     else:
-        console.print("No 'sources' section found in connection.yml")
+        system.print_error("No 'sources' section found in connection.yml")
     return results

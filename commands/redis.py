@@ -12,12 +12,12 @@ def connect_redis(host, port):
     try:
         r = redis.Redis(host=host, port=port)
         if r.ping():
-            console.print(f"[Info] Redis instance at {host}:{port} is accessible")
+            system.print_info(f"Redis instance at {host}:{port} is accessible")
             return r
         else:
-            console.print(f"[bold red]❌ Redis instance at {host}:{port} is not accessible")
+            system.print_error(f"Redis instance at {host}:{port} is not accessible")
     except Exception as e:
-        console.print(f"[bold red]❌ Redis instance at {host}:{port} is not accessible with error: {e}")
+        system.print_error(f"Redis instance at {host}:{port} is not accessible with error: {e}")
 
 def get_patterns_from_file(file_path):
     with open(file_path, 'r') as file:
@@ -69,9 +69,9 @@ def execute(args):
                         results = check_data_patterns(redis_instance, patterns, profile_name, host)
                         redis_instance.close()
                 else:
-                    console.print(f"Incomplete Redis configuration for key: {profile_name}")
+                    system.print_error(f"Incomplete Redis configuration for key: {profile_name}")
         else:
-            console.print("No Redis connection details found in connection.yml")
+            system.print_error("No Redis connection details found in connection.yml")
     else:
-        console.print("No 'sources' section found in connection.yml")
+        system.print_error("No 'sources' section found in connection.yml")
     return results

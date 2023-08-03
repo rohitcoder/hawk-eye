@@ -46,6 +46,7 @@ def main():
     parser = argparse.ArgumentParser(description='CLI Command Executor')
     parser.add_argument('command', nargs='?', choices=data_sources, help='Command to execute')
     parser.add_argument('--json', help='Save output to json file')
+    parser.add_argument('--debug', action='store_true', help='Enable debug mode')
 
     args, extra_args = parser.parse_known_args()
     results = []

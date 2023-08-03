@@ -4,14 +4,19 @@ import random
 import yaml
 import re
 import os
+import argparse
 
 console = Console()
+parser = argparse.ArgumentParser(description='CLI Command Executor')
+parser.add_argument('--debug', action='store_true', help='Enable debug mode')
+args, extra_args = parser.parse_known_args()
 
 def print_info(message):
     console.print(f"[yellow][INFO][/yellow] {message}")
 
 def print_debug(message):
-    console.print(f"[blue][DEBUG][/blue] {message}")
+    if args.debug:
+        console.print(f"[blue][DEBUG][/blue] {message}")
 
 def print_error(message):
     console.print(f"[bold red]❌ {message}")
@@ -41,7 +46,7 @@ def print_banner():
     <__ ~"-.  ~       /_/   \   \I  Y   : |
     ^-.__           ~(_/   \   >._:   | l______
         ^--.,___.-~"  /_/   !  `-.~"--l_ /     ~"-.                 + ================================================== +
-                (_/ .  ~(   /'     "~"--,Y   -=b-. _)               + [bold yellow]H[/bold yellow].[bold yellow]A[/bold yellow].[bold yellow]W[/bold yellow].[bold yellow]K[/bold yellow] [bold yellow]Eyes[/bold yellow] - [bold blue]Highly Advanced Watchful Keeper Eyes[/bold blue] +
+                (_/ .  ~(   /'     "~"--,Y   -=b-. _)               + [bold yellow]H[/bold yellow].[bold yellow]A[/bold yellow].[bold yellow]W[/bold yellow].[bold yellow]K[/bold yellow] [bold yellow]Eye[/bold yellow] - [bold blue]Highly Advanced Watchful Keeper Eye[/bold blue] +
                 (_/ .  \  :           / l      c"~o \               + ================================================== +
                     \ /    `.    .     .^   \_.-~"~--.  )                 
                     (_/ .   `  /     /       !       )/   
@@ -72,8 +77,11 @@ def match_strings(content):
     patterns = get_patterns_from_file(fingerprint_file)
 
     for pattern_name, pattern_regex in patterns.items():
+        print_debug(f"Matching pattern: {pattern_name}")
         found = {} 
-        matches = re.findall(pattern_regex, content)
+        ## parse pattern_regex as Regex
+        complied_regex = re.compile(pattern_regex, re.IGNORECASE)
+        matches = re.findall(complied_regex, content)
         if matches:
             found['pattern_name'] = pattern_name
             found['matches'] = matches

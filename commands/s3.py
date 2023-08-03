@@ -17,10 +17,10 @@ def connect_s3(access_key, secret_key, bucket_name):
         )
         s3 = session.resource('s3')
         bucket = s3.Bucket(bucket_name)
-        system.print_debug(f"Connected to S3 bucket: {bucket_name}")
+        system.print_info(f"Connected to S3 bucket: {bucket_name}")
         return bucket
     except Exception as e:
-        console.print(f"[bold red]Failed[/bold red] to connect to S3 bucket: {e}")
+        system.print_error(f"[bold red]Failed[/bold red] to connect to S3 bucket: {e}")
 
 def get_last_update_time(obj):
     last_modified = obj.last_modified
@@ -45,7 +45,7 @@ def should_exclude_file(file_name, exclude_patterns, exclude_names):
 def execute(args):
     results = []
     shouldDownload = True
-    console.print(f"[yellow][INFO][/yellow] Running Checks for S3 Sources")
+    system.print_info(f"Running Checks for S3 Sources")
     with open('connection.yml', 'r') as file:
         connections = yaml.safe_load(file)
 
@@ -61,7 +61,7 @@ def execute(args):
                 exclude_patterns = config.get('exclude_patterns', [])
                 exclude_names = config.get('exclude_names', [])
 
-                console.print(f"[blue][DEBUG][/blue] Checking S3 profile: '{key}' with bucket '{bucket_name}'")
+                system.print_info(f"Checking S3 profile: '{key}' with bucket '{bucket_name}'")
                 profile_name = key
                 if access_key and secret_key and bucket_name:
                     bucket = connect_s3(access_key, secret_key, bucket_name)
@@ -92,7 +92,7 @@ def execute(args):
 
                             if shouldDownload:
                                 file_path = f"data/s3/{remote_etag}-{file_name}"
-                                console.print(f"[blue][DEBUG][/blue] Downloading file: {file_name} to {file_path}...")
+                                system.print_debug(f"Downloading file: {file_name} to {file_path}...")
                                 bucket.download_file(file_name, file_path)
                             
                             matches = system.read_match_strings(file_path, 'google_cloud_storage')
@@ -109,13 +109,13 @@ def execute(args):
                                     })
 
                     else:
-                        console.print(f"Failed to connect to S3 bucket: {bucket_name}")
+                        system.print_error(f"Failed to connect to S3 bucket: {bucket_name}")
                 else:
-                    console.print(f"Incomplete S3 configuration for key: {key}")
+                    system.print_error(f"Incomplete S3 configuration for key: {key}")
         else:
-            console.print("No S3 connection details found in connection.yml")
+            system.print_error("No S3 connection details found in connection.yml")
     else:
-        console.print("No 'sources' section found in connection.yml")
+        system.print_error("No 'sources' section found in connection.yml")
     if config.get("cache") == False:
         os.system("rm -rf data/s3")
     return results
