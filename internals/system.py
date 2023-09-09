@@ -89,23 +89,34 @@ def match_strings(content):
             matched_strings.append(found)
     return matched_strings
 
-def should_exclude_file(file_name, exclude_patterns, exclude_names):
+def should_exclude_file(file_name, exclude_patterns):
     _, extension = os.path.splitext(file_name)
     if extension in exclude_patterns:
+        print_debug(f"Excluding file: {file_name} because of extension: {extension}")
         return True
-    for name in exclude_names:
-        if name in file_name:
+    
+    for pattern in exclude_patterns:
+        if pattern in file_name:
+            print_debug(f"Excluding file: {file_name} because of pattern: {pattern}")
             return True
     return False
 
+def should_exclude_folder(folder_name, exclude_patterns):
+    for pattern in exclude_patterns:
+        if pattern in folder_name:
+            return True
+    return False
 
-def list_all_files_iteratively(path, exclude_patterns, exclude_names):
-    for root, dirs, files in os.walk(path):
+def list_all_files_iteratively(path, exclude_patterns):
+    for root, dirs, files in os.walk(path, topdown=True):
+        dirs[:] = [d for d in dirs if not should_exclude_folder(os.path.join(root, d), exclude_patterns)]
+
         for file in files:
-            if not should_exclude_file(file, exclude_patterns, exclude_names):
+            if not should_exclude_file(file, exclude_patterns):
                 yield os.path.join(root, file)
 
 def read_match_strings(file_path, source):
+    #print_info(f"Scanning file: {file_path}")
     content = ''
     try:
         with open(file_path, 'r') as file:

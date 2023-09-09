@@ -71,7 +71,6 @@ def check_data_patterns(conn, patterns, profile_name, database_name):
     return results
 
 def execute(args):
-    print("okey")
     results = []
     system.print_info(f"Running Checks for MySQL Sources")
     with open('connection.yml', 'r') as file:

@@ -7,15 +7,6 @@ import re
 import time
 import yaml
 
-def should_exclude_file(file_name, exclude_patterns, exclude_names):
-    _, extension = os.path.splitext(file_name)
-    if extension in exclude_patterns:
-        return True
-    for name in exclude_names:
-        if name in file_name:
-            return True
-    return False
-
 def execute(args):
     results = []
     shouldDownload = True
@@ -30,9 +21,8 @@ def execute(args):
                 path = config.get('path') or os.getcwd()
                 if not os.path.exists(path):
                     path = os.getcwd()
-                exclude_patterns = fs_config.get('exclude_patterns') or []
-                exclude_names = fs_config.get('exclude_names') or []
-                files = system.list_all_files_iteratively(path, exclude_patterns, exclude_names)
+                exclude_patterns = fs_config.get(key).get('exclude_patterns', [])
+                files = system.list_all_files_iteratively(path, exclude_patterns)
                 for file_path in files:
                     matches = system.read_match_strings(file_path, 'google_cloud_storage')
                     if matches:

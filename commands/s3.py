@@ -33,15 +33,6 @@ def get_patterns_from_file(file_path):
         patterns = yaml.safe_load(file)
         return patterns
 
-def should_exclude_file(file_name, exclude_patterns, exclude_names):
-    _, extension = os.path.splitext(file_name)
-    if extension in exclude_patterns:
-        return True
-    for name in exclude_names:
-        if name in file_name:
-            return True
-    return False
-
 def execute(args):
     results = []
     shouldDownload = True
@@ -58,22 +49,19 @@ def execute(args):
                 access_key = config.get('access_key')
                 secret_key = config.get('secret_key')
                 bucket_name = config.get('bucket_name')
-                exclude_patterns = config.get('exclude_patterns', [])
-                exclude_names = config.get('exclude_names', [])
+                exclude_patterns = config.get(key).get('exclude_patterns', [])
 
                 system.print_info(f"Checking S3 profile: '{key}' with bucket '{bucket_name}'")
                 profile_name = key
                 if access_key and secret_key and bucket_name:
                     bucket = connect_s3(access_key, secret_key, bucket_name)
                     if bucket:
-                        fingerprint_file = 'fingerprint.yml'
-                        patterns = get_patterns_from_file(fingerprint_file)
-
+                        
                         for obj in bucket.objects.all():
                             remote_etag = obj.e_tag.replace('"', '')
                             system.print_debug(f"Remote etag: {remote_etag}")
                             file_name = obj.key
-                            if should_exclude_file(file_name, exclude_patterns, exclude_names):
+                            if system.should_exclude_file(file_name, exclude_patterns):
                                 continue
 
                             file_path = f"data/s3/{remote_etag}-{file_name}"

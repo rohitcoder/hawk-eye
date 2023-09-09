@@ -16,9 +16,6 @@ sources:
       exclude_patterns:
         - .pdf
         - .docx
-      exclude_names:
-        - private
-        - confidential
   firebase:
     firebase_example:
       credentials_file: /path/to/your/credential_file.json
@@ -27,9 +24,6 @@ sources:
       exclude_patterns:
         - .pdf
         - .docx
-      exclude_names:
-        - private
-        - confidential
   mysql:
     mysql_example:
       host: YOUR_MYSQL_HOST
@@ -43,6 +37,6 @@ sources:
       exclude_patterns:
         - .pdf
         - .docx
-      exclude_names:
         - private
-        - confidential
+        - venv
+        - node_modules

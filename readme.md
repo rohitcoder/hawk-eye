@@ -130,9 +130,7 @@ sources:
       exclude_patterns:
         - .pdf
         - .docx
-      exclude_names:
         - private
-        - confidential
 
   firebase:
     firebase1:

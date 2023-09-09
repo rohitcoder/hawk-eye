@@ -19,20 +19,6 @@ def connect_firebase(credentials_file, bucket_name):
     except Exception as e:
         print(f"Failed to connect to Firebase bucket: {e}")
 
-def get_patterns_from_file(file_path):
-    with open(file_path, 'r') as file:
-        patterns = yaml.safe_load(file)
-        return patterns
-
-def should_exclude_file(file_name, exclude_patterns, exclude_names):
-    _, extension = os.path.splitext(file_name)
-    if extension in exclude_patterns:
-        return True
-    for name in exclude_names:
-        if name in file_name:
-            return True
-    return False
-
 def execute(args):
     results = []
     shouldDownload = True
@@ -47,22 +33,18 @@ def execute(args):
             for key, config in firebase_config.items():
                 credentials_file = config.get('credentials_file')
                 bucket_name = config.get('bucket_name')
-                exclude_patterns = config.get('exclude_patterns', [])
-                exclude_names = config.get('exclude_names', [])
+                exclude_patterns = config.get(key).get('exclude_patterns', [])
 
                 if credentials_file and bucket_name:
                     bucket = connect_firebase(credentials_file, bucket_name)
                     if bucket:
-                        fingerprint_file = 'fingerprint.yml'
-                        patterns = get_patterns_from_file(fingerprint_file)
-
                         for blob in bucket.list_blobs():
                             file_name = blob.name
                             ## get unique etag or hash of file
                             remote_etag = blob.etag
                             system.print_debug(f"Remote etag: {remote_etag}")
 
-                            if should_exclude_file(file_name, exclude_patterns, exclude_names):
+                            if system.should_exclude_file(file_name, exclude_patterns):
                                 continue
 
                             file_path = f"data/firebase/{remote_etag}-{file_name}"

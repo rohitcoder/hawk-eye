@@ -22,15 +22,6 @@ def get_last_update_time(blob):
     # Use Google Cloud Blob's etag as the entity tag (ETag)
     return blob.etag
 
-def should_exclude_file(file_name, exclude_patterns, exclude_names):
-    _, extension = os.path.splitext(file_name)
-    if extension in exclude_patterns:
-        return True
-    for name in exclude_names:
-        if name in file_name:
-            return True
-    return False
-
 def execute(args):
     results = []
     shouldDownload = True
@@ -44,8 +35,7 @@ def execute(args):
         if gcs_config:
             for key, config in gcs_config.items():
                 bucket_name = config.get('bucket_name')
-                exclude_patterns = config.get('exclude_patterns', [])
-                exclude_names = config.get('exclude_names', [])
+                exclude_patterns = config.get(key).get('exclude_patterns', [])
                 credentials_file = config.get('credentials_file')
 
                 if bucket_name:
@@ -57,7 +47,7 @@ def execute(args):
                             remote_etag = get_last_update_time(blob)
                             system.print_debug(f"Remote etag: {remote_etag}")
 
-                            if should_exclude_file(file_name, exclude_patterns, exclude_names):
+                            if system.should_exclude_file(file_name, exclude_patterns):
                                 continue
 
                             file_path = f"data/google_cloud_storage/{remote_etag}-{file_name}"
