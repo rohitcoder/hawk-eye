@@ -100,6 +100,10 @@ Note: If you don't provide any command, it will run all commands (firebase, fs, 
          <td>--json</td>
          <td>Provide --json file name to save output in json file like --json output.json</td>
       </tr>
+      <tr>
+         <td>--shutup</td>
+         <td>Use --shutup flag if you want to hide Hawk ASCII art from your terminal 😁</td>
+      </tr>
    </tbody>
 </table>
 
