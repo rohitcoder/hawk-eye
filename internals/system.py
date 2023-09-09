@@ -11,6 +11,7 @@ import json
 console = Console()
 parser = argparse.ArgumentParser(description='CLI Command Executor')
 parser.add_argument('--debug', action='store_true', help='Enable debug mode')
+parser.add_argument('--shut-up', action='store_true', help='Suppress the Hawk Eye banner 🫣', default=False)
 args, extra_args = parser.parse_known_args()
 
 def print_info(message):
@@ -66,7 +67,8 @@ def print_banner():
                 (_/  /   | | j-"             ~^~^
                     ~-<_(_.^-~"
     """
-    console.print(banner)
+    if not args.shut_up:
+        console.print(banner)
 
 def get_patterns_from_file(file_path):
     with open(file_path, 'r') as file:

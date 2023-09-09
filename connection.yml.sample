@@ -1,3 +1,7 @@
+notify:
+  slack:
+    webhook_url: https://hooks.slack.com/services/T0XXXXXXXXXXX/BXXXXXXXX/1CIyXXXXXXXXXXXXXXX
+   
 sources:
   redis:
     redis_example:

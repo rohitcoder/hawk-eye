@@ -18,7 +18,7 @@ See how this works on Youtube - https://youtu.be/LuPXE7UJKOY
 
 - Swiftly scans multiple data sources (S3, MySQL, Redis, Firebase, filesystem, and GCS) for PII data and malware exposure.
 - Advanced algorithms and deep scanning capabilities provide thorough security auditing.
-- Real-time alerts and notifications keep you informed of potential data vulnerabilities.
+- Real-time alerts and notifications keep you informed of potential data vulnerabilities using Slack and other integrations, with more coming soon.
 - New command support for S3, MySQL, Redis, Firebase, filesystem, and GCS expands the tool's capabilities.
 - ``--debug`` flag enables printing of all debugging output for comprehensive troubleshooting.
 - Save output in JSON format using the --json flag and specify a file name like --json output.json.
@@ -110,6 +110,10 @@ HAWK Eye uses a YAML file to store connection profiles for various data sources.
 ### Your connection fille will look like this
 
 ```yaml
+notify:
+  slack:
+    webhook_url: https://hooks.slack.com/services/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
+
 sources:
   redis:
     redis1:
@@ -140,9 +144,6 @@ sources:
       exclude_patterns:
         - .pdf
         - .docx
-      exclude_names:
-        - private
-        - confidential
 
   mysql:
     mysql1:
@@ -158,9 +159,8 @@ sources:
       exclude_patterns:
         - .pdf
         - .docx
-      exclude_names:
-        - private
-        - confidential
+        - venv
+        - node_modules
 ```
 
 You can add or remove profiles from the connection.yml file as needed. You can also configure only one or two data sources if you don't need to scan all of them.

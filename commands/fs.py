@@ -6,7 +6,7 @@ import os
 import re
 import time
 import yaml
-import concurrent.futures  # Import the concurrent.futures module
+import concurrent.futures
 
 def process_file(file_path, key, results):
     matches = system.read_match_strings(file_path, 'fs')
