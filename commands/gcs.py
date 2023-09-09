@@ -35,7 +35,7 @@ def execute(args):
         if gcs_config:
             for key, config in gcs_config.items():
                 bucket_name = config.get('bucket_name')
-                exclude_patterns = config.get(key).get('exclude_patterns', [])
+                exclude_patterns = config.get(key, {}).get('exclude_patterns', [])
                 credentials_file = config.get('credentials_file')
 
                 if bucket_name:

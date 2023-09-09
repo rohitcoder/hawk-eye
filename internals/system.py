@@ -5,6 +5,8 @@ import yaml
 import re
 import os
 import argparse
+import requests
+import json
 
 console = Console()
 parser = argparse.ArgumentParser(description='CLI Command Executor')
@@ -116,7 +118,7 @@ def list_all_files_iteratively(path, exclude_patterns):
                 yield os.path.join(root, file)
 
 def read_match_strings(file_path, source):
-    #print_info(f"Scanning file: {file_path}")
+    print_info(f"Scanning file: {file_path}")
     content = ''
     try:
         with open(file_path, 'r') as file:
@@ -125,3 +127,20 @@ def read_match_strings(file_path, source):
         pass
     matched_strings = match_strings(content)
     return matched_strings
+
+def SlackNotify(msg):
+    with open('connection.yml', 'r') as file:
+        connections = yaml.safe_load(file)
+
+    if 'notify' in connections:
+        slack_config = connections['notify'].get('slack', {})
+        webhook_url = slack_config.get('webhook_url', '')
+        if webhook_url != '':
+            try:
+                payload = {
+                    'text': msg,
+                }
+                headers = {'Content-Type': 'application/json'}
+                requests.post(webhook_url, data=json.dumps(payload), headers=headers)
+            except Exception as e:
+                print_error(f"An error occurred: {str(e)}")

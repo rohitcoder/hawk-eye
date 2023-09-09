@@ -97,6 +97,7 @@ def main():
         table.add_column("Exposed Values")
         table.add_column("Sample Text")
         i = 1
+
         for result in grouped_results[group]:
             if group == 's3':
                 table.add_row(
@@ -108,6 +109,24 @@ def main():
                     str(', '.join(result['matches'])),
                     result['sample_text'],
                 )
+                AlertMsg = """
+                *** PII Or Secret Found ***
+                Data Source: S3 Bucket
+                Bucket: {bucket}
+                File Path: {file_path}
+                Pattern Name: {pattern_name}
+                Total Exposed: {total_exposed}
+                Exposed Values: {exposed_values}
+                """.format(
+                    bucket=result['bucket'],
+                    file_path=result['file_path'],
+                    pattern_name=result['pattern_name'],
+                    total_exposed=str(len(result['matches'])),
+                    exposed_values=', '.join(result['matches'])
+                )
+                
+                system.SlackNotify(AlertMsg)
+                
             elif group == 'mysql':
                 table.add_row(
                     str(i),
@@ -118,6 +137,30 @@ def main():
                     str(', '.join(result['matches'])),
                     result['sample_text'],
                 )
+                
+                # Slack notification for MySQL
+                AlertMsg = """
+                *** PII Or Secret Found ***
+                Data Source: MySQL
+                Host: {host}
+                Database: {database}
+                Table: {table}
+                Column: {column}
+                Pattern Name: {pattern_name}
+                Total Exposed: {total_exposed}
+                Exposed Values: {exposed_values}
+                """.format(
+                    host=result['host'],
+                    database=result['database'],
+                    table=result['table'],
+                    column=result['column'],
+                    pattern_name=result['pattern_name'],
+                    total_exposed=str(len(result['matches'])),
+                    exposed_values=', '.join(result['matches'])
+                )
+                
+                system.SlackNotify(AlertMsg)
+                
             elif group == 'redis':
                 table.add_row(
                     str(i),
@@ -128,6 +171,23 @@ def main():
                     str(', '.join(result['matches'])),
                     result['sample_text'],
                 )
+                AlertMsg = """
+                *** PII Or Secret Found ***
+                Data Source: Redis
+                Host: {host}
+                Key: {key}
+                Pattern Name: {pattern_name}
+                Total Exposed: {total_exposed}
+                Exposed Values: {exposed_values}
+                """.format(
+                    host=result['host'],
+                    key=result['key'],
+                    pattern_name=result['pattern_name'],
+                    total_exposed=str(len(result['matches'])),
+                    exposed_values=', '.join(result['matches'])
+                )
+                
+                system.SlackNotify(AlertMsg)
             elif group == 'firebase' or group == 'gcs':
                 table.add_row(
                     str(i),
@@ -138,6 +198,26 @@ def main():
                     str(', '.join(result['matches'])),
                     result['sample_text'],
                 )
+                
+                # Slack notification for Firebase/GCS
+                AlertMsg = """
+                *** PII Or Secret Found ***
+                Data Source: Firebase/GCS
+                Bucket: {bucket}
+                File Path: {file_path}
+                Pattern Name: {pattern_name}
+                Total Exposed: {total_exposed}
+                Exposed Values: {exposed_values}
+                """.format(
+                    bucket=result['bucket'],
+                    file_path=result['file_path'],
+                    pattern_name=result['pattern_name'],
+                    total_exposed=str(len(result['matches'])),
+                    exposed_values=', '.join(result['matches'])
+                )
+                
+                system.SlackNotify(AlertMsg)
+                
             elif group == 'fs':
                 table.add_row(
                     str(i),
@@ -148,6 +228,25 @@ def main():
                     str(', '.join(result['matches'])),
                     result['sample_text'],
                 )
+                AlertMsg = """
+                *** PII Or Secret Found ***
+                Data Source: File System
+                File Path: {file_path}
+                Pattern Name: {pattern_name}
+                Total Exposed: {total_exposed}
+                Exposed Values: {exposed_values}
+                """.format(
+                    file_path=result['file_path'],
+                    pattern_name=result['pattern_name'],
+                    total_exposed=str(len(result['matches'])),
+                    exposed_values=str(', '.join(result['matches']))
+                )
+                
+                system.SlackNotify(AlertMsg)
+            else:
+                # Handle other cases or do nothing for unsupported groups
+                pass
+
             i += 1
         console.print(table)
 

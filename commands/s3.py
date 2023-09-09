@@ -49,14 +49,14 @@ def execute(args):
                 access_key = config.get('access_key')
                 secret_key = config.get('secret_key')
                 bucket_name = config.get('bucket_name')
-                exclude_patterns = config.get(key).get('exclude_patterns', [])
+                exclude_patterns = config.get(key, {}).get('exclude_patterns', [])
 
                 system.print_info(f"Checking S3 profile: '{key}' with bucket '{bucket_name}'")
                 profile_name = key
                 if access_key and secret_key and bucket_name:
                     bucket = connect_s3(access_key, secret_key, bucket_name)
                     if bucket:
-                        
+
                         for obj in bucket.objects.all():
                             remote_etag = obj.e_tag.replace('"', '')
                             system.print_debug(f"Remote etag: {remote_etag}")

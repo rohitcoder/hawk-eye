@@ -33,7 +33,7 @@ def execute(args):
             for key, config in firebase_config.items():
                 credentials_file = config.get('credentials_file')
                 bucket_name = config.get('bucket_name')
-                exclude_patterns = config.get(key).get('exclude_patterns', [])
+                exclude_patterns = config.get(key, {}).get('exclude_patterns', [])
 
                 if credentials_file and bucket_name:
                     bucket = connect_firebase(credentials_file, bucket_name)
