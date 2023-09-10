@@ -39,11 +39,18 @@ def get_fingerprint_file():
             print_error(f"Fingerprint file not found: {args.fingerprint}")
             exit(1)
     else:
-        if os.path.exists('fingerprint.yml'):
-            with open('fingerprint.yml', 'r') as file:
-                return yaml.safe_load(file)
-        else:
-            print_error(f"Default Fingerprint file not found: fingerprint.yml")
+        file_path = "https://github.com/rohitcoder/hawk-eye/raw/main/fingerprint.yml"
+        try:
+            response = requests.get(file_path)
+            if response.status_code == 200:
+                with open('fingerprint.yml', 'wb') as file:
+                    file.write(response.content)
+                return yaml.safe_load(response.content)
+            else:
+                print_error(f"Unable to download default fingerprint.yml please provide your own fingerprint file using --fingerprint flag")
+                exit(1)
+        except Exception as e:
+            print_error(f"Unable to download default fingerprint.yml please provide your own fingerprint file using --fingerprint flag")
             exit(1)
     
 def print_info(message):

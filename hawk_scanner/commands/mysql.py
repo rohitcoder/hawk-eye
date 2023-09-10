@@ -1,7 +1,7 @@
 import argparse
 import yaml
 import mysql.connector
-from hawk_eye.internals import system
+from hawk_scanner.internals import system
 import re
 from rich.console import Console
 from rich.table import Table

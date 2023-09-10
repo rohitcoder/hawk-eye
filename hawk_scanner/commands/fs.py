@@ -1,7 +1,7 @@
 import argparse
 from google.cloud import storage
 from rich.console import Console
-from hawk_eye.internals import system
+from hawk_scanner.internals import system
 import os
 import re
 import time

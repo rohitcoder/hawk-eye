@@ -1,7 +1,7 @@
 import argparse
 import redis
 import yaml
-from hawk_eye.internals import system
+from hawk_scanner.internals import system
 from rich.console import Console
 
 

@@ -24,23 +24,33 @@ See how this works on Youtube - https://youtu.be/LuPXE7UJKOY
 - Save output in JSON format using the --json flag and specify a file name like --json output.json.
 - Proudly crafted with love and a sense of humor to make your security journey enjoyable and stress-free.
 
-## Installation
+## Installation via pip or pip3
+   ```bash
+      pip3 install hawk-scanner
+   ```
+
+## Example working command
+   ```bash
+      hawk_scanner --connection connection.yml --fingerprint fingerprint.yml --json output.json --debug
+   ```
+
+## Building or running from source
 
 HAWK Eye is a Python-based CLI tool that can be installed using the following steps:
 
 1. Clone the HAWK Eye repository to your local machine.
    ```bash
-   git clone https://github.com/rohitcoder/hawk-eye.git
+      git clone https://github.com/rohitcoder/hawk-eye.git
    ```
 2. Navigate to the HAWK Eye directory.
 3. Run the following command to install the required dependencies:
    ```bash
-   pip3 install -r requirements.txt
+      pip3 install -r requirements.txt
    ```
 4. Create a connection.yml file in the root directory and add your connection profiles (see the "How to Configure HAWK Eye Connections" section for details).
 5. Run the following command to install HAWK Eye:
    ```bash
-   python3 main.py
+      python3 hawk_scanner/main.py
    ```
 
 ## Usage
@@ -91,6 +101,14 @@ Note: If you don't provide any command, it will run all commands (firebase, fs, 
             s3
           </td>
          <td>Scan S3 profiles for PII and secrets data.</td>
+      </tr>
+      <tr>
+         <td>--connection</td>
+         <td>Provide a connection YAML local file path like --connection connection.yml, this file will contain all creds and configs for different sources and other configurations.</td>
+      </tr>
+      <tr>
+         <td>--fingerprint</td>
+         <td>Provide a fingerprint file path like --fingerprint fingerprint.yml, this file will override default fingerprints.</td>
       </tr>
       <tr>
          <td>--debug</td>

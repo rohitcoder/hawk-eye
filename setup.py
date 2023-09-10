@@ -1,11 +1,11 @@
 from setuptools import setup, find_packages
 
-with open("readme.md", "r") as f:
+with open("README.md", "r") as f:
     long_description = f.read()
 
 setup(
-    name='hawk_eye',
-    version='0.1.0',    
+    name='hawk_scanner',
+    version='0.1.1',    
     description='A powerful scanner to scan your Filesystem, S3, MySQL, Redis, Google Cloud Storage and Firebase storage for PII and sensitive data.',
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -17,7 +17,7 @@ setup(
     zip_safe=False,
     entry_points={
         'console_scripts': [
-            'hawk-eye=hawk_eye.main:main',
+            'hawk_scanner=hawk_scanner.main:main',
         ],
     },
     license='Apache License 2.0',
@@ -29,7 +29,6 @@ setup(
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
         'Topic :: Software Development :: Build Tools',
-        'License :: OSI Approved :: Apache License 2.0',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.7',
     ],

@@ -6,7 +6,7 @@ from rich.console import Console
 from rich.table import Table
 from rich.markdown import Markdown
 
-from hawk_eye.internals import system
+from hawk_scanner.internals import system
 from rich import print
 from rich.panel import Panel
 from rich.text import Text
@@ -22,7 +22,7 @@ console = Console()
 
 def load_command_module(command):
     try:
-        module = importlib.import_module(f"hawk_eye.commands.{command}")
+        module = importlib.import_module(f"hawk_scanner.commands.{command}")
         return module
     except Exception as e:
         print(f"Command '{command}' is not supported. {e} ")
