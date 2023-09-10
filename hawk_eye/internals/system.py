@@ -9,11 +9,43 @@ import requests
 import json
 
 console = Console()
-parser = argparse.ArgumentParser(description='CLI Command Executor')
+parser = argparse.ArgumentParser(description='🦅 A powerful scanner to scan your Filesystem, S3, MySQL, Redis, Google Cloud Storage and Firebase storage for PII and sensitive data.')
+parser.add_argument('--connection', action='store', help='YAML Connection file path')
+parser.add_argument('--fingerprint', action='store', help='Override YAML fingerprint file path')
 parser.add_argument('--debug', action='store_true', help='Enable debug mode')
 parser.add_argument('--shutup', action='store_true', help='Suppress the Hawk Eye banner 🫣', default=False)
+
 args, extra_args = parser.parse_known_args()
 
+def get_connection():
+    if args.connection:
+        if os.path.exists(args.connection):
+            with open(args.connection, 'r') as file:
+                connections = yaml.safe_load(file)
+                return connections
+        else:
+            print_error(f"Connection file not found: {args.connection}")
+            exit(1)
+    else:
+        print_error(f"Please provide a connection file using --connection flag")
+        exit(1)
+
+def get_fingerprint_file():
+    if args.fingerprint:
+        if os.path.exists(args.fingerprint):
+            with open(args.fingerprint, 'r') as file:
+                return yaml.safe_load(file)
+        else:
+            print_error(f"Fingerprint file not found: {args.fingerprint}")
+            exit(1)
+    else:
+        if os.path.exists('fingerprint.yml'):
+            with open('fingerprint.yml', 'r') as file:
+                return yaml.safe_load(file)
+        else:
+            print_error(f"Default Fingerprint file not found: fingerprint.yml")
+            exit(1)
+    
 def print_info(message):
     console.print(f"[yellow][INFO][/yellow] {message}")
 
@@ -70,16 +102,9 @@ def print_banner():
     if not args.shutup:
         console.print(banner)
 
-def get_patterns_from_file(file_path):
-    with open(file_path, 'r') as file:
-        patterns = yaml.safe_load(file)
-        return patterns
-
 def match_strings(content):
     matched_strings = []
-    fingerprint_file = 'fingerprint.yml'
-    patterns = get_patterns_from_file(fingerprint_file)
-
+    patterns = get_fingerprint_file()
     for pattern_name, pattern_regex in patterns.items():
         print_debug(f"Matching pattern: {pattern_name}")
         found = {} 
@@ -131,8 +156,7 @@ def read_match_strings(file_path, source):
     return matched_strings
 
 def SlackNotify(msg):
-    with open('connection.yml', 'r') as file:
-        connections = yaml.safe_load(file)
+    connections = get_connection()
 
     if 'notify' in connections:
         slack_config = connections['notify'].get('slack', {})

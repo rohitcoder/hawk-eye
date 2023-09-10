@@ -1,7 +1,7 @@
 import argparse
 from google.cloud import storage
 from rich.console import Console
-from src.hawk_eye.internals import system
+from hawk_eye.internals import system
 import os
 import re
 import time
@@ -24,9 +24,7 @@ def process_file(file_path, key, results):
 
 def execute(args):
     results = []
-    shouldDownload = True
-    with open('connection.yml', 'r') as file:
-        connections = yaml.safe_load(file)
+    connections = system.get_connection()
 
     if 'sources' in connections:
         sources_config = connections['sources']

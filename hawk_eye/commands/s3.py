@@ -4,7 +4,7 @@ import os
 import re
 import time
 import yaml
-from src.hawk_eye.internals import system
+from hawk_eye.internals import system
 from rich.console import Console
 
 console = Console()
@@ -37,8 +37,7 @@ def execute(args):
     results = []
     shouldDownload = True
     system.print_info(f"Running Checks for S3 Sources")
-    with open('connection.yml', 'r') as file:
-        connections = yaml.safe_load(file)
+    connections = system.get_connection()
 
     if 'sources' in connections:
         sources_config = connections['sources']

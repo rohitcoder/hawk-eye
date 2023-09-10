@@ -1,7 +1,7 @@
 import argparse
 import yaml
 import mysql.connector
-from src.hawk_eye.internals import system
+from hawk_eye.internals import system
 import re
 from rich.console import Console
 from rich.table import Table
@@ -24,11 +24,6 @@ def connect_mysql(host, port, user, password, database):
             system.print_error(f"Failed to connect to MySQL database at {host}")
     except Exception as e:
         system.print_error(f"Failed to connect to MySQL database at {host} with error: {e}")
-
-def get_patterns_from_file(file_path):
-    with open(file_path, 'r') as file:
-        patterns = yaml.safe_load(file)
-        return patterns
 
 def check_data_patterns(conn, patterns, profile_name, database_name):
     cursor = conn.cursor()
@@ -72,16 +67,14 @@ def check_data_patterns(conn, patterns, profile_name, database_name):
 def execute(args):
     results = []
     system.print_info(f"Running Checks for MySQL Sources")
-    with open('connection.yml', 'r') as file:
-        connections = yaml.safe_load(file)
+    connections = system.get_connection()
 
     if 'sources' in connections:
         sources_config = connections['sources']
         mysql_config = sources_config.get('mysql')
 
         if mysql_config:
-            fingerprint_file = 'fingerprint.yml'
-            patterns = get_patterns_from_file(fingerprint_file)
+            patterns = system.get_fingerprint_file()
 
             for key, config in mysql_config.items():
                 host = config.get('host')

@@ -1,7 +1,7 @@
 import argparse
 import redis
 import yaml
-from src.hawk_eye.internals import system
+from hawk_eye.internals import system
 from rich.console import Console
 
 
@@ -47,16 +47,14 @@ def check_data_patterns(redis_instance, patterns, profile_name, host):
 
 def execute(args):
     results = []
-    with open('connection.yml', 'r') as file:
-        connections = yaml.safe_load(file)
+    connections = system.get_connection()
 
     if 'sources' in connections:
         sources_config = connections['sources']
         redis_config = sources_config.get('redis')
 
         if redis_config:
-            fingerprint_file = 'fingerprint.yml'
-            patterns = get_patterns_from_file(fingerprint_file)
+            patterns = system.get_fingerprint_file()
 
             for profile_name, config in redis_config.items():
                 host = config.get('host')
