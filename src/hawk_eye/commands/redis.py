@@ -1,8 +1,7 @@
 import argparse
 import redis
 import yaml
-import re
-from internals import system
+from src.hawk_eye.internals import system
 from rich.console import Console
 
 

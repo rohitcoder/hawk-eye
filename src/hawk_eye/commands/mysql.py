@@ -1,7 +1,7 @@
 import argparse
 import yaml
 import mysql.connector
-from internals import system
+from src.hawk_eye.internals import system
 import re
 from rich.console import Console
 from rich.table import Table
@@ -9,7 +9,6 @@ from rich.table import Table
 console = Console()
 
 def connect_mysql(host, port, user, password, database):
-    print("try")
     try:
         conn = mysql.connector.connect(
             host=host,
