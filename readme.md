@@ -1,11 +1,26 @@
-![HAWK Eye](assets/banner.png)
+<h1 align="center">🦅 Hawk-eye</h1>
+<p align="center"><b>Find PII & Secrets like never before across your entire infrastructure with same tool!</b></p>
+<p align="center">
+<a href="#description">Description</a> • <a href="#features">Features</a> • <a href="#config">Configuration</a> • <a href="#acknowledgements">Acknowledgements</a><br><br>
+<img alt="Static Badge" src="https://img.shields.io/badge/Supports-AWS-yellow?logo=amazon">
+<img alt="Static Badge" src="https://img.shields.io/badge/Supports-GCP-red?logo=googlecloud">
+<img alt="Static Badge" src="https://img.shields.io/badge/Supports-DigitalOcean-blue?logo=digitalocean">
+<img alt="Static Badge" src="https://img.shields.io/badge/Supports-MysQL-green?logo=mysql">
+<img alt="Static Badge" src="https://img.shields.io/badge/Supports-Redis-red?logo=redis">
+<img alt="Static Badge" src="https://img.shields.io/badge/Supports-On Prem-black?logo=amazonec2">
+</p>
 
-# 🦅 HAWK Eye - Highly Advanced Watchful Keeper Eye
+![HAWK Eye](assets/banner.png)
+<div id="description">
+
+### 🦅 HAWK Eye - Highly Advanced Watchful Keeper Eye
 
 HAWK Eye is a powerful and versatile CLI (Command-Line Interface) tool designed to be your vigilant watchkeeper, guarding against potential data breaches and cyber threats across various platforms. Inspired by the precision and vision of majestic birds of prey, HAWK Eye swiftly scans multiple data sources, including S3, MySQL, Redis, Firebase, filesystem, and Google Cloud buckets (GCS), for Personally Identifiable Information (PII) and secrets.
 
+
 ### Why "HAWK Eye"?
 The name "HAWK Eye" captures the essence of a Highly Advanced Watchful Keeper. Like the keen vision of a hawk, this tool enables you to monitor and safeguard your data with precision and accuracy, ensuring data privacy and security.
+</div>
 
 ## HAWK Eye in Action
 
@@ -14,15 +29,8 @@ See how this works on Youtube - https://youtu.be/LuPXE7UJKOY
 ![HAWK Eye Demo](assets/preview.png)
 ![HAWK Eye Demo](assets/preview2.png)
 
-## Key features
 
-- Swiftly scans multiple data sources (S3, MySQL, Redis, Firebase, filesystem, and GCS) for PII data and malware exposure.
-- Advanced algorithms and deep scanning capabilities provide thorough security auditing.
-- Real-time alerts and notifications keep you informed of potential data vulnerabilities using Slack and other integrations, with more coming soon.
-- New command support for S3, MySQL, Redis, Firebase, filesystem, and GCS expands the tool's capabilities.
-- ``--debug`` flag enables printing of all debugging output for comprehensive troubleshooting.
-- Save output in JSON format using the --json flag and specify a file name like --json output.json.
-- Proudly crafted with love and a sense of humor to make your security journey enjoyable and stress-free.
+<div id="installation">
 
 ## Installation via pip or pip3
    ```bash
@@ -52,6 +60,19 @@ HAWK Eye is a Python-based CLI tool that can be installed using the following st
    ```bash
       python3 hawk_scanner/main.py
    ```
+</div>
+
+<div id="features">
+
+## Key features
+- Swiftly scans multiple data sources (S3, MySQL, Redis, Firebase, filesystem, and GCS) for PII data and malware exposure.
+- Advanced algorithms and deep scanning capabilities provide thorough security auditing.
+- Real-time alerts and notifications keep you informed of potential data vulnerabilities using Slack and other integrations, with more coming soon.
+- New command support for S3, MySQL, Redis, Firebase, filesystem, and GCS expands the tool's capabilities.
+- ``--debug`` flag enables printing of all debugging output for comprehensive troubleshooting.
+- Save output in JSON format using the --json flag and specify a file name like --json output.json.
+- Proudly crafted with love and a sense of humor to make your security journey enjoyable and stress-free.
+
 
 ## Usage
 To unleash the power of HAWK Eye, simply follow the steps mentioned in the "Usage" section of the "README.md" file.
@@ -124,10 +145,14 @@ Note: If you don't provide any command, it will run all commands (firebase, fs, 
       </tr>
    </tbody>
 </table>
+</div>
+
+<div id="config">
 
 ## How to Configure HAWK Eye Connections (Profiles in connection.yml)
 
 HAWK Eye uses a YAML file to store connection profiles for various data sources. The connection.yml file is located in the config directory. You can add new profiles to this file to enable HAWK Eye to scan additional data sources. The following sections describe the process for adding new profiles to the connection.yml file.
+
 
 ### Your connection fille will look like this
 
@@ -186,6 +211,7 @@ sources:
 ```
 
 You can add or remove profiles from the connection.yml file as needed. You can also configure only one or two data sources if you don't need to scan all of them.
+</div>
 
 ## Adding New Commands
 HAWK Eye's extensibility empowers developers to contribute new security commands. Here's how:
@@ -213,16 +239,17 @@ We welcome contributions from the open-source community to enhance HAWK Eye's ca
 
 Join the HAWK Eye community and contribute to data source security worldwide. For any questions or assistance, feel free to open an issue on the repository.
 
-## Donation
-
 If you find HAWK Eye useful and would like to support the project, please consider making a donation. All 100% of the donations will be distributed to charities focused on education welfare and animal help.
 
-#### How to Donate
-Feel free to make a donation directly to the charities of your choice or send it to us, and we'll ensure it reaches the deserving causes. Just reach out to us on [LinkedIn](https://linkedin.com/in/rohitcoder) or [Twitter](https://twitter.com/rohitcoder) to let us know about your contribution. Your generosity and support mean the world to us, and we can't wait to express our heartfelt gratitude.
+<div id="acknowledgements">
 
-Your donations will play a significant role in making a positive impact in the lives of those in need. Thank you for considering supporting our cause!
-
-
+## Conferences and Talks
+<ul type="disc">
+<li><a href="https://www.blackhat.com/eu-23/arsenal/schedule/index.html#hawk-eye---pii--secret-detection-tool-for-your-servers-database-filesystems-cloud-storage-services-35711" target="_blank">
+Black Hat Europe 2023 [Arsenal]</a></li>
+<li><a href="https://www.blackhat.com/sector/2023/arsenal/schedule/index.html#hawk-eye---pii--secret-detection-tool-for-your-servers-database-filesystems-cloud-storage-services-35716" target="_blank">
+Black Hat SecTor 2023 [Arsenal]</a></li>
+</ul>
 
 ## 💪 Contributors
 We extend our heartfelt appreciation to all contributors who continuously improve this tool! Your efforts are essential in strengthening the security landscape. 🙏
@@ -230,3 +257,10 @@ We extend our heartfelt appreciation to all contributors who continuously improv
 <a href="https://github.com/rohitcoder/hawk-eye/graphs/contributors">
   <img src="https://contrib.rocks/image?abc=1&repo=rohitcoder/hawk-eye" />
 </a>
+</div>
+
+## Donation
+#### How to Donate
+Feel free to make a donation directly to the charities of your choice or send it to us, and we'll ensure it reaches the deserving causes. Just reach out to us on [LinkedIn](https://linkedin.com/in/rohitcoder) or [Twitter](https://twitter.com/rohitcoder) to let us know about your contribution. Your generosity and support mean the world to us, and we can't wait to express our heartfelt gratitude.
+
+Your donations will play a significant role in making a positive impact in the lives of those in need. Thank you for considering supporting our cause!
