@@ -1,3 +1,5 @@
+VERSION = "0.1.3"
+
 from setuptools import setup, find_packages
 
 with open("readme.md", "r") as f:
@@ -8,7 +10,7 @@ with open("requirements.txt") as f:
 
 setup(
     name='hawk_scanner',
-    version='0.1.2',    
+    version=VERSION,   
     description='A powerful scanner to scan your Filesystem, S3, MySQL, Redis, Google Cloud Storage and Firebase storage for PII and sensitive data.',
     long_description=long_description,
     long_description_content_type="text/markdown",

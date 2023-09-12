@@ -1,6 +1,5 @@
 from rich.console import Console
 from rich.table import Table
-import random
 import yaml
 import re
 import os

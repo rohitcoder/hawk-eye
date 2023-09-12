@@ -4,6 +4,7 @@ from rich.console import Console
 from hawk_scanner.internals import system
 import os
 import concurrent.futures
+import time
 
 def process_file(file_path, key, results):
     matches = system.read_match_strings(file_path, 'fs')
@@ -28,20 +29,29 @@ def execute(args):
         fs_config = sources_config.get('fs')
         if fs_config:
             for key, config in fs_config.items():
-                path = config.get('path') or os.getcwd()
+                if 'path' not in config:
+                    system.print_error(f"Path not found in fs profile '{key}'")
+                    continue
+                path = config.get('path')
                 if not os.path.exists(path):
-                    path = os.getcwd()
+                    system.print_error(f"Path '{path}' does not exist")
+                
                 exclude_patterns = fs_config.get(key, {}).get('exclude_patterns', [])
+                start_time = time.time()
                 files = system.list_all_files_iteratively(path, exclude_patterns)
                 
                 # Use ThreadPoolExecutor for parallel processing
+                file_count = 0
                 with concurrent.futures.ThreadPoolExecutor() as executor:
                     futures = []
                     for file_path in files:
+                        file_count += 1
                         futures.append(executor.submit(process_file, file_path, key, results))
                     
                     # Wait for all tasks to complete
                     concurrent.futures.wait(futures)
+                end_time = time.time()
+                system.print_info(f"Time taken to analyze {file_count} files: {end_time - start_time} seconds")
         else:
             system.print_error("No filesystem 'fs' connection details found in connection.yml")
     else:
