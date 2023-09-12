@@ -20,6 +20,9 @@ system.print_banner()
 
 console = Console()
 
+## Now separate the results by data_source
+data_sources = ['s3', 'mysql', 'redis', 'firebase', 'gcs', 'fs']
+
 def load_command_module(command):
     try:
         module = importlib.import_module(f"hawk_scanner.commands.{command}")
@@ -39,24 +42,25 @@ def execute_command(command, args):
 
 
 def main():
-    ## Now separate the results by data_source
-    data_sources = ['s3', 'mysql', 'redis', 'firebase', 'gcs', 'fs']
-
+    data_sources_option = ['all'] + data_sources
     parser = argparse.ArgumentParser(description='CLI Command Executor')
-    parser.add_argument('command', nargs='?', choices=data_sources, help='Command to execute')
+    parser.add_argument('command', nargs='?', choices=data_sources_option, help='Command to execute')
     parser.add_argument('--json', help='Save output to json file')
     parser.add_argument('--debug', action='store_true', help='Enable debug mode')
 
     args, extra_args = parser.parse_known_args()
     results = []
     if args.command:
-        for data in execute_command(args.command, extra_args):
-            results.append(data)
-    else:
-        commands = data_sources
-        for command in commands:
-            for data in execute_command(command, extra_args):
+        if args.command == 'all':
+            commands = data_sources
+            for command in commands:
+                for data in execute_command(command, extra_args):
+                    results.append(data)
+        else:
+            for data in execute_command(args.command, extra_args):
                 results.append(data)
+    else:
+        system.print_error("Please provide a command to execute")
 
     ## GROUP results in grouped_results by datasource by key val
     grouped_results = {}

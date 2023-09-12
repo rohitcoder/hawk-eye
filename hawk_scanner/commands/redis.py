@@ -1,4 +1,3 @@
-import argparse
 import redis
 import yaml
 from hawk_scanner.internals import system

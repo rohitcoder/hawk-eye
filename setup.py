@@ -1,11 +1,14 @@
 from setuptools import setup, find_packages
 
-with open("README.md", "r") as f:
+with open("readme.md", "r") as f:
     long_description = f.read()
+
+with open("requirements.txt") as f:
+    requires = f.read().splitlines()
 
 setup(
     name='hawk_scanner',
-    version='0.1.1',    
+    version='0.1.2',    
     description='A powerful scanner to scan your Filesystem, S3, MySQL, Redis, Google Cloud Storage and Firebase storage for PII and sensitive data.',
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -21,7 +24,7 @@ setup(
         ],
     },
     license='Apache License 2.0',
-    install_requires=['pyyaml', 'rich', 'mysql-connector-python', 'redis', 'boto3'],
+    install_requires=requires,
     extras_require={
         "dev": ["twine>=4.0.2"],
     },

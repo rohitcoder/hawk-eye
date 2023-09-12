@@ -4,3 +4,5 @@ rich
 mysql-connector-python
 redis
 firebase-admin
+google-cloud-core
+google-cloud-storage

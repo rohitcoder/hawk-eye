@@ -1,5 +1,3 @@
-import argparse
-import yaml
 import mysql.connector
 from hawk_scanner.internals import system
 import re

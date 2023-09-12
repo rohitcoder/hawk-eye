@@ -3,9 +3,6 @@ from google.cloud import storage
 from rich.console import Console
 from hawk_scanner.internals import system
 import os
-import re
-import time
-import yaml
 import concurrent.futures
 
 def process_file(file_path, key, results):

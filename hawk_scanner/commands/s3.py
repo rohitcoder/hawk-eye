@@ -1,7 +1,5 @@
-import argparse
 import boto3
 import os
-import re
 import time
 import yaml
 from hawk_scanner.internals import system
