@@ -16,6 +16,7 @@ parser.add_argument('--shutup', action='store_true', help='Suppress the Hawk Eye
 
 args, extra_args = parser.parse_known_args()
 
+
 def get_connection():
     if args.connection:
         if os.path.exists(args.connection):
@@ -40,7 +41,8 @@ def get_fingerprint_file():
     else:
         file_path = "https://github.com/rohitcoder/hawk-eye/raw/main/fingerprint.yml"
         try:
-            response = requests.get(file_path)
+            response = requests.get(file_path, timeout=10)
+            print_info(f"Downloading default fingerprint.yml from {file_path}")
             if response.status_code == 200:
                 with open('fingerprint.yml', 'wb') as file:
                     file.write(response.content)
@@ -51,7 +53,9 @@ def get_fingerprint_file():
         except Exception as e:
             print_error(f"Unable to download default fingerprint.yml please provide your own fingerprint file using --fingerprint flag")
             exit(1)
-    
+
+patterns = get_fingerprint_file()
+
 def print_info(message):
     console.print(f"[yellow][INFO][/yellow] {message}")
 
@@ -110,7 +114,6 @@ def print_banner():
 
 def match_strings(content):
     matched_strings = []
-    patterns = get_fingerprint_file()
     for pattern_name, pattern_regex in patterns.items():
         print_debug(f"Matching pattern: {pattern_name}")
         found = {} 
