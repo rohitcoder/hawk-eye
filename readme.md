@@ -1,7 +1,9 @@
-<h1 align="center">🦅 Hawk-eye</h1>
+<h1 align="center">🦅 Hawk-eye </h1> 
 <p align="center"><b>Find PII & Secrets like never before across your entire infrastructure with same tool!</b></p>
 <p align="center">
 <a href="#description">Description</a> • <a href="#installation">Installation</a> • <a href="#features">Features</a> • <a href="#config">Configuration</a> • <a href="#acknowledgements">Acknowledgements</a><br><br>
+   
+[![Publish to PyPI.org](https://github.com/rohitcoder/hawk-eye/actions/workflows/pypi.yml/badge.svg)](https://github.com/rohitcoder/hawk-eye/actions/workflows/pypi.yml) 
 <img alt="Static Badge" src="https://img.shields.io/badge/Supports-S3-yellow?logo=amazons3">
 <img alt="Static Badge" src="https://img.shields.io/badge/Supports-GCP-red?logo=googlecloud">
 <img alt="Static Badge" src="https://img.shields.io/badge/Supports-MysQL-green?logo=mysql">
