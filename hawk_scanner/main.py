@@ -163,6 +163,40 @@ def main():
                 
                 system.SlackNotify(AlertMsg)
                 
+            elif group == 'postgresql':
+                table.add_row(
+                    str(i),
+                    result['profile'],
+                    f"{result['host']} > {result['database']} > {result['table']}.{result['column']}",
+                    result['pattern_name'],
+                    str(len(result['matches'])),
+                    str(', '.join(result['matches'])),
+                    result['sample_text'],
+                )
+
+                # Slack notification for PostgreSQL
+                AlertMsg = """
+                *** PII Or Secret Found ***
+                Data Source: PostgreSQL
+                Host: {host}
+                Database: {database}
+                Table: {table}
+                Column: {column}
+                Pattern Name: {pattern_name}
+                Total Exposed: {total_exposed}
+                Exposed Values: {exposed_values}
+                """.format(
+                    host=result['host'],
+                    database=result['database'],
+                    table=result['table'],
+                    column=result['column'],
+                    pattern_name=result['pattern_name'],
+                    total_exposed=str(len(result['matches'])),
+                    exposed_values=', '.join(result['matches'])
+                )
+
+                system.SlackNotify(AlertMsg)
+
             elif group == 'redis':
                 table.add_row(
                     str(i),
