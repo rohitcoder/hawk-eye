@@ -35,8 +35,8 @@ sources:
       user: YOUR_MYSQL_USERNAME
       password: YOUR_MYSQL_PASSWORD
       database: YOUR_MYSQL_DATABASE_NAME
-  postgresql:  # New PostgreSQL configuration
-    postgresql_profile:
+  postgresql: 
+    postgresql1:
       host: YOUR_POSTGRESQL_HOST
       port: YOUR_POSTGRESQL_PORT
       user: YOUR_POSTGRESQL_USERNAME

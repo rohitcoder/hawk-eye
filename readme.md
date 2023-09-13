@@ -5,6 +5,7 @@
 <img alt="Static Badge" src="https://img.shields.io/badge/Supports-S3-yellow?logo=amazons3">
 <img alt="Static Badge" src="https://img.shields.io/badge/Supports-GCP-red?logo=googlecloud">
 <img alt="Static Badge" src="https://img.shields.io/badge/Supports-MysQL-green?logo=mysql">
+<img alt="Static Badge" src="https://img.shields.io/badge/Supports-PostgreSQL-blue?logo=postgresql">
 <img alt="Static Badge" src="https://img.shields.io/badge/Supports-Redis-red?logo=redis">
 <img alt="Static Badge" src="https://img.shields.io/badge/Supports-On Prem-black?logo=amazonec2">
 </p>
@@ -14,7 +15,7 @@
 
 ### 🦅 HAWK Eye - Highly Advanced Watchful Keeper Eye
 
-HAWK Eye is a powerful and versatile CLI (Command-Line Interface) tool designed to be your vigilant watchkeeper, guarding against potential data breaches and cyber threats across various platforms. Inspired by the precision and vision of majestic birds of prey, HAWK Eye swiftly scans multiple data sources, including S3, MySQL, Redis, Firebase, filesystem, and Google Cloud buckets (GCS), for Personally Identifiable Information (PII) and secrets.
+HAWK Eye is a powerful and versatile CLI (Command-Line Interface) tool designed to be your vigilant watchkeeper, guarding against potential data breaches and cyber threats across various platforms. Inspired by the precision and vision of majestic birds of prey, HAWK Eye swiftly scans multiple data sources, including S3, MySQL, PostgreSQL, Redis, Firebase, filesystem, and Google Cloud buckets (GCS), for Personally Identifiable Information (PII) and secrets.
 
 
 ### Why "HAWK Eye"?
@@ -64,10 +65,10 @@ HAWK Eye is a Python-based CLI tool that can be installed using the following st
 <div id="features">
 
 ## Key features
-- Swiftly scans multiple data sources (S3, MySQL, Redis, Firebase, filesystem, and GCS) for PII data and malware exposure.
+- Swiftly scans multiple data sources (S3, MySQL, PostgreSQL, Redis, Firebase, filesystem, and GCS) for PII data and malware exposure.
 - Advanced algorithms and deep scanning capabilities provide thorough security auditing.
 - Real-time alerts and notifications keep you informed of potential data vulnerabilities using Slack and other integrations, with more coming soon.
-- New command support for S3, MySQL, Redis, Firebase, filesystem, and GCS expands the tool's capabilities.
+- New command support for S3, MySQL, PostgreSQL, Redis, Firebase, filesystem, and GCS expands the tool's capabilities.
 - ``--debug`` flag enables printing of all debugging output for comprehensive troubleshooting.
 - Save output in JSON format using the --json flag and specify a file name like --json output.json.
 - Proudly crafted with love and a sense of humor to make your security journey enjoyable and stress-free.
@@ -77,7 +78,7 @@ HAWK Eye is a Python-based CLI tool that can be installed using the following st
 To unleash the power of HAWK Eye, simply follow the steps mentioned in the "Usage" section of the "README.md" file.
 
 ### Options
-Note: If you don't provide any command, it will run all commands (firebase, fs, gcs, mysql, redis, s3) by default.
+Note: If you don't provide any command, it will run all commands (firebase, fs, gcs, mysql, postgresql, redis, s3) by default.
 <table>
    <thead>
       <tr>
@@ -109,6 +110,11 @@ Note: If you don't provide any command, it will run all commands (firebase, fs, 
          <td>
             mysql
          <td>Scan MySQL profiles for PII and secrets data.</td>
+      </tr>
+      <tr>
+         <td>
+            postgresql
+         <td>Scan postgreSQL profiles for PII and secrets data.</td>
       </tr>
       <tr>
          <td>
@@ -198,6 +204,14 @@ sources:
       user: YOUR_MYSQL_USERNAME
       password: YOUR_MYSQL_PASSWORD
       database: YOUR_MYSQL_DATABASE_NAME
+  
+  postgresql: 
+    postgresql1:
+      host: YOUR_POSTGRESQL_HOST
+      port: YOUR_POSTGRESQL_PORT
+      user: YOUR_POSTGRESQL_USERNAME
+      password: YOUR_POSTGRESQL_PASSWORD
+      database: YOUR_POSTGRESQL_DATABASE_NAME
 
   fs:
     fs1:
