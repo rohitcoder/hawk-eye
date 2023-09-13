@@ -1,6 +1,5 @@
 import psycopg2
 from hawk_scanner.internals import system
-import re
 from rich.console import Console
 from rich.table import Table
 

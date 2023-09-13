@@ -21,7 +21,7 @@ system.print_banner()
 console = Console()
 
 ## Now separate the results by data_source
-data_sources = ['s3', 'mysql', 'redis', 'firebase', 'gcs', 'fs']
+data_sources = ['s3', 'mysql', 'redis', 'firebase', 'gcs', 'fs', 'postgresql']
 
 def load_command_module(command):
     try:
