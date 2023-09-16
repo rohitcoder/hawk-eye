@@ -6,4 +6,4 @@ redis
 firebase-admin
 google-cloud-core
 google-cloud-storage
-psycopg2
+psycopg2-binary

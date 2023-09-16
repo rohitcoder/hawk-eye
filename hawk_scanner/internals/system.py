@@ -17,6 +17,24 @@ parser.add_argument('--shutup', action='store_true', help='Suppress the Hawk Eye
 args, extra_args = parser.parse_known_args()
 
 
+def print_info(message):
+    console.print(f"[yellow][INFO][/yellow] {message}")
+
+def print_debug(message):
+    if args.debug:
+        console.print(f"[blue][DEBUG][/blue] {message}")
+
+def print_error(message):
+    console.print(f"[bold red]❌ {message}")
+
+def print_success(message):
+    console.print(f"[bold green]✅ {message}")
+
+def print_info(message):
+    console.print(f"[yellow][INFO][/yellow] {message}")
+def print_alert(message):
+    console.print(f"[bold red][ALERT][/bold red] {message}")
+
 def get_connection():
     if args.connection:
         if os.path.exists(args.connection):
@@ -55,24 +73,6 @@ def get_fingerprint_file():
             exit(1)
 
 patterns = get_fingerprint_file()
-
-def print_info(message):
-    console.print(f"[yellow][INFO][/yellow] {message}")
-
-def print_debug(message):
-    if args.debug:
-        console.print(f"[blue][DEBUG][/blue] {message}")
-
-def print_error(message):
-    console.print(f"[bold red]❌ {message}")
-
-def print_success(message):
-    console.print(f"[bold green]✅ {message}")
-
-def print_info(message):
-    console.print(f"[yellow][INFO][/yellow] {message}")
-def print_alert(message):
-    console.print(f"[bold red][ALERT][/bold red] {message}")
 
 def print_banner():
     banner = r"""

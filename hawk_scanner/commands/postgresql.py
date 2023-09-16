@@ -24,9 +24,7 @@ def check_data_patterns(conn, patterns, profile_name, database_name):
     cursor = conn.cursor()
     cursor.execute("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'")
     tables = [table[0] for table in cursor.fetchall()]
-
     table_count = 1
-
     results = []
     for table in tables:
         cursor.execute(f"SELECT * FROM {table}")
