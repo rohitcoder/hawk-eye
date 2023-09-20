@@ -203,7 +203,14 @@ sources:
       exclude_patterns:
         - .pdf
         - .docx
-
+  mongodb:
+    mongodb_example:
+      uri: YOUR_MONGODB_URI
+      host: YOUR_MONGODB_HOST
+      port: YOUR_MONGODB_PORT
+      username: YOUR_MONGODB_USERNAME
+      password: YOUR_MONGODB_PASSWORD
+      database: YOUR_MONGODB_DATABASE_NAME
   mysql:
     mysql1:
       host: localhost
