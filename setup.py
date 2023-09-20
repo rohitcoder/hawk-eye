@@ -1,4 +1,4 @@
-VERSION = "0.1.6"
+VERSION = "0.1.7"
 
 from setuptools import setup, find_packages
 
@@ -11,7 +11,7 @@ with open("requirements.txt") as f:
 setup(
     name='hawk_scanner',
     version=VERSION,   
-    description='A powerful scanner to scan your Filesystem, S3, MySQL, PostgreSQL, Redis, Google Cloud Storage and Firebase storage for PII and sensitive data.',
+    description='A powerful scanner to scan your Filesystem, S3, MongoDB, MySQL, PostgreSQL, Redis, Google Cloud Storage and Firebase storage for PII and sensitive data.',
     long_description=long_description,
     long_description_content_type="text/markdown",
     url='https://github.com/rohitcoder/hawk-eye',

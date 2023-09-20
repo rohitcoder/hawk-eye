@@ -8,7 +8,7 @@ import requests
 import json
 
 console = Console()
-parser = argparse.ArgumentParser(description='🦅 A powerful scanner to scan your Filesystem, S3, MySQL, Redis, Google Cloud Storage and Firebase storage for PII and sensitive data.')
+parser = argparse.ArgumentParser(description='🦅 A powerful scanner to scan your Filesystem, S3, MySQL, PostgreSQL, MongoDB, Redis, Google Cloud Storage and Firebase storage for PII and sensitive data.')
 parser.add_argument('--connection', action='store', help='YAML Connection file path')
 parser.add_argument('--fingerprint', action='store', help='Override YAML fingerprint file path')
 parser.add_argument('--debug', action='store_true', help='Enable debug mode')

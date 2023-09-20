@@ -17,7 +17,7 @@
 
 ### 🦅 HAWK Eye - Highly Advanced Watchful Keeper Eye
 
-HAWK Eye is a powerful and versatile CLI (Command-Line Interface) tool designed to be your vigilant watchkeeper, guarding against potential data breaches and cyber threats across various platforms. Inspired by the precision and vision of majestic birds of prey, HAWK Eye swiftly scans multiple data sources, including S3, MySQL, PostgreSQL, Redis, Firebase, filesystem, and Google Cloud buckets (GCS), for Personally Identifiable Information (PII) and secrets.
+HAWK Eye is a powerful and versatile CLI (Command-Line Interface) tool designed to be your vigilant watchkeeper, guarding against potential data breaches and cyber threats across various platforms. Inspired by the precision and vision of majestic birds of prey, HAWK Eye swiftly scans multiple data sources, including S3, MySQL, PostgreSQL, MongoDB, Redis, Firebase, filesystem, and Google Cloud buckets (GCS), for Personally Identifiable Information (PII) and secrets.
 
 
 ### Why "HAWK Eye"?
@@ -112,6 +112,11 @@ Note: If you don't provide any command, it will run all commands (firebase, fs, 
          <td>
             mysql
          <td>Scan MySQL profiles for PII and secrets data.</td>
+      </tr>
+      <tr>
+         <td>
+            mongodb
+         <td>Scan MongoDB profiles for PII and secrets data.</td>
       </tr>
       <tr>
          <td>

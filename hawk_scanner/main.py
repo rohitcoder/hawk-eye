@@ -21,7 +21,7 @@ system.print_banner()
 console = Console()
 
 ## Now separate the results by data_source
-data_sources = ['s3', 'mysql', 'redis', 'firebase', 'gcs', 'fs', 'postgresql']
+data_sources = ['s3', 'mysql', 'redis', 'firebase', 'gcs', 'fs', 'postgresql', 'mongodb']
 
 def load_command_module(command):
     try:
@@ -85,7 +85,7 @@ def main():
         table.add_column("Vulnerable Profile")
         if group == 's3':
             table.add_column("Bucket > File Path")
-        elif group == 'mysql':
+        elif group == 'mysql' or group == 'postgresql':
             table.add_column("Host > Database > Table.Column")
         elif group == 'redis':
             table.add_column("Host > Key")
@@ -93,6 +93,8 @@ def main():
             table.add_column("Bucket > File Path")
         elif group == 'fs':
             table.add_column("File Path")
+        elif group == 'mongodb':
+            table.add_column("Host > Database > Collection > Field")
 
         table.add_column("Pattern Name")
         table.add_column("Total Exposed")
@@ -162,7 +164,41 @@ def main():
                 )
                 
                 system.SlackNotify(AlertMsg)
-                
+           
+            elif group == 'mongodb':
+                table.add_row(
+                    str(i),
+                    result['profile'],
+                    f"{result['host']} > {result['database']} > {result['collection']} > {result['field']}",
+                    result['pattern_name'],
+                    str(len(result['matches'])),
+                    str(', '.join(result['matches'])),
+                    result['sample_text'],
+                )
+
+                # Slack notification for MongoDB
+                AlertMsg = """
+                *** PII Or Secret Found ***
+                Data Source: MongoDB
+                Host: {host}
+                Database: {database}
+                Collection: {collection}
+                Field: {field}
+                Pattern Name: {pattern_name}
+                Total Exposed: {total_exposed}
+                Exposed Values: {exposed_values}
+                """.format(
+                    host=result['host'],
+                    database=result['database'],
+                    collection=result['collection'],
+                    field=result['field'],
+                    pattern_name=result['pattern_name'],
+                    total_exposed=str(len(result['matches'])),
+                    exposed_values=', '.join(result['matches'])
+                )
+
+                system.SlackNotify(AlertMsg)
+
             elif group == 'postgresql':
                 table.add_row(
                     str(i),
