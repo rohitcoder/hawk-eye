@@ -39,9 +39,9 @@ See how this works on Youtube - https://youtu.be/LuPXE7UJKOY
       pip3 install hawk-scanner
    ```
 
-## Example working command
+## Example working command (To scan all supported services, or use fs/s3/gcs etc...)
    ```bash
-      hawk_scanner --connection connection.yml --fingerprint fingerprint.yml --json output.json --debug
+      hawk_scanner all --connection connection.yml --fingerprint fingerprint.yml --json output.json --debug
    ```
 
 ## Building or running from source
