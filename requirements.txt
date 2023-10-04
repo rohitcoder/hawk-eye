@@ -6,5 +6,5 @@ redis
 firebase-admin
 google-cloud-core
 google-cloud-storage
-psycopg2-binary
+# psycopg2-binary
 pymongo==3.13.0
