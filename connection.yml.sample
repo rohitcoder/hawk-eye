@@ -1,5 +1,6 @@
 notify:
   redacted: True
+  suppress_duplicates: True
   slack:
     webhook_url: https://hooks.slack.com/services/T0XXXXXXXXXXX/BXXXXXXXX/1CIyXXXXXXXXXXXXXXX
 

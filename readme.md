@@ -179,6 +179,8 @@ HAWK Eye uses a YAML file to store connection profiles for various data sources.
 
 ```yaml
 notify:
+  redacted: True
+  suppress_duplicates: True
   slack:
     webhook_url: https://hooks.slack.com/services/T0XXXXXXXXXXXXXX/B0XXXXXXXXXXXXXX/1CIyXXXXXXXXXXXXXX
 
