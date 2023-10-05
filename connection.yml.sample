@@ -1,4 +1,5 @@
 notify:
+  redacted: True
   slack:
     webhook_url: https://hooks.slack.com/services/T0XXXXXXXXXXX/BXXXXXXXX/1CIyXXXXXXXXXXXXXXX
 

@@ -115,13 +115,14 @@ def main():
                 )
                 AlertMsg = """
                 *** PII Or Secret Found ***
-                Data Source: S3 Bucket
+                Data Source: S3 Bucket - {vulnerable_profile}
                 Bucket: {bucket}
                 File Path: {file_path}
                 Pattern Name: {pattern_name}
                 Total Exposed: {total_exposed}
                 Exposed Values: {exposed_values}
                 """.format(
+                    vulnerable_profile=result['profile'],
                     bucket=result['bucket'],
                     file_path=result['file_path'],
                     pattern_name=result['pattern_name'],
@@ -145,7 +146,7 @@ def main():
                 # Slack notification for MySQL
                 AlertMsg = """
                 *** PII Or Secret Found ***
-                Data Source: MySQL
+                Data Source: MySQL - {vulnerable_profile}
                 Host: {host}
                 Database: {database}
                 Table: {table}
@@ -154,6 +155,7 @@ def main():
                 Total Exposed: {total_exposed}
                 Exposed Values: {exposed_values}
                 """.format(
+                    vulnerable_profile=result['profile'],
                     host=result['host'],
                     database=result['database'],
                     table=result['table'],
@@ -179,7 +181,7 @@ def main():
                 # Slack notification for MongoDB
                 AlertMsg = """
                 *** PII Or Secret Found ***
-                Data Source: MongoDB
+                Data Source: MongoDB - {vulnerable_profile}
                 Host: {host}
                 Database: {database}
                 Collection: {collection}
@@ -188,6 +190,7 @@ def main():
                 Total Exposed: {total_exposed}
                 Exposed Values: {exposed_values}
                 """.format(
+                    vulnerable_profile=result['profile'],
                     host=result['host'],
                     database=result['database'],
                     collection=result['collection'],
@@ -213,7 +216,7 @@ def main():
                 # Slack notification for PostgreSQL
                 AlertMsg = """
                 *** PII Or Secret Found ***
-                Data Source: PostgreSQL
+                Data Source: PostgreSQL - {vulnerable_profile}
                 Host: {host}
                 Database: {database}
                 Table: {table}
@@ -222,6 +225,7 @@ def main():
                 Total Exposed: {total_exposed}
                 Exposed Values: {exposed_values}
                 """.format(
+                    vulnerable_profile=result['profile'],
                     host=result['host'],
                     database=result['database'],
                     table=result['table'],
@@ -245,13 +249,14 @@ def main():
                 )
                 AlertMsg = """
                 *** PII Or Secret Found ***
-                Data Source: Redis
+                Data Source: Redis - {vulnerable_profile}
                 Host: {host}
                 Key: {key}
                 Pattern Name: {pattern_name}
                 Total Exposed: {total_exposed}
                 Exposed Values: {exposed_values}
                 """.format(
+                    vulnerable_profile=result['profile'],
                     host=result['host'],
                     key=result['key'],
                     pattern_name=result['pattern_name'],
@@ -274,13 +279,14 @@ def main():
                 # Slack notification for Firebase/GCS
                 AlertMsg = """
                 *** PII Or Secret Found ***
-                Data Source: Firebase/GCS
+                Data Source: Firebase/GCS - {vulnerable_profile}
                 Bucket: {bucket}
                 File Path: {file_path}
                 Pattern Name: {pattern_name}
                 Total Exposed: {total_exposed}
                 Exposed Values: {exposed_values}
                 """.format(
+                    vulnerable_profile=result['profile'],
                     bucket=result['bucket'],
                     file_path=result['file_path'],
                     pattern_name=result['pattern_name'],
@@ -302,18 +308,24 @@ def main():
                 )
                 AlertMsg = """
                 *** PII Or Secret Found ***
-                Data Source: File System
-                File Path: {file_path}
+                Data Source: File System - {vulnerable_profile}
+                File Path: {file_path},
+                File Creator: {file_creator},
+                File Created at : {file_created},
+                File Last Modified at : {file_last_modified},
                 Pattern Name: {pattern_name}
                 Total Exposed: {total_exposed}
                 Exposed Values: {exposed_values}
                 """.format(
+                    file_creator = result['file_data']['creator'],
+                    file_created = result['file_data']['created_time'],
+                    file_last_modified = result['file_data']['modified_time'],
+                    vulnerable_profile=result['profile'],
                     file_path=result['file_path'],
                     pattern_name=result['pattern_name'],
                     total_exposed=str(len(result['matches'])),
                     exposed_values=str(', '.join(result['matches']))
                 )
-                
                 system.SlackNotify(AlertMsg)
             else:
                 # Handle other cases or do nothing for unsupported groups

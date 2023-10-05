@@ -8,6 +8,7 @@ import time
 
 def process_file(file_path, key, results):
     matches = system.read_match_strings(file_path, 'fs')
+    file_data = system.getFileData(file_path)
     if matches:
         for match in matches:
             results.append({
@@ -17,7 +18,8 @@ def process_file(file_path, key, results):
                 'matches': match['matches'],
                 'sample_text': match['sample_text'],
                 'profile': key,
-                'data_source': 'fs'
+                'data_source': 'fs',
+                'file_data': file_data
             })
 
 def execute(args):

@@ -39,9 +39,18 @@ See how this works on Youtube - https://youtu.be/LuPXE7UJKOY
       pip3 install hawk-scanner
    ```
 
-## Example working command (To scan all supported services, or use fs/s3/gcs etc...)
+
+## Example working command (Use all/fs/s3/gcs etc...)
    ```bash
       hawk_scanner all --connection connection.yml --fingerprint fingerprint.yml --json output.json --debug
+   ```
+
+### Note: Scanning Postgresql?, then you have to install some extra dependencies.
+
+For scanning postgresql source, this tool requires psycopg2-binary dependency, we can't ship this dependency with main package because psycopg2-binary not works with most of the systems espically with Windows, so you have to install it manually.
+   
+   ```bash
+      pip3 install psycopg2-binary
    ```
 
 ## Building or running from source
