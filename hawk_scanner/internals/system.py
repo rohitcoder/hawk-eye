@@ -2,7 +2,6 @@ from rich.console import Console
 from rich.table import Table
 import json, requests, argparse, yaml, re, datetime, os, subprocess, platform, hashlib
 from tinydb import TinyDB, Query
-from pwd import getpwuid
 
 # Create a TinyDB instance for storing previous alert hashes
 db = TinyDB('previous_alerts.json')
@@ -61,6 +60,7 @@ def get_file_owner(file_path):
             owner_name = ""
     else:
         try:
+            from pwd import getpwuid
             # Use the 'os.stat()' method to get the file owner on non-Windows systems
             file_stat = os.stat(file_path)
             owner_name = file_stat.st_uid  # You can also use pwd.getpwuid(file_stat.st_uid).pw_name to get the username
