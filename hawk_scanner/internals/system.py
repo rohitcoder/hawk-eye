@@ -233,7 +233,7 @@ def read_match_strings(file_path, source):
     print_info(f"Scanning file: {file_path}")
     content = ''
     try:
-        with open(file_path, 'r') as file:
+        with open(file_path, 'r', encoding="utf-8") as file:
             content = file.read()
     except Exception as e:
         pass
