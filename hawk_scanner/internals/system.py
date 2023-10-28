@@ -183,13 +183,18 @@ def match_strings(content):
         found = {} 
         ## parse pattern_regex as Regex
         complied_regex = re.compile(pattern_regex, re.IGNORECASE)
+        print_debug(f"Regex: {complied_regex}")
+        print_debug(f"Content: {content}")
         matches = re.findall(complied_regex, content)
-
+        print_debug(f"Matches: {matches}")
         if matches:
+            print_debug(f"Found {len(matches)} matches for pattern: {pattern_name}")
             found['pattern_name'] = pattern_name
             redacted_matches = []
             if redacted:
+                print_debug(f"Redacting matches for pattern: {pattern_name}")
                 for match in matches:
+                    print_debug(f"Redacting match: {match}")
                     redacted_matches.append(RedactData(match))
                 found['matches'] = redacted_matches
             else:
@@ -199,8 +204,9 @@ def match_strings(content):
                 found['sample_text'] = RedactData(content[:50])
             else:
                 found['sample_text'] = content[:50]
-
+            
             matched_strings.append(found)
+    print_debug(f"Matched strings: {matched_strings}")
     return matched_strings
 
 def should_exclude_file(file_name, exclude_patterns):
