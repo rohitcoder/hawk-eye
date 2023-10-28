@@ -103,6 +103,7 @@ def main():
         i = 1
 
         for result in grouped_results[group]:
+            records_mini = ', '.join(result['matches']) if len(result['matches']) < 25 else ', '.join(result['matches'][:25]) + f" + {len(result['matches']) - 25} more records"
             if group == 's3':
                 table.add_row(
                     str(i),
@@ -110,7 +111,7 @@ def main():
                     f"{result['bucket']} > {result['file_path']}",
                     result['pattern_name'],
                     str(len(result['matches'])),
-                    str(', '.join(result['matches'])),
+                    str(records_mini),
                     result['sample_text'],
                 )
                 AlertMsg = """
@@ -127,7 +128,7 @@ def main():
                     file_path=result['file_path'],
                     pattern_name=result['pattern_name'],
                     total_exposed=str(len(result['matches'])),
-                    exposed_values=', '.join(result['matches'])
+                    exposed_values=records_mini
                 )
                 
                 system.SlackNotify(AlertMsg)
@@ -139,7 +140,7 @@ def main():
                     f"{result['host']} > {result['database']} > {result['table']}.{result['column']}",
                     result['pattern_name'],
                     str(len(result['matches'])),
-                    str(', '.join(result['matches'])),
+                    records_mini,
                     result['sample_text'],
                 )
                 
@@ -162,7 +163,7 @@ def main():
                     column=result['column'],
                     pattern_name=result['pattern_name'],
                     total_exposed=str(len(result['matches'])),
-                    exposed_values=', '.join(result['matches'])
+                    exposed_values=records_mini
                 )
                 
                 system.SlackNotify(AlertMsg)
@@ -174,7 +175,7 @@ def main():
                     f"{result['host']} > {result['database']} > {result['collection']} > {result['field']}",
                     result['pattern_name'],
                     str(len(result['matches'])),
-                    str(', '.join(result['matches'])),
+                    records_mini,
                     result['sample_text'],
                 )
 
@@ -197,7 +198,7 @@ def main():
                     field=result['field'],
                     pattern_name=result['pattern_name'],
                     total_exposed=str(len(result['matches'])),
-                    exposed_values=', '.join(result['matches'])
+                    exposed_values=records_mini
                 )
 
                 system.SlackNotify(AlertMsg)
@@ -209,7 +210,7 @@ def main():
                     f"{result['host']} > {result['database']} > {result['table']}.{result['column']}",
                     result['pattern_name'],
                     str(len(result['matches'])),
-                    str(', '.join(result['matches'])),
+                    records_mini,
                     result['sample_text'],
                 )
 
@@ -232,7 +233,7 @@ def main():
                     column=result['column'],
                     pattern_name=result['pattern_name'],
                     total_exposed=str(len(result['matches'])),
-                    exposed_values=', '.join(result['matches'])
+                    exposed_values=records_mini
                 )
 
                 system.SlackNotify(AlertMsg)
@@ -244,7 +245,7 @@ def main():
                     f"{result['host']} > {result['key']}",
                     result['pattern_name'],
                     str(len(result['matches'])),
-                    str(', '.join(result['matches'])),
+                    records_mini,
                     result['sample_text'],
                 )
                 AlertMsg = """
@@ -261,7 +262,7 @@ def main():
                     key=result['key'],
                     pattern_name=result['pattern_name'],
                     total_exposed=str(len(result['matches'])),
-                    exposed_values=', '.join(result['matches'])
+                    exposed_values=records_mini
                 )
                 
                 system.SlackNotify(AlertMsg)
@@ -272,7 +273,7 @@ def main():
                     f"{result['bucket']} > {result['file_path']}",
                     result['pattern_name'],
                     str(len(result['matches'])),
-                    str(', '.join(result['matches'])),
+                    records_mini,
                     result['sample_text'],
                 )
                 
@@ -291,7 +292,7 @@ def main():
                     file_path=result['file_path'],
                     pattern_name=result['pattern_name'],
                     total_exposed=str(len(result['matches'])),
-                    exposed_values=', '.join(result['matches'])
+                    exposed_values=records_mini
                 )
                 
                 system.SlackNotify(AlertMsg)
@@ -303,7 +304,7 @@ def main():
                     f"{result['file_path']}",
                     result['pattern_name'],
                     str(len(result['matches'])),
-                    str(', '.join(result['matches'])),
+                    records_mini,
                     result['sample_text'],
                 )
                 AlertMsg = """
@@ -324,7 +325,7 @@ def main():
                     file_path=result['file_path'],
                     pattern_name=result['pattern_name'],
                     total_exposed=str(len(result['matches'])),
-                    exposed_values=str(', '.join(result['matches']))
+                    exposed_values=records_mini
                 )
                 system.SlackNotify(AlertMsg)
             else:

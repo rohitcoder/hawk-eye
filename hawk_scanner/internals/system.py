@@ -177,7 +177,9 @@ def match_strings(content):
 
     if 'notify' in connections:
         redacted: bool = connections.get('notify', {}).get('redacted', False)
-
+    else:
+        redacted = False
+        
     for pattern_name, pattern_regex in patterns.items():
         print_debug(f"Matching pattern: {pattern_name}")
         found = {} 
@@ -242,6 +244,7 @@ def read_match_strings(file_path, source):
         with open(file_path, 'r', encoding="utf-8") as file:
             content = file.read()
     except Exception as e:
+        print_debug(f"Error in read_match_strings: {e}")
         pass
     matched_strings = match_strings(content)
     return matched_strings
