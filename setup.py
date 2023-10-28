@@ -1,11 +1,11 @@
-VERSION = "0.2.2"
+VERSION = "0.2.3"
 
 from setuptools import setup, find_packages
 
-with open("readme.md", "r") as f:
+with open("readme.md", "r", encoding="utf-8") as f:
     long_description = f.read()
 
-with open("requirements.txt") as f:
+with open("requirements.txt", "r", encoding="utf-8") as f:
     requires = f.read().splitlines()
 
 setup(
