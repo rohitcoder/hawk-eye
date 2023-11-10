@@ -17,7 +17,7 @@
 
 ### 🦅 HAWK Eye - Highly Advanced Watchful Keeper Eye
 
-HAWK Eye is a powerful and versatile CLI (Command-Line Interface) tool designed to be your vigilant watchkeeper, guarding against potential data breaches and cyber threats across various platforms. Inspired by the precision and vision of majestic birds of prey, HAWK Eye swiftly scans multiple data sources, including S3, MySQL, PostgreSQL, MongoDB, Redis, Firebase, filesystem, and Google Cloud buckets (GCS), for Personally Identifiable Information (PII) and secrets.
+HAWK Eye is a powerful and versatile CLI (Command-Line Interface) tool designed to be your vigilant watchkeeper, guarding against potential data breaches and cyber threats across various platforms. Inspired by the precision and vision of majestic birds of prey, HAWK Eye swiftly scans multiple data sources, including S3, MySQL, PostgreSQL, MongoDB, Slack, Redis, Firebase, filesystem, Slack, and Google Cloud buckets (GCS), for Personally Identifiable Information (PII) and secrets.
 
 
 ### Why "HAWK Eye"?
@@ -126,6 +126,11 @@ Note: If you don't provide any command, it will run all commands (firebase, fs, 
          <td>
             mongodb
          <td>Scan MongoDB profiles for PII and secrets data.</td>
+      </tr>
+      <tr>
+         <td>
+            slack
+         <td>Scan slack profiles for PII and secrets data.</td>
       </tr>
       <tr>
          <td>
@@ -246,6 +251,16 @@ sources:
         - .docx
         - venv
         - node_modules
+   
+   slack:
+    slack_example:
+      token: xoxp-XXXXXXXXXXXXXXXXXXXXXXXXX # get your slack app these permissiosn https://api.slack.com/methods/team.info and https://api.slack.com/methods/conversations.list
+      channel_types: "public_channel,private_channel"
+      # Optional: List of channel names to check
+      # channel_names:
+      #   - general
+      #   - random
+
 ```
 
 You can add or remove profiles from the connection.yml file as needed. You can also configure only one or two data sources if you don't need to scan all of them.

@@ -61,3 +61,12 @@ sources:
         - private
         - venv
         - node_modules
+
+  slack:
+    slack_example:
+      token: xoxp-XXXXXXXXXXXXXXXXXXXXXXXXX # get your slack app these permissiosn https://api.slack.com/methods/team.info and https://api.slack.com/methods/conversations.list
+      channel_types: "public_channel,private_channel"
+      # Optional: List of channel names to check
+      # channel_names:
+      #   - general
+      #   - random

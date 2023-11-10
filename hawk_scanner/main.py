@@ -21,7 +21,7 @@ system.print_banner()
 console = Console()
 
 ## Now separate the results by data_source
-data_sources = ['s3', 'mysql', 'redis', 'firebase', 'gcs', 'fs', 'postgresql', 'mongodb']
+data_sources = ['s3', 'mysql', 'redis', 'firebase', 'gcs', 'fs', 'postgresql', 'mongodb', 'slack']
 
 def load_command_module(command):
     try:
@@ -95,6 +95,8 @@ def main():
             table.add_column("File Path")
         elif group == 'mongodb':
             table.add_column("Host > Database > Collection > Field")
+        elif group == 'slack':
+            table.add_column("Channel Name > Message Link")
 
         table.add_column("Pattern Name")
         table.add_column("Total Exposed")
@@ -202,7 +204,34 @@ def main():
                 )
 
                 system.SlackNotify(AlertMsg)
-
+            elif group == 'slack':
+                table.add_row(
+                    str(i),
+                    result['profile'],
+                    f"{result['channel_name'] } > {result['message_link']}",
+                    result['pattern_name'],
+                    str(len(result['matches'])),
+                    records_mini,
+                    result['sample_text'],
+                )
+                AlertMsg = """
+                *** PII Or Secret Found ***
+                Data Source: Slack - {vulnerable_profile}
+                Channel Name: {channel_name}
+                Mesasge Link: {message_link}
+                Pattern Name: {pattern_name}
+                Total Exposed: {total_exposed}
+                Exposed Values: {exposed_values}
+                """.format(
+                    vulnerable_profile=result['profile'],
+                    channel_name=result['channel_name'],
+                    message_link=result['message_link'],
+                    pattern_name=result['pattern_name'],
+                    total_exposed=str(len(result['matches'])),
+                    exposed_values=records_mini
+                )
+                
+                system.SlackNotify(AlertMsg)
             elif group == 'postgresql':
                 table.add_row(
                     str(i),

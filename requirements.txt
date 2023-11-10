@@ -4,6 +4,7 @@ rich
 mysql-connector-python
 redis
 firebase-admin
+slack-sdk
 google-cloud-core
 google-cloud-storage
 pymongo==3.13.0
