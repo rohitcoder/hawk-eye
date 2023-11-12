@@ -11,7 +11,7 @@ pymongo==3.13.0
 tinydb==4.8.0
 pytesseract
 Pillow
-docx
+python-docx
 openpyxl
 PyPDF2
 patool
