@@ -1,4 +1,4 @@
-VERSION = "0.2.6"
+VERSION = "0.3.0"
 
 from setuptools import setup, find_packages
 
@@ -11,7 +11,7 @@ with open("requirements.txt", "r", encoding="utf-8") as f:
 setup(
     name='hawk_scanner',
     version=VERSION,   
-    description='A powerful scanner to scan your Filesystem, S3, MongoDB, MySQL, PostgreSQL, Redis, Slack, Google Cloud Storage and Firebase storage for PII and sensitive data.',
+    description='A powerful scanner to scan your Filesystem, S3, MongoDB, MySQL, PostgreSQL, Redis, Slack, Google Cloud Storage and Firebase storage for PII and sensitive data using text and OCR analysis. Hawk-eye can also analyse supports most of the file types like docx, xlsx, pptx, pdf, jpg, png, gif, zip, tar, rar, etc.',
     long_description=long_description,
     long_description_content_type="text/markdown",
     url='https://github.com/rohitcoder/hawk-eye',
