@@ -1,7 +1,17 @@
-from rich.console import Console
+from rich.console import Console 
 from rich.table import Table
 import json, requests, argparse, yaml, re, datetime, os, subprocess, platform, hashlib
 from tinydb import TinyDB, Query
+import pytesseract
+from PIL import Image
+from docx import Document
+from openpyxl import load_workbook
+import PyPDF2
+import patoolib
+import tempfile
+import shutil
+import os
+import tarfile
 
 # Create a TinyDB instance for storing previous alert hashes
 db = TinyDB('previous_alerts.json')
@@ -240,14 +250,107 @@ def list_all_files_iteratively(path, exclude_patterns):
 def read_match_strings(file_path, source):
     print_info(f"Scanning file: {file_path}")
     content = ''
+
     try:
-        with open(file_path, 'r', encoding="utf-8") as file:
-            content = file.read()
+        # Check if the file is an image
+        if file_path.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.bmp')):
+            # Use OCR to extract text from the image
+            image = Image.open(file_path)
+            content = pytesseract.image_to_string(image)
+        # Check if the file is a PDF document
+        elif file_path.lower().endswith('.pdf'):
+            content = read_pdf(file_path)
+        # Check if the file is an office document (Word, Excel, PowerPoint)
+        elif file_path.lower().endswith(('.docx', '.xlsx', '.pptx')):
+            content = read_office_document(file_path)
+        # Check if the file is an archive (zip, rar, tar, tar.gz)
+        elif file_path.lower().endswith(('.zip', '.rar', '.tar', '.tar.gz')):
+            content = read_archive(file_path)
+        else:
+            # For other file types, read content normally
+            with open(file_path, 'rb') as file:
+                # Attempt to decode using UTF-8, fallback to 'latin-1' if needed
+                content = file.read().decode('utf-8', errors='replace')
     except Exception as e:
         print_debug(f"Error in read_match_strings: {e}")
         pass
+
     matched_strings = match_strings(content)
     return matched_strings
+
+
+def read_pdf(file_path):
+    content = ''
+    try:
+        # Read content from PDF document
+        with open(file_path, 'rb') as file:
+            pdf_reader = PyPDF2.PdfReader(file)
+            for page_num in range(len(pdf_reader.pages)):  # Use len() instead of deprecated numPages
+                page = pdf_reader.pages[page_num]
+                try:
+                    content += page.extract_text()
+                except UnicodeDecodeError:
+                    # Handle decoding errors by trying a different encoding
+                    content += page.extract_text(encoding='latin-1')
+    except Exception as e:
+        print_debug(f"Error in read_pdf: {e}")
+    return content
+
+
+def read_office_document(file_path):
+    content = ''
+    try:
+        # Check the file type and read content accordingly
+        if file_path.lower().endswith('.docx'):
+            # Read content from Word document
+            doc = Document(file_path)
+            for paragraph in doc.paragraphs:
+                content += paragraph.text + '\n'
+        elif file_path.lower().endswith('.xlsx'):
+            # Read content from Excel spreadsheet
+            workbook = load_workbook(file_path)
+            for sheet_name in workbook.sheetnames:
+                sheet = workbook[sheet_name]
+                for row in sheet.iter_rows():
+                    for cell in row:
+                        content += str(cell.value) + '\n'
+        elif file_path.lower().endswith('.pptx'):
+            # Read content from PowerPoint presentation
+            # You can add specific logic for PowerPoint if needed
+            pass
+    except Exception as e:
+        print_debug(f"Error in read_office_document: {e}")
+    return content
+
+def read_archive(file_path):
+    content = ''
+    try:
+        # Create a temporary directory to extract the contents of the archive
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            # Extract the contents of the archive based on the file extension
+            if file_path.lower().endswith('.zip'):
+                patoolib.extract_archive(file_path, outdir=tmp_dir)
+            elif file_path.lower().endswith('.rar'):
+                patoolib.extract_archive(file_path, outdir=tmp_dir)
+            elif file_path.lower().endswith('.tar'):
+                with tarfile.open(file_path, 'r') as tar:
+                    tar.extractall(tmp_dir)
+            elif file_path.lower().endswith('.tar.gz'):
+                with tarfile.open(file_path, 'r:gz') as tar:
+                    tar.extractall(tmp_dir)
+
+            # Iterate over all files in the temporary directory
+            for root, dirs, files in os.walk(tmp_dir):
+                for file in files:
+                    file_path = os.path.join(root, file)
+                    content += read_match_strings(file_path, 'archive')  # Recursively read content
+
+            # Clean up the temporary directory
+            shutil.rmtree(tmp_dir)
+    except Exception as e:
+        print_debug(f"Error in read_archive: {e}")
+    return content
+
 
 def getFileData(file_path):
     try:
