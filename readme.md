@@ -298,10 +298,12 @@ If you find HAWK Eye useful and would like to support the project, please consid
 
 ## Conferences and Talks
 <ul type="disc">
-<li><a href="https://www.blackhat.com/eu-23/arsenal/schedule/index.html#hawk-eye---pii--secret-detection-tool-for-your-servers-database-filesystems-cloud-storage-services-35711" target="_blank">
-Black Hat Europe 2023 [Arsenal]</a></li>
 <li><a href="https://www.blackhat.com/sector/2023/arsenal/schedule/index.html#hawk-eye---pii--secret-detection-tool-for-your-servers-database-filesystems-cloud-storage-services-35716" target="_blank">
 Black Hat SecTor 2023 [Arsenal]</a></li>
+<li><a href="https://blackhatmea.com/session/hawk-eye-pii-secret-detection-tool-your-servers-database-filesystems-cloud-storage-0" target="_blank">
+Black Hat Middle East and Africa 2023 [Arsenal]</a></li>
+<li><a href="https://www.blackhat.com/eu-23/arsenal/schedule/index.html#hawk-eye---pii--secret-detection-tool-for-your-servers-database-filesystems-cloud-storage-services-35711" target="_blank">
+Black Hat Europe 2023 [Arsenal]</a></li>
 </ul>
 
 ## 💪 Contributors
