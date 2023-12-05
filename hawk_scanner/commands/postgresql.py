@@ -1,7 +1,6 @@
 import psycopg2
 from hawk_scanner.internals import system
 from rich.console import Console
-from rich.table import Table
 
 console = Console()
 
@@ -20,14 +19,23 @@ def connect_postgresql(host, port, user, password, database):
     except Exception as e:
         system.print_error(f"Failed to connect to PostgreSQL database at {host} with error: {e}")
 
-def check_data_patterns(conn, patterns, profile_name, database_name):
+def check_data_patterns(conn, patterns, profile_name, database_name, limit_start=0, limit_end=500, tables=None):
     cursor = conn.cursor()
+    
+    # Get the list of tables to scan
     cursor.execute("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'")
-    tables = [table[0] for table in cursor.fetchall()]
+    all_tables = [table[0] for table in cursor.fetchall()]
+    tables_to_scan = tables or all_tables  # Use all tables if tables[] is blank or not provided
+
     table_count = 1
+
     results = []
-    for table in tables:
-        cursor.execute(f"SELECT * FROM {table}")
+    for table in tables_to_scan:
+        if table not in all_tables:
+            system.print_warning(f"Table {table} not found in the database. Skipping.")
+            continue
+
+        cursor.execute(f"SELECT * FROM {table} LIMIT {limit_end} OFFSET {limit_start}")
         columns = [column[0] for column in cursor.description]
 
         data_count = 1
@@ -75,12 +83,15 @@ def execute(args):
                 port = config.get('port', 5432)  # default port for PostgreSQL
                 password = config.get('password')
                 database = config.get('database')
+                limit_start = config.get('limit_start', 0)
+                limit_end = config.get('limit_end', 500)
+                tables = config.get('tables', [])
 
                 if host and user and password and database:
-                    system.print_info(f"Checking PostgreSQL Profile {key} and database {database}")
+                    system.print_info(f"Checking PostgreSQL Profile {key}, database {database}")
                     conn = connect_postgresql(host, port, user, password, database)
                     if conn:
-                        results += check_data_patterns(conn, patterns, key, database)
+                        results += check_data_patterns(conn, patterns, key, database, limit_start=limit_start, limit_end=limit_end, tables=tables)
                         conn.close()
                 else:
                     system.print_error(f"Incomplete PostgreSQL configuration for key: {key}")
@@ -89,3 +100,7 @@ def execute(args):
     else:
         system.print_error("No 'sources' section found in connection.yml")
     return results
+
+# Example usage
+if __name__ == "__main__":
+    execute(None)

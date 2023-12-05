@@ -36,7 +36,11 @@ sources:
       port: YOUR_MYSQL_PORT
       user: YOUR_MYSQL_USERNAME
       password: YOUR_MYSQL_PASSWORD
-      database: YOUR_MYSQL_DATABASE_NAME
+      limit_start: 0   # Specify the starting limit for the range
+      limit_end: 500   # Specify the ending limit for the range
+      tables:
+        - table1
+        - table2
   postgresql:
     postgresql_example:
       host: YOUR_POSTGRESQL_HOST
@@ -44,6 +48,11 @@ sources:
       user: YOUR_POSTGRESQL_USERNAME
       password: YOUR_POSTGRESQL_PASSWORD
       database: YOUR_POSTGRESQL_DATABASE_NAME
+      limit_start: 0   # Specify the starting limit for the range
+      limit_end: 500   # Specify the ending limit for the range
+      tables:
+        - table1
+        - table2
   mongodb:
     mongodb_example:
       uri: YOUR_MONGODB_URI
@@ -52,6 +61,12 @@ sources:
       username: YOUR_MONGODB_USERNAME
       password: YOUR_MONGODB_PASSWORD
       database: YOUR_MONGODB_DATABASE_NAME
+      uri: YOUR_MONGODB_URI  # Use either URI or individual connection parameters
+      limit_start: 0   # Specify the starting limit for the range
+      limit_end: 500   # Specify the ending limit for the range
+      collections:
+        - collection1
+        - collection2
   fs:
     fs_example:
       path: /path/to/your/filesystem/directory

@@ -1,3 +1,4 @@
+from androguard.misc import AnalyzeAPK
 from rich.console import Console 
 from rich.table import Table
 import json, requests, argparse, yaml, re, datetime, os, subprocess, platform, hashlib
@@ -266,6 +267,9 @@ def read_match_strings(file_path, source):
         # Check if the file is an archive (zip, rar, tar, tar.gz)
         elif file_path.lower().endswith(('.zip', '.rar', '.tar', '.tar.gz')):
             content = read_archive(file_path)
+        # Check if the file is an APK (Android application package)
+        elif file_path.lower().endswith('.apk'):
+            content = read_apk(file_path)
         else:
             # For other file types, read content normally
             with open(file_path, 'rb') as file:
@@ -277,6 +281,26 @@ def read_match_strings(file_path, source):
 
     matched_strings = match_strings(content)
     return matched_strings
+
+def read_apk(file_path):
+    try:
+        # Analyze the APK file using androguard
+        a, d, dx = AnalyzeAPK(file_path)
+
+        # Extract strings from the APK
+        strings = []
+        for method in dx.get_methods():
+            for _, _, _, string in method.get_strings():
+                strings.append(string)
+
+        # Combine all extracted strings into a single content string
+        content = ' '.join(strings)
+
+    except Exception as e:
+        print_debug(f"Error in read_apk: {e}")
+        content = ''
+
+    return content
 
 
 def read_pdf(file_path):

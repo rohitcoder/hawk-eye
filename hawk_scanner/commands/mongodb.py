@@ -1,8 +1,6 @@
 import pymongo
 from hawk_scanner.internals import system
-import re
 from rich.console import Console
-from rich.table import Table
 
 console = Console()
 
@@ -25,11 +23,11 @@ def connect_mongodb(host, port, username, password, database, uri=None):
         return None
 
 
-def check_data_patterns(db, patterns, profile_name, database_name):
+def check_data_patterns(db, patterns, profile_name, database_name, limit_start=0, limit_end=500):
     results = []
     for collection_name in db.list_collection_names():
         collection = db[collection_name]
-        for document in collection.find():
+        for document in collection.find().limit(limit_end).skip(limit_start):
             for field_name, field_value in document.items():
                 if field_value:
                     value_str = str(field_value)
@@ -69,6 +67,8 @@ def execute(args):
                 password = config.get('password')
                 database = config.get('database')
                 uri = config.get('uri')  # Added support for URI
+                limit_start = config.get('limit_start', 0)
+                limit_end = config.get('limit_end', 500)
 
                 if uri:
                     system.print_info(f"Checking MongoDB Profile {key} using URI")
@@ -80,7 +80,7 @@ def execute(args):
 
                 db = connect_mongodb(host, port, username, password, database, uri)
                 if db:
-                    results += check_data_patterns(db, patterns, key, database)
+                    results += check_data_patterns(db, patterns, key, database, limit_start=limit_start, limit_end=limit_end)
         else:
             system.print_error("No MongoDB connection details found in connection.yml")
     else:

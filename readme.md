@@ -17,7 +17,7 @@
 
 ### 🦅 HAWK Eye - Highly Advanced Watchful Keeper Eye
 
-HAWK Eye is a powerful and versatile CLI (Command-Line Interface) tool designed to be your vigilant watchkeeper, guarding against potential data breaches and cyber threats across various platforms. Inspired by the precision and vision of majestic birds of prey, HAWK Eye swiftly scans multiple data sources, including S3, MySQL, PostgreSQL, MongoDB, Slack, Redis, Firebase, filesystem, Slack, and Google Cloud buckets (GCS), for Personally Identifiable Information (PII) and secrets. It uses text analysis and OCR techniques to go throug most of the documents, database and different file types like  docx, xlsx, pptx, pdf, jpg, png, gif, zip, tar, rar, etc.
+HAWK Eye is a powerful and versatile CLI (Command-Line Interface) tool designed to be your vigilant watchkeeper, guarding against potential data breaches and cyber threats across various platforms. Inspired by the precision and vision of majestic birds of prey, HAWK Eye swiftly scans multiple data sources, including S3, MySQL, PostgreSQL, MongoDB, CouchDB, Slack, Redis, Firebase, filesystem, Slack, and Google Cloud buckets (GCS), for Personally Identifiable Information (PII) and secrets. It uses text analysis and OCR techniques to go throug most of the documents, database and different file types like  docx, xlsx, pptx, pdf, jpg, png, gif, zip, tar, rar, etc.
 
 
 ### Why "HAWK Eye"?
@@ -129,6 +129,11 @@ Note: If you don't provide any command, it will run all commands (firebase, fs, 
       </tr>
       <tr>
          <td>
+            couchdb
+         <td>Scan CouchDB profiles for PII and secrets data.</td>
+      </tr>
+      <tr>
+         <td>
             slack
          <td>Scan slack profiles for PII and secrets data.</td>
       </tr>
@@ -187,38 +192,57 @@ notify:
   redacted: True
   suppress_duplicates: True
   slack:
-    webhook_url: https://hooks.slack.com/services/T0XXXXXXXXXXXXXX/B0XXXXXXXXXXXXXX/1CIyXXXXXXXXXXXXXX
+    webhook_url: https://hooks.slack.com/services/T0XXXXXXXXXXX/BXXXXXXXX/1CIyXXXXXXXXXXXXXXX
 
 sources:
   redis:
-    redis1:
-      host: 127.0.0.1
-
+    redis_example:
+      host: YOUR_REDIS_HOST
   s3:
-    s3_1:
+    s3_example:
       access_key: YOUR_S3_ACCESS_KEY
       secret_key: YOUR_S3_SECRET_KEY
       bucket_name: YOUR_S3_BUCKET_NAME
-      cache: True
-
+      cache: true
   gcs:
-    gcs1:
-      credentials_file: /Users/rohitcoder/Downloads/credential_file.json
-      bucket_name: test-proj.appspot.com
-      cache: True
+    gcs_example:
+      credentials_file: /path/to/your/credential_file.json
+      bucket_name: YOUR_GCS_BUCKET_NAME
+      cache: true
       exclude_patterns:
         - .pdf
         - .docx
-        - private
-
   firebase:
-    firebase1:
-      credentials_file: /Users/rohitcoder/Downloads/credential_file.json
-      bucket_name: test-proj.appspot.com
-      cache: True
+    firebase_example:
+      credentials_file: /path/to/your/credential_file.json
+      bucket_name: YOUR_FIREBASE_BUCKET_NAME
+      cache: true
       exclude_patterns:
         - .pdf
         - .docx
+  mysql:
+    mysql_example:
+      host: YOUR_MYSQL_HOST
+      port: YOUR_MYSQL_PORT
+      user: YOUR_MYSQL_USERNAME
+      password: YOUR_MYSQL_PASSWORD
+      limit_start: 0   # Specify the starting limit for the range
+      limit_end: 500   # Specify the ending limit for the range
+      tables:
+        - table1
+        - table2
+  postgresql:
+    postgresql_example:
+      host: YOUR_POSTGRESQL_HOST
+      port: YOUR_POSTGRESQL_PORT
+      user: YOUR_POSTGRESQL_USERNAME
+      password: YOUR_POSTGRESQL_PASSWORD
+      database: YOUR_POSTGRESQL_DATABASE_NAME
+      limit_start: 0   # Specify the starting limit for the range
+      limit_end: 500   # Specify the ending limit for the range
+      tables:
+        - table1
+        - table2
   mongodb:
     mongodb_example:
       uri: YOUR_MONGODB_URI
@@ -227,32 +251,23 @@ sources:
       username: YOUR_MONGODB_USERNAME
       password: YOUR_MONGODB_PASSWORD
       database: YOUR_MONGODB_DATABASE_NAME
-  mysql:
-    mysql1:
-      host: localhost
-      port: 8889
-      user: YOUR_MYSQL_USERNAME
-      password: YOUR_MYSQL_PASSWORD
-      database: YOUR_MYSQL_DATABASE_NAME
-  
-  postgresql: 
-    postgresql1:
-      host: YOUR_POSTGRESQL_HOST
-      port: YOUR_POSTGRESQL_PORT
-      user: YOUR_POSTGRESQL_USERNAME
-      password: YOUR_POSTGRESQL_PASSWORD
-      database: YOUR_POSTGRESQL_DATABASE_NAME
-
+      uri: YOUR_MONGODB_URI  # Use either URI or individual connection parameters
+      limit_start: 0   # Specify the starting limit for the range
+      limit_end: 500   # Specify the ending limit for the range
+      collections:
+        - collection1
+        - collection2
   fs:
-    fs1:
-      path: /Users/rohitcoder/Desktop/Projects/pii-search/data/google_cloud_storage/
+    fs_example:
+      path: /path/to/your/filesystem/directory
       exclude_patterns:
         - .pdf
         - .docx
+        - private
         - venv
         - node_modules
-   
-   slack:
+
+  slack:
     slack_example:
       token: xoxp-XXXXXXXXXXXXXXXXXXXXXXXXX # get your slack app these permissiosn https://api.slack.com/methods/team.info and https://api.slack.com/methods/conversations.list
       channel_types: "public_channel,private_channel"
@@ -260,7 +275,6 @@ sources:
       # channel_names:
       #   - general
       #   - random
-
 ```
 
 You can add or remove profiles from the connection.yml file as needed. You can also configure only one or two data sources if you don't need to scan all of them.
