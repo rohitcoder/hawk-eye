@@ -161,6 +161,12 @@ Note: If you don't provide any command, it will run all commands (firebase, fs, 
          <td>Scan Google drive profiles for PII and secrets data.</td>
       </tr>
       <tr>
+         <td>
+            gdrive_workspace
+          </td>
+         <td>Scan Google drive Workspace profiles for PII and secrets data.</td>
+      </tr>
+      <tr>
          <td>--connection</td>
          <td>Provide a connection YAML local file path like --connection connection.yml, this file will contain all creds and configs for different sources and other configurations.</td>
       </tr>
