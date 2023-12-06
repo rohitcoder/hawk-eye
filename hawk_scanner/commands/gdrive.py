@@ -8,6 +8,9 @@ from pydrive2.fs import GDriveFileSystem
 def connect_google_drive(credentials_file):
     credentials = open(credentials_file, 'r').read()
     credentials = json.loads(credentials)
+    ## if installed key is in the credentials file, use it
+    if 'installed' in credentials:
+        credentials = credentials['installed']
     client_id = credentials['client_id']
     client_secret = credentials['client_secret']
 
@@ -82,6 +85,8 @@ def execute(args):
             exclude_patterns = config.get(key, {}).get('exclude_patterns', [])
             is_cache_enabled = config.get('cache', False)
             drive = connect_google_drive(credentials_file)
+            if not os.path.exists("data/google_drive"):
+                os.makedirs("data/google_drive")
             if drive:
                 files = list_files(drive, folder_name=folder_name)
                 for file_obj in files:

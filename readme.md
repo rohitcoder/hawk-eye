@@ -274,10 +274,22 @@ sources:
         - venv
         - node_modules
   
-  gdrive:
+ gdrive:
     drive_example:
       folder_name:
-      credentials_file: /Users/kumarohit/Downloads/client_secret.json
+      credentials_file: /Users/kumarohit/Downloads/client_secret.json ## this will be oauth app json file
+      cache: true
+      exclude_patterns:
+        - .pdf
+        - .docx
+
+  gdrive_workspace:
+    drive_example:
+      folder_name:
+      credentials_file: /Users/kumarohit/Downloads/client_secret.json ## this will be service account json file
+      impersonate_users:
+        - usera@amce.org
+        - userb@amce.org
       cache: true
       exclude_patterns:
         - .pdf
