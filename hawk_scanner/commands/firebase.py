@@ -80,7 +80,7 @@ def execute(args):
                 else:
                     system.print_error(f"Incomplete Firebase configuration for key: {key}")
         else:
-            system.print_error("No Firebase connection details found in connection.yml")
+            system.print_error("No Firebase connection details found in connection file")
     else:
         system.print_error("No 'sources' section found in connection.yml")
     

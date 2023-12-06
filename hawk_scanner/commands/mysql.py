@@ -19,13 +19,16 @@ def connect_mysql(host, port, user, password, database):
     except Exception as e:
         system.print_error(f"Failed to connect to MySQL database at {host} with error: {e}")
 
-def check_data_patterns(conn, patterns, profile_name, database_name, limit_start=0, limit_end=500, tables=None):
+def check_data_patterns(conn, patterns, profile_name, database_name, limit_start=0, limit_end=500, whitelisted_tables=None):
     cursor = conn.cursor()
     
     # Get the list of tables to scan
     cursor.execute("SHOW TABLES")
     tables = [table[0] for table in cursor.fetchall()]
-    tables_to_scan = tables or []  # Use all tables if tables[] is blank or not provided
+    if whitelisted_tables:
+        tables_to_scan = [table for table in tables if table in whitelisted_tables]
+    else:
+        tables_to_scan = tables or []
 
     table_count = 1
 
@@ -83,11 +86,11 @@ def execute(args):
                 limit_end = config.get('limit_end', 500)
                 tables = config.get('tables', [])
 
-                if host and user and password and database:
+                if host and user and database:
                     system.print_info(f"Checking MySQL Profile {key} and database {database}")
                     conn = connect_mysql(host, port, user, password, database)
                     if conn:
-                        results += check_data_patterns(conn, patterns, key, database, limit_start=limit_start, limit_end=limit_end, tables=tables)
+                        results += check_data_patterns(conn, patterns, key, database, limit_start=limit_start, limit_end=limit_end, whitelisted_tables=tables)
                         conn.close()
                 else:
                     system.print_error(f"Incomplete MySQL configuration for key: {key}")

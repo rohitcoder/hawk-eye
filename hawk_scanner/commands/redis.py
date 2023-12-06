@@ -18,7 +18,7 @@ def connect_redis(host, port):
         system.print_error(f"Redis instance at {host}:{port} is not accessible with error: {e}")
 
 def get_patterns_from_file(file_path):
-    with open(file_path, 'r') as file:
+    with open(file_path, 'r', encoding='utf-8') as file:
         patterns = yaml.safe_load(file)
         return patterns
 

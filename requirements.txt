@@ -2,6 +2,7 @@ boto3
 PyYAML
 rich
 mysql-connector-python
+pymysql
 redis
 firebase-admin
 slack-sdk
@@ -15,3 +16,8 @@ python-docx
 openpyxl
 PyPDF2
 patool
+pydrive2
+appdirs
+tqdm
+funcy
+fsspec

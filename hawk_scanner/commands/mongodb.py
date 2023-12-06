@@ -23,9 +23,20 @@ def connect_mongodb(host, port, username, password, database, uri=None):
         return None
 
 
-def check_data_patterns(db, patterns, profile_name, database_name, limit_start=0, limit_end=500):
+def check_data_patterns(db, patterns, profile_name, database_name, limit_start=0, limit_end=500, whitelisted_collections=None):
     results = []
-    for collection_name in db.list_collection_names():
+    all_collections = db.list_collection_names()
+
+    if whitelisted_collections:
+        collections_to_scan = [collection for collection in all_collections if collection in whitelisted_collections]
+    else:
+        collections_to_scan = all_collections or []
+
+    for collection_name in collections_to_scan:
+        if collection_name not in all_collections:
+            system.print_warning(f"Collection {collection_name} not found in the database. Skipping.")
+            continue
+
         collection = db[collection_name]
         for document in collection.find().limit(limit_end).skip(limit_start):
             for field_name, field_value in document.items():
@@ -69,6 +80,7 @@ def execute(args):
                 uri = config.get('uri')  # Added support for URI
                 limit_start = config.get('limit_start', 0)
                 limit_end = config.get('limit_end', 500)
+                collections = config.get('collections', [])
 
                 if uri:
                     system.print_info(f"Checking MongoDB Profile {key} using URI")
@@ -80,9 +92,13 @@ def execute(args):
 
                 db = connect_mongodb(host, port, username, password, database, uri)
                 if db:
-                    results += check_data_patterns(db, patterns, key, database, limit_start=limit_start, limit_end=limit_end)
+                    results += check_data_patterns(db, patterns, key, database, limit_start=limit_start, limit_end=limit_end, whitelisted_collections=collections)
         else:
             system.print_error("No MongoDB connection details found in connection.yml")
     else:
         system.print_error("No 'sources' section found in connection.yml")
     return results
+
+# Example usage
+if __name__ == "__main__":
+    execute(None)

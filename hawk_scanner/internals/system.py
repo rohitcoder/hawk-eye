@@ -31,11 +31,14 @@ def calculate_msg_hash(msg):
     return hashlib.sha256(msg.encode()).hexdigest()
 
 def print_info(message):
-    console.print(f"[yellow][INFO][/yellow] {message}")
+    console.print(f"[yellow][INFO][/yellow] {str(message)}")
 
 def print_debug(message):
     if args.debug:
-        console.print(f"[blue][DEBUG][/blue] {message}")
+        try:
+            console.print(f"[blue][DEBUG][/blue] {str(message)}")
+        except Exception as e:
+            pass
 
 def print_error(message):
     console.print(f"[bold red]❌ {message}")
@@ -395,8 +398,7 @@ def SlackNotify(msg):
         
         slack_config = notify_config.get('slack', {})
         webhook_url = slack_config.get('webhook_url', '')
-        
-        if webhook_url != '':
+        if webhook_url and webhook_url.startswith('https://hooks.slack.com/services/'):
             try:
                 payload = {
                     'text': msg,

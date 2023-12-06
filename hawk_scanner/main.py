@@ -21,7 +21,7 @@ system.print_banner()
 console = Console()
 
 ## Now separate the results by data_source
-data_sources = ['s3', 'mysql', 'redis', 'firebase', 'gcs', 'fs', 'postgresql', 'mongodb', 'slack', 'couchdb']
+data_sources = ['s3', 'mysql', 'redis', 'firebase', 'gcs', 'fs', 'postgresql', 'mongodb', 'slack', 'couchdb', 'gdrive']
 
 def load_command_module(command):
     try:
@@ -99,6 +99,8 @@ def main():
             table.add_column("Channel Name > Message Link")
         elif group == 'couchdb':
             table.add_column("Host > Database > Document ID > Field")
+        elif group == 'gdrive':
+            table.add_column("File Name")
 
         table.add_column("Pattern Name")
         table.add_column("Total Exposed")
@@ -385,6 +387,32 @@ def main():
                     database=result['database'],
                     doc_id=result['doc_id'],
                     field=result['field'],
+                    pattern_name=result['pattern_name'],
+                    total_exposed=str(len(result['matches'])),
+                    exposed_values=records_mini
+                )
+                
+                system.SlackNotify(AlertMsg)
+            elif group == 'gdrive':
+                table.add_row(
+                    str(i),
+                    result['profile'],
+                    f"{result['file_name']}",
+                    result['pattern_name'],
+                    str(len(result['matches'])),
+                    records_mini,
+                    result['sample_text'],
+                )
+                AlertMsg = """
+                *** PII Or Secret Found ***
+                Data Source: Google Drive - {vulnerable_profile}
+                File Name: {file_name}
+                Pattern Name: {pattern_name}
+                Total Exposed: {total_exposed}
+                Exposed Values: {exposed_values}
+                """.format(
+                    vulnerable_profile=result['profile'],
+                    file_name=result['file_name'],
                     pattern_name=result['pattern_name'],
                     total_exposed=str(len(result['matches'])),
                     exposed_values=records_mini
