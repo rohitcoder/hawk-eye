@@ -232,6 +232,7 @@ sources:
       port: YOUR_MYSQL_PORT
       user: YOUR_MYSQL_USERNAME
       password: YOUR_MYSQL_PASSWORD
+      database: YOUR_MYSQL_DATABASE_NAME
       limit_start: 0   # Specify the starting limit for the range
       limit_end: 500   # Specify the ending limit for the range
       tables:
