@@ -3,14 +3,14 @@ from rich.table import Table
 import json, requests, argparse, yaml, re, datetime, os, subprocess, platform, hashlib
 from tinydb import TinyDB, Query
 import pytesseract
-from PIL import Image
+from PIL import Image, ImageEnhance
 from docx import Document
 from openpyxl import load_workbook
 import PyPDF2
 import patoolib
 import tempfile
 import shutil
-import os
+import os, cv2
 import tarfile
 
 # Create a TinyDB instance for storing previous alert hashes
@@ -256,10 +256,12 @@ def read_match_strings(file_path, source):
 
     try:
         # Check if the file is an image
+        print(file_path)
         if file_path.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.bmp')):
-            # Use OCR to extract text from the image
-            image = Image.open(file_path)
-            content = pytesseract.image_to_string(image)
+            print("ocr started for "+file_path)
+            content = enhance_and_ocr(file_path)
+            print("texts")
+            print(content)
         # Check if the file is a PDF document
         elif file_path.lower().endswith('.pdf'):
             content = read_pdf(file_path)
@@ -411,3 +413,42 @@ def SlackNotify(msg):
                     db.insert({'msg_hash': msg_hash})
             except Exception as e:
                 print_error(f"An error occurred: {str(e)}")
+
+def enhance_and_ocr(image_path):
+    # Load the image
+    original_image = Image.open(image_path)
+
+    # Enhance the image (you can adjust enhancement factors as needed)
+    enhanced_image = enhance_image(original_image)
+
+    # Save the enhanced image for reference
+    enhanced_image.save("enhanced_image.png")
+
+    # Perform OCR on the enhanced image
+    ocr_text = perform_ocr(enhanced_image)
+
+    return ocr_text
+
+def enhance_image(image):
+    # Convert to grayscale
+    grayscale_image = image.convert('L')
+
+    # Increase contrast
+    contrast_enhancer = ImageEnhance.Contrast(grayscale_image)
+    contrast_factor = 2.0  # Adjust as needed
+    contrast_enhanced_image = contrast_enhancer.enhance(contrast_factor)
+
+    # Apply thresholding
+    threshold_value = 100  # Adjust as needed
+    thresholded_image = contrast_enhanced_image.point(lambda x: 0 if x < threshold_value else 255)
+
+    # Reduce noise (optional)
+    denoised_image = cv2.fastNlMeansDenoising(np.array(thresholded_image), None, h=10, templateWindowSize=7, searchWindowSize=21)
+
+    return Image.fromarray(denoised_image)
+
+def perform_ocr(image):
+    # Use Tesseract OCR
+    ocr_text = pytesseract.image_to_string(image)
+
+    return ocr_text

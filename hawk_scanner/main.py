@@ -72,6 +72,11 @@ def main():
     
     if args.json:
         with open(args.json, 'w') as file:
+            #file_path = file_path.replace('-runtime.pdf', '')
+            if 'gdrive_workspace' in grouped_results:
+                for result in grouped_results['gdrive_workspace']:
+                    result['file_name'] = result['file_name'].replace('-runtime.pdf', '')
+                
             file.write(json.dumps(grouped_results, indent=4))
         system.print_success(f"Results saved to {args.json}")
         sys.exit(0)

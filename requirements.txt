@@ -21,3 +21,4 @@ appdirs
 tqdm
 funcy
 fsspec
+opencv-python
