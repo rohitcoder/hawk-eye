@@ -21,7 +21,7 @@ system.print_banner()
 console = Console()
 
 ## Now separate the results by data_source
-data_sources = ['s3', 'mysql', 'redis', 'firebase', 'gcs', 'fs', 'postgresql', 'mongodb', 'slack', 'couchdb', 'gdrive', 'gdrive_workspace']
+data_sources = ['s3', 'mysql', 'redis', 'firebase', 'gcs', 'fs', 'postgresql', 'mongodb', 'slack', 'couchdb', 'gdrive', 'gdrive_workspace', 'text']
 
 def load_command_module(command):
     try:
@@ -71,13 +71,16 @@ def main():
         grouped_results[data_source].append(result)
     
     if args.json:
-        with open(args.json, 'w') as file:
-            #file_path = file_path.replace('-runtime.pdf', '')
-            if 'gdrive_workspace' in grouped_results:
-                for result in grouped_results['gdrive_workspace']:
-                    result['file_name'] = result['file_name'].replace('-runtime.pdf', '')
-                
-            file.write(json.dumps(grouped_results, indent=4))
+        if args.json != '':
+            with open(args.json, 'w') as file:
+                #file_path = file_path.replace('-runtime.pdf', '')
+                if 'gdrive_workspace' in grouped_results:
+                    for result in grouped_results['gdrive_workspace']:
+                        result['file_name'] = result['file_name'].replace('-runtime.pdf', '')
+                    
+                file.write(json.dumps(grouped_results, indent=4))
+        else:
+            print(json.dumps(grouped_results, indent=4))
         system.print_success(f"Results saved to {args.json}")
         sys.exit(0)
     panel = Panel(Text("Now, lets look at findings!", justify="center"))
@@ -109,7 +112,6 @@ def main():
         elif group == 'gdrive_workspace':
             table.add_column("File Name")
             table.add_column("User")
-
         table.add_column("Pattern Name")
         table.add_column("Total Exposed")
         table.add_column("Exposed Values")
@@ -450,6 +452,29 @@ def main():
                     vulnerable_profile=result['profile'],
                     file_name=result['file_name'],
                     user=result['user'],
+                    pattern_name=result['pattern_name'],
+                    total_exposed=str(len(result['matches'])),
+                    exposed_values=records_mini
+                )
+                
+                system.SlackNotify(AlertMsg)
+            elif group == 'text':
+                table.add_row(
+                    str(i),
+                    result['profile'],
+                    result['pattern_name'],
+                    str(len(result['matches'])),
+                    records_mini,
+                    result['sample_text'],
+                )
+                AlertMsg = """
+                *** PII Or Secret Found ***
+                Data Source: Text - {vulnerable_profile}
+                Pattern Name: {pattern_name}
+                Total Exposed: {total_exposed}
+                Exposed Values: {exposed_values}
+                """.format(
+                    vulnerable_profile=result['profile'],
                     pattern_name=result['pattern_name'],
                     total_exposed=str(len(result['matches'])),
                     exposed_values=records_mini
