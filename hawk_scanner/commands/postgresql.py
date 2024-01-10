@@ -46,7 +46,7 @@ def check_data_patterns(conn, patterns, profile_name, database_name, limit_start
             for column, value in zip(columns, row):
                 if value:
                     value_str = str(value)
-                    matches = system.match_strings(value_str)
+                    matches = system.analyze_strings(value_str)
                     if matches:
                         for match in matches:
                             results.append({
@@ -68,40 +68,43 @@ def check_data_patterns(conn, patterns, profile_name, database_name, limit_start
     cursor.close()
     return results
 
-def execute(args):
-    results = []
-    system.print_info(f"Running Checks for PostgreSQL Sources")
-    connections = system.get_connection()
+def execute(args, programmatic=False):
+    try:
+        results = []
+        system.print_info(f"Running Checks for PostgreSQL Sources")
+        connections = system.get_connection(args, programmatic)
 
-    if 'sources' in connections:
-        sources_config = connections['sources']
-        postgresql_config = sources_config.get('postgresql')
+        if 'sources' in connections:
+            sources_config = connections['sources']
+            postgresql_config = sources_config.get('postgresql')
 
-        if postgresql_config:
-            patterns = system.get_fingerprint_file()
+            if postgresql_config:
+                patterns = system.get_fingerprint_file(args, programmatic)
 
-            for key, config in postgresql_config.items():
-                host = config.get('host')
-                user = config.get('user')
-                port = config.get('port', 5432)  # default port for PostgreSQL
-                password = config.get('password')
-                database = config.get('database')
-                limit_start = config.get('limit_start', 0)
-                limit_end = config.get('limit_end', 500)
-                tables = config.get('tables', [])
+                for key, config in postgresql_config.items():
+                    host = config.get('host')
+                    user = config.get('user')
+                    port = config.get('port', 5432)  # default port for PostgreSQL
+                    password = config.get('password')
+                    database = config.get('database')
+                    limit_start = config.get('limit_start', 0)
+                    limit_end = config.get('limit_end', 500)
+                    tables = config.get('tables', [])
 
-                if host and user and password and database:
-                    system.print_info(f"Checking PostgreSQL Profile {key}, database {database}")
-                    conn = connect_postgresql(host, port, user, password, database)
-                    if conn:
-                        results += check_data_patterns(conn, patterns, key, database, limit_start=limit_start, limit_end=limit_end, whitelisted_tables=tables)
-                        conn.close()
-                else:
-                    system.print_error(f"Incomplete PostgreSQL configuration for key: {key}")
+                    if host and user and password and database:
+                        system.print_info(f"Checking PostgreSQL Profile {key}, database {database}")
+                        conn = connect_postgresql(host, port, user, password, database)
+                        if conn:
+                            results += check_data_patterns(conn, patterns, key, database, limit_start=limit_start, limit_end=limit_end, whitelisted_tables=tables)
+                            conn.close()
+                    else:
+                        system.print_error(f"Incomplete PostgreSQL configuration for key: {key}")
+            else:
+                system.print_error("No PostgreSQL connection details found in connection.yml")
         else:
-            system.print_error("No PostgreSQL connection details found in connection.yml")
-    else:
-        system.print_error("No 'sources' section found in connection.yml")
+            system.print_error("No 'sources' section found in connection.yml")
+    except Exception as e:
+        system.print_error(f"Failed to run PostgreSQL checks with error: {e}")
     return results
 
 # Example usage

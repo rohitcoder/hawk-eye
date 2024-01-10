@@ -5,7 +5,7 @@ console = Console()
 
 def check_data_patterns(value, patterns, profile_name):
     value_str = str(value)
-    matches = system.match_strings(value_str)
+    matches = system.analyze_strings(value_str)
     results = []
     if matches:
         for match in matches:
@@ -19,16 +19,14 @@ def check_data_patterns(value, patterns, profile_name):
     return results
 
 def execute(args, programmatic=False):
-    results = []
-    system.print_info(f"Running Checks for Simple text")
-    connections = system.get_connection()
-    patterns = system.get_fingerprint_file()
-    
-    if not programmatic:
+    try:
+        results = []
+        system.print_info(f"Running Checks for Simple text")
+        connections = system.get_connection(args, programmatic)
+        patterns = system.get_fingerprint_file(args, programmatic)
         if 'sources' in connections:
             sources_config = connections['sources']
             text_config = sources_config.get('text')
-
             if text_config:
                 for key, config in text_config.items():
                     text = config.get('text', None)
@@ -37,9 +35,8 @@ def execute(args, programmatic=False):
                 system.print_error("No text connection details found in connection.yml")
         else:
             system.print_error("No 'sources' section found in connection.yml")
-    else:
-        text = args.get('text', None)
-        results += check_data_patterns(text, patterns, 'text')
+    except Exception as e:
+        system.print_error(f"Failed to connect to text with error: {e}")
     return results
 
 # Example usage
