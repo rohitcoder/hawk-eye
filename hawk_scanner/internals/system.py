@@ -192,7 +192,7 @@ def print_banner():
 
 connections = get_connection()
 
-def match_strings(content):
+def match_strings(content, source='text'):
     matched_strings = []
 
     if 'notify' in connections:
@@ -209,6 +209,7 @@ def match_strings(content):
         print_debug(f"Content: {content}")
         matches = re.findall(complied_regex, content)
         print_debug(f"Matches: {matches}")
+        found['data_source'] = source
         if matches:
             print_debug(f"Found {len(matches)} matches for pattern: {pattern_name}")
             found['pattern_name'] = pattern_name
@@ -258,17 +259,13 @@ def list_all_files_iteratively(path, exclude_patterns):
                 yield os.path.join(root, file)
 
 def read_match_strings(file_path, source):
-    print_info(f"Scanning file: {file_path}")
+    print_info(f"Scanning file: {file_path} for Source: {source}")
     content = ''
-
+    is_archive = False
     try:
         # Check if the file is an image
-        print(file_path)
         if file_path.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.bmp')):
-            print("ocr started for "+file_path)
             content = enhance_and_ocr(file_path)
-            print("texts")
-            print(content)
         # Check if the file is a PDF document
         elif file_path.lower().endswith('.pdf'):
             content = read_pdf(file_path)
@@ -277,7 +274,9 @@ def read_match_strings(file_path, source):
             content = read_office_document(file_path)
         # Check if the file is an archive (zip, rar, tar, tar.gz)
         elif file_path.lower().endswith(('.zip', '.rar', '.tar', '.tar.gz')):
-            content = read_archive(file_path)
+            ## this is archive, so we need to extract it and find pii from it, and return matched_strings
+            matched_strings = find_pii_in_archive(file_path, source)
+            is_archive = True
         else:
             # For other file types, read content normally
             with open(file_path, 'rb') as file:
@@ -286,8 +285,10 @@ def read_match_strings(file_path, source):
     except Exception as e:
         print_debug(f"Error in read_match_strings: {e}")
         pass
-
-    matched_strings = match_strings(content)
+    
+    if not is_archive:
+        matched_strings = match_strings(content, source)
+        
     return matched_strings
 
 def read_pdf(file_path):
@@ -333,33 +334,30 @@ def read_office_document(file_path):
         print_debug(f"Error in read_office_document: {e}")
     return content
 
-def read_archive(file_path):
-    content = ''
-    try:
-        # Create a temporary directory to extract the contents of the archive
-        with tempfile.TemporaryDirectory() as tmp_dir:
-            # Extract the contents of the archive based on the file extension
-            if file_path.lower().endswith('.zip'):
-                patoolib.extract_archive(file_path, outdir=tmp_dir)
-            elif file_path.lower().endswith('.rar'):
-                patoolib.extract_archive(file_path, outdir=tmp_dir)
-            elif file_path.lower().endswith('.tar'):
-                with tarfile.open(file_path, 'r') as tar:
-                    tar.extractall(tmp_dir)
-            elif file_path.lower().endswith('.tar.gz'):
-                with tarfile.open(file_path, 'r:gz') as tar:
-                    tar.extractall(tmp_dir)
-
-            # Iterate over all files in the temporary directory
-            for root, dirs, files in os.walk(tmp_dir):
-                for file in files:
-                    file_path = os.path.join(root, file)
-                    content += read_match_strings(file_path, 'archive')  # Recursively read content
-
-            # Clean up the temporary directory
-            shutil.rmtree(tmp_dir)
-    except Exception as e:
-        print_debug(f"Error in read_archive: {e}")
+def find_pii_in_archive(file_path, source):
+    content = []
+    # Create a temporary directory to extract the contents of the archive
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        # Extract the contents of the archive based on the file extension
+        if file_path.lower().endswith('.zip'):
+            patoolib.extract_archive(file_path, outdir=tmp_dir)
+        elif file_path.lower().endswith('.rar'):
+            patoolib.extract_archive(file_path, outdir=tmp_dir)
+        elif file_path.lower().endswith('.tar'):
+            with tarfile.open(file_path, 'r') as tar:
+                tar.extractall(tmp_dir)
+        elif file_path.lower().endswith('.tar.gz'):
+            with tarfile.open(file_path, 'r:gz') as tar:
+                tar.extractall(tmp_dir)
+        # Iterate over all files in the temporary directory
+        for root, dirs, files in os.walk(tmp_dir):
+            for file in files:
+                file_path = os.path.join(root, file)
+                data = read_match_strings(file_path, source)
+                for d in data:
+                    content.append(d)
+        # Clean up the temporary directory
+        shutil.rmtree(tmp_dir)
     return content
 
 

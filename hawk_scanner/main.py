@@ -81,7 +81,6 @@ def main():
         panel = Panel(Text("Now, lets look at findings!", justify="center"))
         print(panel)
 
-
     for group in grouped_results:
         table = Table(show_header=True, header_style="bold magenta", show_lines=True, title=f"[bold blue]Total {grouped_results[group].__len__()} findings in {group}[/bold blue]")
         table.add_column("Sl. No.")
