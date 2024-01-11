@@ -22,6 +22,16 @@ console = Console()
 
 ## Now separate the results by data_source
 data_sources = ['s3', 'mysql', 'redis', 'firebase', 'gcs', 'fs', 'postgresql', 'mongodb', 'slack', 'couchdb', 'gdrive', 'gdrive_workspace', 'text']
+data_sources_option = ['all'] + data_sources
+parser = argparse.ArgumentParser(description='🦅 A powerful scanner to scan your Filesystem, S3, MySQL, PostgreSQL, MongoDB, Redis, Google Cloud Storage and Firebase storage for PII and sensitive data.')
+parser.add_argument('command', nargs='?', choices=data_sources_option, help='Command to execute')
+parser.add_argument('--json', help='Save output to json file')
+parser.add_argument('--debug', action='store_true', help='Enable debug mode')
+parser.add_argument('--connection', action='store', help='YAML Connection file path')
+parser.add_argument('--fingerprint', action='store', help='Override YAML fingerprint file path')
+parser.add_argument('--shutup', action='store_true', help='Suppress the Hawk Eye banner 🫣', default=False)
+
+args = parser.parse_args()
 
 def load_command_module(command):
     try:
@@ -42,22 +52,15 @@ def execute_command(command, args):
 
 
 def main():
-    data_sources_option = ['all'] + data_sources
-    parser = argparse.ArgumentParser(description='CLI Command Executor')
-    parser.add_argument('command', nargs='?', choices=data_sources_option, help='Command to execute')
-    parser.add_argument('--json', help='Save output to json file')
-    parser.add_argument('--debug', action='store_true', help='Enable debug mode')
-
-    args, extra_args = parser.parse_known_args()
     results = []
     if args.command:
         if args.command == 'all':
             commands = data_sources
             for command in commands:
-                for data in execute_command(command, extra_args):
+                for data in execute_command(command, args):
                     results.append(data)
         else:
-            for data in execute_command(args.command, extra_args):
+            for data in execute_command(args.command, args):
                 results.append(data)
     else:
         system.print_error("Please provide a command to execute")
