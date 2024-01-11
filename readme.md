@@ -89,7 +89,7 @@ HAWK Eye is a Python-based CLI tool that can be installed using the following st
 To unleash the power of HAWK Eye, simply follow the steps mentioned in the "Usage" section of the "README.md" file.
 
 ### Options
-Note: If you don't provide any command, it will run all commands (firebase, fs, gcs, mysql, postgresql, redis, s3) by default.
+Note: If you don't provide any command, it will run all commands (firebase, fs, gcs, mysql, text, couchdb, gdrive, gdrive workspace, slack, postgresql, redis, s3) by default.
 <table>
    <thead>
       <tr>
@@ -116,6 +116,12 @@ Note: If you don't provide any command, it will run all commands (firebase, fs, 
             gcs
          </td>
          <td>Scan GCS (Google Cloud Storage) profiles for PII and secrets data.</td>
+      </tr>
+      <tr>
+         <td>
+            text
+         </td>
+         <td>Scan text or string for PII and secrets data.</td>
       </tr>
       <tr>
          <td>
@@ -177,6 +183,14 @@ Note: If you don't provide any command, it will run all commands (firebase, fs, 
       <tr>
          <td>--debug</td>
          <td>Enable Debug mode.</td>
+      </tr>
+      <tr>
+         <td>--stdout</td>
+         <td>Print output on stdout or terminal.</td>
+      </tr>
+      <tr>
+         <td>--quiet</td>
+         <td>Use --quiet flag if you want to hide all logs from your terminal.</td>
       </tr>
       <tr>
          <td>--json</td>
@@ -300,7 +314,9 @@ sources:
       exclude_patterns:
         - .pdf
         - .docx
-
+  text:
+    profile1:
+      text: "Hello World HHWPK6943Q"
   slack:
     slack_example:
       token: xoxp-XXXXXXXXXXXXXXXXXXXXXXXXX # get your slack app these permissiosn https://api.slack.com/methods/team.info and https://api.slack.com/methods/conversations.list

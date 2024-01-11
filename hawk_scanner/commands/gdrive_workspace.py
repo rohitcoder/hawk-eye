@@ -81,80 +81,76 @@ def list_files(drive, impersonate_user=None):
         print(f"Error listing files: {e}")
         return []
 
-def execute(args, programmatic=False):
-    try:
-        results = []
-        connections = system.get_connection(args, programmatic)
-        fingerprints = system.get_fingerprint_file(args, programmatic)
+def execute(args):
+    results = []
+    connections = system.get_connection()
+    is_cache_enabled = False
 
-        is_cache_enabled = False
+    if 'sources' in connections:
+        sources_config = connections['sources']
+        drive_config = sources_config.get('gdrive_workspace')
+    else:
+        system.print_error("No 'sources' section found in connection.yml")
 
-        if 'sources' in connections:
-            sources_config = connections['sources']
-            drive_config = sources_config.get('gdrive_workspace')
-        else:
-            system.print_error("No 'sources' section found in connection.yml")
+    if drive_config:
+        for key, config in drive_config.items():
+            credentials_file = config.get('credentials_file')
+            impersonate_users = config.get('impersonate_users', [])
+            exclude_patterns = config.get(key, {}).get('exclude_patterns', [])
+            is_cache_enabled = config.get('cache', False)
 
-        if drive_config:
-            for key, config in drive_config.items():
-                credentials_file = config.get('credentials_file')
-                impersonate_users = config.get('impersonate_users', [])
-                exclude_patterns = config.get(key, {}).get('exclude_patterns', [])
-                is_cache_enabled = config.get('cache', False)
+            for impersonate_user in impersonate_users or [None]:
+                drive = connect_google_drive(credentials_file, impersonate_user)
+                if not os.path.exists("data/google_drive"):
+                    os.makedirs("data/google_drive")
+                if drive:
+                    files = list_files(drive, impersonate_user)
+                    for file_obj in files:
+                        
+                        if 'mimeType' in file_obj and file_obj['mimeType'] == 'application/vnd.google-apps.document' or file_obj['mimeType'] == 'application/vnd.google-apps.spreadsheet' or file_obj['mimeType'] == 'application/vnd.google-apps.presentation' or file_obj['mimeType'] == 'application/vnd.google-apps.drawing' or file_obj['mimeType'] == 'application/vnd.google-apps.script':
+                            file_obj['name'] = file_obj['name'] + '-runtime.pdf'
 
-                for impersonate_user in impersonate_users or [None]:
-                    drive = connect_google_drive(credentials_file, impersonate_user)
-                    if not os.path.exists("data/google_drive"):
-                        os.makedirs("data/google_drive")
-                    if drive:
-                        files = list_files(drive, impersonate_user)
-                        for file_obj in files:
-                            
-                            if 'mimeType' in file_obj and file_obj['mimeType'] == 'application/vnd.google-apps.document' or file_obj['mimeType'] == 'application/vnd.google-apps.spreadsheet' or file_obj['mimeType'] == 'application/vnd.google-apps.presentation' or file_obj['mimeType'] == 'application/vnd.google-apps.drawing' or file_obj['mimeType'] == 'application/vnd.google-apps.script':
-                                file_obj['name'] = file_obj['name'] + '-runtime.pdf'
+                        file_id = file_obj['id']
+                        file_name = file_obj['name']
+                        folder_path = "data/google_drive"
 
-                            file_id = file_obj['id']
-                            file_name = file_obj['name']
-                            folder_path = "data/google_drive"
+                        file_path = os.path.join(folder_path, file_name)
 
-                            file_path = os.path.join(folder_path, file_name)
+                        if system.should_exclude_file(file_name, exclude_patterns):
+                            continue
 
-                            if system.should_exclude_file(file_name, exclude_patterns):
-                                continue
+                        if config.get("cache") and os.path.exists(file_path):
+                            is_cache_enabled = False
+                            system.print_debug(f"File already exists in cache, using it.")
+                        else:
+                            is_cache_enabled = True
 
-                            if config.get("cache") and os.path.exists(file_path):
-                                is_cache_enabled = False
-                                system.print_debug(f"File already exists in cache, using it.")
-                            else:
-                                is_cache_enabled = True
+                        if is_cache_enabled:
+                            download_file(drive, file_obj, "data/google_drive/")
 
-                            if is_cache_enabled:
-                                download_file(drive, file_obj, "data/google_drive/")
+                        matches = system.read_match_strings(file_path, 'gdrive_workspace')
+                        file_name = file_name.replace('-runtime.pdf', '')
+                        if matches:
+                            for match in matches:
+                                results.append({
+                                    'file_id': file_id,
+                                    'file_name': file_name,
+                                    'user': impersonate_user,
+                                    'file_path': file_path,
+                                    'pattern_name': match['pattern_name'],
+                                    'matches': match['matches'],
+                                    'sample_text': match['sample_text'],
+                                    'profile': key,
+                                    'data_source': 'gdrive_workspace'
+                                })
+                else:
+                    system.print_error("Failed to connect to Google Drive")
+    else:
+        system.print_error("No Google Drive connection details found in connection file")
 
-                            matches = system.analyze_file(file_path, 'gdrive_workspace', connections, fingerprints, programmatic=programmatic)
-                            file_name = file_name.replace('-runtime.pdf', '')
-                            if matches:
-                                for match in matches:
-                                    results.append({
-                                        'file_id': file_id,
-                                        'file_name': file_name,
-                                        'user': impersonate_user,
-                                        'file_path': file_path,
-                                        'pattern_name': match['pattern_name'],
-                                        'matches': match['matches'],
-                                        'sample_text': match['sample_text'],
-                                        'profile': key,
-                                        'data_source': 'gdrive_workspace'
-                                    })
-                    else:
-                        system.print_error("Failed to connect to Google Drive")
-        else:
-            system.print_error("No Google Drive connection details found in connection file")
+    """if not is_cache_enabled:
+        os.system("rm -rf data/google_drive")"""
 
-        """if not is_cache_enabled:
-            os.system("rm -rf data/google_drive")"""
-    except Exception as e:
-        print(f"Error executing gdrive_workspace module: {e}")
     return results
 
 # Call the execute function with the necessary arguments

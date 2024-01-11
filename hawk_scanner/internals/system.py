@@ -15,39 +15,48 @@ import tarfile
 
 # Create a TinyDB instance for storing previous alert hashes
 db = TinyDB('previous_alerts.json')
-console = Console()
+
+data_sources = ['s3', 'mysql', 'redis', 'firebase', 'gcs', 'fs', 'postgresql', 'mongodb', 'slack', 'couchdb', 'gdrive', 'gdrive_workspace', 'text']
+data_sources_option = ['all'] + data_sources
 
 parser = argparse.ArgumentParser(description='🦅 A powerful scanner to scan your Filesystem, S3, MySQL, PostgreSQL, MongoDB, Redis, Google Cloud Storage and Firebase storage for PII and sensitive data.')
+parser.add_argument('command', nargs='?', choices=data_sources_option, help='Command to execute')
 parser.add_argument('--connection', action='store', help='YAML Connection file path')
 parser.add_argument('--fingerprint', action='store', help='Override YAML fingerprint file path')
+parser.add_argument('--json', help='Save output to json file')
+parser.add_argument('--stdout', action='store_true', help='Print output to stdout')
+parser.add_argument('--quiet', action='store_true', help='Print only the results')
 parser.add_argument('--debug', action='store_true', help='Enable debug mode')
-parser.add_argument('--programmatic', action='store_true', help='Enable programmatic mode')
 parser.add_argument('--shutup', action='store_true', help='Suppress the Hawk Eye banner 🫣', default=False)
 
-args, extra = parser.parse_known_args()
+args = parser.parse_args()
+
+if args.quiet:
+    args.shutup = True
+    
+console = Console()
+
 def calculate_msg_hash(msg):
     return hashlib.sha256(msg.encode()).hexdigest()
 
 def print_info(message):
-    console.print(f"[yellow][INFO][/yellow] {str(message)}")
+    if not args.quiet:
+        console.print(f"[yellow][INFO][/yellow] {str(message)}")
 
 def print_debug(message):
-    if args.debug:
+    if args.debug and not args.quiet:
         try:
             console.print(f"[blue][DEBUG][/blue] {str(message)}")
         except Exception as e:
             pass
 
 def print_error(message):
-    console.print(f"[bold red]❌ {message}")
+    if not args.quiet:
+        console.print(f"[bold red]❌ {message}")
 
 def print_success(message):
-    console.print(f"[bold green]✅ {message}")
-
-def print_info(message):
-    console.print(f"[yellow][INFO][/yellow] {message}")
-def print_alert(message):
-    console.print(f"[bold red][ALERT][/bold red] {message}")
+    if not args.quiet:
+        console.print(f"[bold green]✅ {message}")
 
 def get_file_owner(file_path):
     owner_name = ""
@@ -104,31 +113,20 @@ def RedactData(input_string):
 
     return redacted_string
 
-def get_connection(args=None, programmatic=False):
-    try:
-        if args.connection and not programmatic:
-            print("ok 1")
-            if os.path.exists(args.connection):
-                print("ok 2")
-                with open(args.connection, 'r') as file:
-                    connections = yaml.safe_load(file)
-                    return connections
-            else:
-                print_error(f"Connection file not found: {args.connection}")
-                exit(1)
-        elif programmatic and args.connection:
-            return args.connection
+def get_connection():
+    if args.connection:
+        if os.path.exists(args.connection):
+            with open(args.connection, 'r') as file:
+                connections = yaml.safe_load(file)
+                return connections
         else:
-            print_error(f"Please provide a connection file using --connection flag")
+            print_error(f"Connection file not found: {args.connection}")
             exit(1)
-    except Exception as e:
-        print_error(f"Unable to load connection file: {e}")
+    else:
+        print_error(f"Please provide a connection file using --connection flag")
         exit(1)
 
-def get_fingerprint_file(args, programmatic=False):
-    print_info(f"Programmatic: {programmatic}")
-    if args.programmatic:
-        programmatic = True
+def get_fingerprint_file():
     if args.fingerprint:
         if os.path.exists(args.fingerprint):
             with open(args.fingerprint, 'r') as file:
@@ -136,8 +134,8 @@ def get_fingerprint_file(args, programmatic=False):
         else:
             print_error(f"Fingerprint file not found: {args.fingerprint}")
             exit(1)
-    elif not programmatic:
-        file_path = "https://github.com/rohitcoderdss/hawk-eye/raw/main/fingerprint.yml"
+    else:
+        file_path = "https://github.com/rohitcoder/hawk-eye/raw/main/fingerprint.yml"
         try:
             response = requests.get(file_path, timeout=10)
             print_info(f"Downloading default fingerprint.yml from {file_path}")
@@ -149,18 +147,10 @@ def get_fingerprint_file(args, programmatic=False):
                 print_error(f"Unable to download default fingerprint.yml please provide your own fingerprint file using --fingerprint flag")
                 exit(1)
         except Exception as e:
-            print_error(f"Unable to download default fingerprint.yml please provide your own fingerprint file using --fingerprint flag: "+str(e))
-            exit(1)
-    else:
-        print_debug(f"Using fingerprint file: {args.fingerprint} for programmatic execution")
-        if os.path.exists(args.fingerprint):
-            with open(args.fingerprint, 'r') as file:
-                return yaml.safe_load(file)
-        else:
-            print_error(f"Fingerprint file not found: {args.fingerprint} for programmatic execution")
+            print_error(f"Unable to download default fingerprint.yml please provide your own fingerprint file using --fingerprint flag")
             exit(1)
 
-patterns = get_fingerprint_file(args)
+patterns = get_fingerprint_file()
 
 def print_banner():
     banner = r"""
@@ -200,12 +190,11 @@ def print_banner():
     if not args.shutup:
         console.print(banner)
 
-connections = get_connection(args)
-patterns = get_fingerprint_file(args)
+connections = get_connection()
 
-def analyze_strings(content, connections=connections, patterns=patterns, programmatic=False):
+def match_strings(content):
     matched_strings = []
-    print_debug(f"Connections: {connections}")
+
     if 'notify' in connections:
         redacted: bool = connections.get('notify', {}).get('redacted', False)
     else:
@@ -217,6 +206,7 @@ def analyze_strings(content, connections=connections, patterns=patterns, program
         ## parse pattern_regex as Regex
         complied_regex = re.compile(pattern_regex, re.IGNORECASE)
         print_debug(f"Regex: {complied_regex}")
+        print_debug(f"Content: {content}")
         matches = re.findall(complied_regex, content)
         print_debug(f"Matches: {matches}")
         if matches:
@@ -267,12 +257,18 @@ def list_all_files_iteratively(path, exclude_patterns):
             if not should_exclude_file(file, exclude_patterns):
                 yield os.path.join(root, file)
 
-def analyze_file(file_path, source, connections=None, patterns=None, programmatic=False):
+def read_match_strings(file_path, source):
     print_info(f"Scanning file: {file_path}")
     content = ''
+
     try:
+        # Check if the file is an image
+        print(file_path)
         if file_path.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.bmp')):
+            print("ocr started for "+file_path)
             content = enhance_and_ocr(file_path)
+            print("texts")
+            print(content)
         # Check if the file is a PDF document
         elif file_path.lower().endswith('.pdf'):
             content = read_pdf(file_path)
@@ -288,10 +284,10 @@ def analyze_file(file_path, source, connections=None, patterns=None, programmati
                 # Attempt to decode using UTF-8, fallback to 'latin-1' if needed
                 content = file.read().decode('utf-8', errors='replace')
     except Exception as e:
-        print_debug(f"Error in analyze_file: {e}")
+        print_debug(f"Error in read_match_strings: {e}")
         pass
-    matched_strings = analyze_strings(content, connections, patterns, programmatic=programmatic)
-    print_debug(f"Matched strings: {matched_strings}")
+
+    matched_strings = match_strings(content)
     return matched_strings
 
 def read_pdf(file_path):
@@ -358,7 +354,7 @@ def read_archive(file_path):
             for root, dirs, files in os.walk(tmp_dir):
                 for file in files:
                     file_path = os.path.join(root, file)
-                    content += analyze_file(file_path, 'archive')  # Recursively read content
+                    content += read_match_strings(file_path, 'archive')  # Recursively read content
 
             # Clean up the temporary directory
             shutil.rmtree(tmp_dir)

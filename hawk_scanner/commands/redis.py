@@ -44,33 +44,30 @@ def check_data_patterns(redis_instance, patterns, profile_name, host):
                     })
     return results
 
-def execute(args, programmatic=False):
-    try:
-        results = []
-        connections = system.get_connection(args, programmatic)
+def execute(args):
+    results = []
+    connections = system.get_connection()
 
-        if 'sources' in connections:
-            sources_config = connections['sources']
-            redis_config = sources_config.get('redis')
+    if 'sources' in connections:
+        sources_config = connections['sources']
+        redis_config = sources_config.get('redis')
 
-            if redis_config:
-                patterns = system.get_fingerprint_file(args, programmatic)
+        if redis_config:
+            patterns = system.get_fingerprint_file()
 
-                for profile_name, config in redis_config.items():
-                    host = config.get('host')
-                    port = config.get('port', 6379)
+            for profile_name, config in redis_config.items():
+                host = config.get('host')
+                port = config.get('port', 6379)
 
-                    if host:
-                        redis_instance = connect_redis(host, port)
-                        if redis_instance:
-                            results = check_data_patterns(redis_instance, patterns, profile_name, host)
-                            redis_instance.close()
-                    else:
-                        system.print_error(f"Incomplete Redis configuration for key: {profile_name}")
-            else:
-                system.print_error("No Redis connection details found in connection.yml")
+                if host:
+                    redis_instance = connect_redis(host, port)
+                    if redis_instance:
+                        results = check_data_patterns(redis_instance, patterns, profile_name, host)
+                        redis_instance.close()
+                else:
+                    system.print_error(f"Incomplete Redis configuration for key: {profile_name}")
         else:
-            system.print_error("No 'sources' section found in connection.yml")
-    except Exception as e:
-        system.print_error(f"Error: {e}")
+            system.print_error("No Redis connection details found in connection.yml")
+    else:
+        system.print_error("No 'sources' section found in connection.yml")
     return results

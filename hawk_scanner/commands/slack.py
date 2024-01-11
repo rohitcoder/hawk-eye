@@ -67,37 +67,35 @@ def check_slack_messages(client, patterns, profile_name, channel_types, channel_
         system.print_error(f"Failed to fetch messages from Slack with error: {e.response['error']}")
         return results
 
-def execute(args, programmatic=False):
-    try:
-        results = []
-        system.print_info("Running Checks for Slack Sources")
-        connections = system.get_connection(args, programmatic)
+def execute(args):
+    results = []
+    system.print_info("Running Checks for Slack Sources")
+    connections = system.get_connection()
 
-        if 'sources' in connections:
-            sources_config = connections['sources']
-            slack_config = sources_config.get('slack')
+    if 'sources' in connections:
+        sources_config = connections['sources']
+        slack_config = sources_config.get('slack')
 
-            if slack_config:
-                patterns = system.get_fingerprint_file(args, programmatic)
+        if slack_config:
+            patterns = system.get_fingerprint_file()
 
-                for key, config in slack_config.items():
-                    token = config.get('token')
-                    channel_types = config.get('channel_types', "public_channel,private_channel")
-                    channel_names = config.get('channel_names', None)
+            for key, config in slack_config.items():
+                token = config.get('token')
+                channel_types = config.get('channel_types', "public_channel,private_channel")
+                channel_names = config.get('channel_names', None)
 
-                    if token:
-                        system.print_info(f"Checking Slack Profile {key}")
-                    else:
-                        system.print_error(f"Incomplete Slack configuration for key: {key}")
-                        continue
+                if token:
+                    system.print_info(f"Checking Slack Profile {key}")
+                else:
+                    system.print_error(f"Incomplete Slack configuration for key: {key}")
+                    continue
 
-                    client = connect_slack(token)
-                    if client:
-                        results += check_slack_messages(client, patterns, key, channel_types, channel_names)
-            else:
-                system.print_error("No Slack connection details found in connection.yml")
+                client = connect_slack(token)
+                if client:
+                    results += check_slack_messages(client, patterns, key, channel_types, channel_names)
         else:
-            system.print_error("No 'sources' section found in connection.yml")
-    except Exception as e:
-        system.print_error(f"Failed to run Slack checks with error: {e}")
+            system.print_error("No Slack connection details found in connection.yml")
+    else:
+        system.print_error("No 'sources' section found in connection.yml")
+
     return results

@@ -19,20 +19,7 @@ clear_screen()
 system.print_banner()
 
 console = Console()
-
-## Now separate the results by data_source
-data_sources = ['s3', 'mysql', 'redis', 'firebase', 'gcs', 'fs', 'postgresql', 'mongodb', 'slack', 'couchdb', 'gdrive', 'gdrive_workspace', 'text']
-data_sources_option = ['all'] + data_sources
-parser = argparse.ArgumentParser(description='🦅 A powerful scanner to scan your Filesystem, S3, MySQL, PostgreSQL, MongoDB, Redis, Google Cloud Storage and Firebase storage for PII and sensitive data.')
-parser.add_argument('command', nargs='?', choices=data_sources_option, help='Command to execute')
-parser.add_argument('--json', help='Save output to json file')
-parser.add_argument('--debug', action='store_true', help='Enable debug mode')
-parser.add_argument('--connection', action='store', help='YAML Connection file path')
-parser.add_argument('--fingerprint', action='store', help='Override YAML fingerprint file path')
-parser.add_argument('--shutup', action='store_true', help='Suppress the Hawk Eye banner 🫣', default=False)
-
-args = parser.parse_args()
-
+args = system.args
 def load_command_module(command):
     try:
         module = importlib.import_module(f"hawk_scanner.commands.{command}")
@@ -57,7 +44,7 @@ def main():
         if args.command == 'all':
             commands = data_sources
             for command in commands:
-                for data in execute_command(command, args):
+                for data in execute_command(command):
                     results.append(data)
         else:
             for data in execute_command(args.command, args):
@@ -86,8 +73,13 @@ def main():
             print(json.dumps(grouped_results, indent=4))
         system.print_success(f"Results saved to {args.json}")
         sys.exit(0)
-    panel = Panel(Text("Now, lets look at findings!", justify="center"))
-    print(panel)
+    
+    if args.stdout:
+        print(json.dumps(grouped_results, indent=4))
+        sys.exit(0)
+    else:
+        panel = Panel(Text("Now, lets look at findings!", justify="center"))
+        print(panel)
 
 
     for group in grouped_results:
