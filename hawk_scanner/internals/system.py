@@ -13,9 +13,6 @@ import shutil
 import os, cv2
 import tarfile
 
-# Create a TinyDB instance for storing previous alert hashes
-db = TinyDB('previous_alerts.json')
-
 data_sources = ['s3', 'mysql', 'redis', 'firebase', 'gcs', 'fs', 'postgresql', 'mongodb', 'slack', 'couchdb', 'gdrive', 'gdrive_workspace', 'text']
 data_sources_option = ['all'] + data_sources
 
@@ -27,9 +24,16 @@ parser.add_argument('--json', help='Save output to json file')
 parser.add_argument('--stdout', action='store_true', help='Print output to stdout')
 parser.add_argument('--quiet', action='store_true', help='Print only the results')
 parser.add_argument('--debug', action='store_true', help='Enable debug mode')
+parser.add_argument('--no-write', action='store_true', help='Do not write previous alerts to file, this may flood you with duplicate alerts')
 parser.add_argument('--shutup', action='store_true', help='Suppress the Hawk Eye banner 🫣', default=False)
 
 args = parser.parse_args()
+
+# Create a TinyDB instance for storing previous alert hashes
+db = None
+
+if not args.no_write:
+    db = TinyDB('previous_alerts.json')
 
 if args.quiet:
     args.shutup = True
@@ -393,7 +397,7 @@ def SlackNotify(msg):
         # Check if suppress_duplicates is set to True
         suppress_duplicates = notify_config.get('suppress_duplicates', False)
         
-        if suppress_duplicates:
+        if suppress_duplicates and not args.no_write:
             # Calculate the hash of the message
             msg_hash = calculate_msg_hash(msg)
             
@@ -413,7 +417,7 @@ def SlackNotify(msg):
                 headers = {'Content-Type': 'application/json'}
                 requests.post(webhook_url, data=json.dumps(payload), headers=headers)
                 
-                if suppress_duplicates:
+                if suppress_duplicates and not args.no_write:
                     # Store the message hash in the previous alerts database
                     db.insert({'msg_hash': msg_hash})
             except Exception as e:
