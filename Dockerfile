@@ -9,7 +9,7 @@ COPY requirements.txt /app/
 RUN apt-get update && apt-get install ffmpeg libsm6 libxext6  -y
 
 # Install the dependencies from requirements.txt
-RUN pip3 install --no-cache-dir -r requirements.txt
+RUN pip3 install -r requirements.txt
 
 # Copy the local code to the container at /app
 COPY . /app/
@@ -18,4 +18,4 @@ COPY . /app/
 RUN pip3 install .
 
 # Run hawk_Scanner from python3 main.py
-ENTRYPOINT ["python3", "main.py"]
+ENTRYPOINT ["hawk_scanner"]
