@@ -45,13 +45,21 @@ See how this works on Youtube - https://youtu.be/LuPXE7UJKOY
       hawk_scanner all --connection connection.yml --fingerprint fingerprint.yml --json output.json --debug
    ```
 
-### Note: Scanning Postgresql?, then you have to install some extra dependencies.
+## Platform and arch-specific guidelines
 
-For scanning postgresql source, this tool requires psycopg2-binary dependency, we can't ship this dependency with main package because psycopg2-binary not works with most of the systems espically with Windows, so you have to install it manually.
+### Postgresql
+You have to install some extra dependencies.
+For scanning postgresql source, this tool requires ``psycopg2-binary`` dependency, we can't ship this dependency with main package because psycopg2-binary not works with most of the systems espically with Windows, so you have to install it manually.
    
    ```bash
       pip3 install psycopg2-binary
    ```
+
+### Redhat Linux
+You may get error after running ``hawk-scanner`` command on redhat from ``cv2`` dependency . You need to install some extra dependencies
+```
+yum install mesa-libGL
+```
 
 ## Building or running from source
 
