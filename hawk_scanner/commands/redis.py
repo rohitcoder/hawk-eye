@@ -6,9 +6,9 @@ from rich.console import Console
 
 console = Console()
 
-def connect_redis(host, port):
+def connect_redis(host, port, password=None):
     try:
-        r = redis.Redis(host=host, port=port)
+        r = redis.Redis(host=host, port=port, password=password)
         if r.ping():
             system.print_info(f"Redis instance at {host}:{port} is accessible")
             return r
@@ -58,9 +58,10 @@ def execute(args):
             for profile_name, config in redis_config.items():
                 host = config.get('host')
                 port = config.get('port', 6379)
+                password = config.get('password')
 
                 if host:
-                    redis_instance = connect_redis(host, port)
+                    redis_instance = connect_redis(host, port, password)
                     if redis_instance:
                         results = check_data_patterns(redis_instance, patterns, profile_name, host)
                         redis_instance.close()

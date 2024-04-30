@@ -8,6 +8,7 @@ sources:
   redis:
     redis_example:
       host: YOUR_REDIS_HOST
+      password: YOUR_REDIS_PASSWORD
   s3:
     s3_example:
       access_key: YOUR_S3_ACCESS_KEY
