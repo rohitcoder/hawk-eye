@@ -9,13 +9,13 @@ def connect_couchdb(host, port, username, password, database):
     try:
         server = couchdb.Server(f"http://{username}:{password}@{host}:{port}/")
         if database not in server:
-            system.print_error(f"Database {database} not found on CouchDB server.")
+            system.print_error(args, f"Database {database} not found on CouchDB server.")
             return None
         db = server[database]
-        system.print_info(f"Connected to CouchDB database")
+        system.print_info(args, f"Connected to CouchDB database")
         return db
     except Exception as e:
-        system.print_error(f"Failed to connect to CouchDB database with error: {e}")
+        system.print_error(args, f"Failed to connect to CouchDB database with error: {e}")
         return None
 
 def check_data_patterns(db, patterns, profile_name, database_name):
@@ -25,7 +25,7 @@ def check_data_patterns(db, patterns, profile_name, database_name):
         for field_name, field_value in document.items():
             if field_value:
                 value_str = str(field_value)
-                matches = system.match_strings(value_str)
+                matches = system.match_strings(args, value_str)
                 if matches:
                     for match in matches:
                         results.append({
@@ -44,15 +44,15 @@ def check_data_patterns(db, patterns, profile_name, database_name):
 
 def execute(args):
     results = []
-    system.print_info(f"Running Checks for CouchDB Sources")
-    connections = system.get_connection()
+    system.print_info(args, f"Running Checks for CouchDB Sources")
+    connections = system.get_connection(args)
 
     if 'sources' in connections:
         sources_config = connections['sources']
         couchdb_config = sources_config.get('couchdb')
 
         if couchdb_config:
-            patterns = system.get_fingerprint_file()
+            patterns = system.get_fingerprint_file(args)
 
             for key, config in couchdb_config.items():
                 host = config.get('host')
@@ -62,16 +62,16 @@ def execute(args):
                 database = config.get('database')
 
                 if host and username and password and database:
-                    system.print_info(f"Checking CouchDB Profile {key} with host and authentication")
+                    system.print_info(args, f"Checking CouchDB Profile {key} with host and authentication")
                 else:
-                    system.print_error(f"Incomplete CouchDB configuration for key: {key}")
+                    system.print_error(args, f"Incomplete CouchDB configuration for key: {key}")
                     continue
 
                 db = connect_couchdb(host, port, username, password, database)
                 if db:
                     results += check_data_patterns(db, patterns, key, database)
         else:
-            system.print_error("No CouchDB connection details found in connection.yml")
+            system.print_error(args, "No CouchDB connection details found in connection.yml")
     else:
-        system.print_error("No 'sources' section found in connection.yml")
+        system.print_error(args, "No 'sources' section found in connection.yml")
     return results

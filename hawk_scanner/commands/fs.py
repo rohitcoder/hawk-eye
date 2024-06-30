@@ -6,8 +6,8 @@ import os
 import concurrent.futures
 import time
 
-def process_file(file_path, key, results):
-    matches = system.read_match_strings(file_path, 'fs')
+def process_file(args, file_path, key, results):
+    matches = system.read_match_strings(args, file_path, 'fs')
     file_data = system.getFileData(file_path)
     if matches:
         for match in matches:
@@ -24,18 +24,18 @@ def process_file(file_path, key, results):
 
 def execute(args):
     results = []
-    connections = system.get_connection()
+    connections = system.get_connection(args)
     if 'sources' in connections:
         sources_config = connections['sources']
         fs_config = sources_config.get('fs')
         if fs_config:
             for key, config in fs_config.items():
                 if 'path' not in config:
-                    system.print_error(f"Path not found in fs profile '{key}'")
+                    system.print_error(args, f"Path not found in fs profile '{key}'")
                     continue
                 path = config.get('path')
                 if not os.path.exists(path):
-                    system.print_error(f"Path '{path}' does not exist")
+                    system.print_error(args, f"Path '{path}' does not exist")
                 
                 exclude_patterns = fs_config.get(key, {}).get('exclude_patterns', [])
                 start_time = time.time()
@@ -51,21 +51,14 @@ def execute(args):
                     futures = []
                     for file_path in files:
                         file_count += 1
-                        futures.append(executor.submit(process_file, file_path, key, results))
+                        futures.append(executor.submit(process_file, args, file_path, key, results))
                     
                     # Wait for all tasks to complete
                     concurrent.futures.wait(futures)
                 end_time = time.time()
-                system.print_info(f"Time taken to analyze {file_count} files: {end_time - start_time} seconds")
+                system.print_info(args, f"Time taken to analyze {file_count} files: {end_time - start_time} seconds")
         else:
-            system.print_error("No filesystem 'fs' connection details found in connection.yml")
+            system.print_error(args, "No filesystem 'fs' connection details found in connection.yml")
     else:
-        system.print_error("No 'sources' section found in connection.yml")
+        system.print_error(args, "No 'sources' section found in connection.yml")
     return results
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    # Add your command-line arguments here if needed
-    args = parser.parse_args()
-    results = execute(args)
-    # Handle results as needed

@@ -12,14 +12,14 @@ def connect_mongodb(host, port, username, password, database, uri=None):
             client = pymongo.MongoClient(host=host, port=port, username=username, password=password)
 
         if database not in client.list_database_names():
-            system.print_error(f"Database {database} not found on MongoDB server.")
+            system.print_error(args, f"Database {database} not found on MongoDB server.")
             return None
 
         db = client[database]
-        system.print_info(f"Connected to MongoDB database")
+        system.print_info(args, f"Connected to MongoDB database")
         return db
     except Exception as e:
-        system.print_error(f"Failed to connect to MongoDB database with error: {e}")
+        system.print_error(args, f"Failed to connect to MongoDB database with error: {e}")
         return None
 
 
@@ -42,7 +42,7 @@ def check_data_patterns(db, patterns, profile_name, database_name, limit_start=0
             for field_name, field_value in document.items():
                 if field_value:
                     value_str = str(field_value)
-                    matches = system.match_strings(value_str)
+                    matches = system.match_strings(args, value_str)
                     if matches:
                         for match in matches:
                             results.append({
@@ -61,15 +61,15 @@ def check_data_patterns(db, patterns, profile_name, database_name, limit_start=0
 
 def execute(args):
     results = []
-    system.print_info(f"Running Checks for MongoDB Sources")
-    connections = system.get_connection()
+    system.print_info(args, f"Running Checks for MongoDB Sources")
+    connections = system.get_connection(args)
 
     if 'sources' in connections:
         sources_config = connections['sources']
         mongodb_config = sources_config.get('mongodb')
 
         if mongodb_config:
-            patterns = system.get_fingerprint_file()
+            patterns = system.get_fingerprint_file(args)
 
             for key, config in mongodb_config.items():
                 host = config.get('host')
@@ -83,20 +83,20 @@ def execute(args):
                 collections = config.get('collections', [])
 
                 if uri:
-                    system.print_info(f"Checking MongoDB Profile {key} using URI")
+                    system.print_info(args, f"Checking MongoDB Profile {key} using URI")
                 elif host and username and password and database:
-                    system.print_info(f"Checking MongoDB Profile {key} with host and authentication")
+                    system.print_info(args, f"Checking MongoDB Profile {key} with host and authentication")
                 else:
-                    system.print_error(f"Incomplete MongoDB configuration for key: {key}")
+                    system.print_error(args, f"Incomplete MongoDB configuration for key: {key}")
                     continue
 
                 db = connect_mongodb(host, port, username, password, database, uri)
                 if db:
                     results += check_data_patterns(db, patterns, key, database, limit_start=limit_start, limit_end=limit_end, whitelisted_collections=collections)
         else:
-            system.print_error("No MongoDB connection details found in connection.yml")
+            system.print_error(args, "No MongoDB connection details found in connection.yml")
     else:
-        system.print_error("No 'sources' section found in connection.yml")
+        system.print_error(args, "No 'sources' section found in connection.yml")
     return results
 
 # Example usage

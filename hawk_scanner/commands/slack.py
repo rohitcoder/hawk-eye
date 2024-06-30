@@ -12,13 +12,13 @@ def connect_slack(token):
         # Test the connection by making an API call
         response = client.auth_test()
         if response["ok"]:
-            system.print_info("Connected to Slack")
+            system.print_info(args, "Connected to Slack")
             return client
         else:
-            system.print_error("Failed to authenticate with Slack")
+            system.print_error(args, "Failed to authenticate with Slack")
             return None
     except SlackApiError as e:
-        system.print_error(f"Failed to connect to Slack with error: {e.response['error']}")
+        system.print_error(args, f"Failed to connect to Slack with error: {e.response['error']}")
         return None
 
 def check_slack_messages(client, patterns, profile_name, channel_types, channel_names=None):
@@ -33,22 +33,22 @@ def check_slack_messages(client, patterns, profile_name, channel_types, channel_
         if channel_names:
             channels = [channel for channel in channels if channel['name'] in channel_names]
         
-        system.print_info(f"Found {len(channels)} channels of type {channel_types}")
-        system.print_info(f"Checking messages in channels: {', '.join([channel['name'] for channel in channels])}")
+        system.print_info(args, f"Found {len(channels)} channels of type {channel_types}")
+        system.print_info(args, f"Checking messages in channels: {', '.join([channel['name'] for channel in channels])}")
         
         for channel in channels:
             channel_name = channel["name"]
             channel_id = channel["id"]
 
             # Get messages from the channel
-            system.print_info(f"Checking messages in channel {channel_name} ({channel_id})")
+            system.print_info(args, f"Checking messages in channel {channel_name} ({channel_id})")
             messages = client.conversations_history(channel=channel_id)["messages"]
 
             for message in messages:
                 user = message.get("user", "")
                 text = message.get("text")
                 if text:
-                    matches = system.match_strings(text)
+                    matches = system.match_strings(args, text)
                     if matches:
                         for match in matches:
                             results.append({
@@ -64,20 +64,20 @@ def check_slack_messages(client, patterns, profile_name, channel_types, channel_
                             })
         return results
     except SlackApiError as e:
-        system.print_error(f"Failed to fetch messages from Slack with error: {e.response['error']}")
+        system.print_error(args, f"Failed to fetch messages from Slack with error: {e.response['error']}")
         return results
 
 def execute(args):
     results = []
-    system.print_info("Running Checks for Slack Sources")
-    connections = system.get_connection()
+    system.print_info(args, "Running Checks for Slack Sources")
+    connections = system.get_connection(args)
 
     if 'sources' in connections:
         sources_config = connections['sources']
         slack_config = sources_config.get('slack')
 
         if slack_config:
-            patterns = system.get_fingerprint_file()
+            patterns = system.get_fingerprint_file(args)
 
             for key, config in slack_config.items():
                 token = config.get('token')
@@ -85,17 +85,17 @@ def execute(args):
                 channel_names = config.get('channel_names', None)
 
                 if token:
-                    system.print_info(f"Checking Slack Profile {key}")
+                    system.print_info(args, f"Checking Slack Profile {key}")
                 else:
-                    system.print_error(f"Incomplete Slack configuration for key: {key}")
+                    system.print_error(args, f"Incomplete Slack configuration for key: {key}")
                     continue
 
                 client = connect_slack(token)
                 if client:
                     results += check_slack_messages(client, patterns, key, channel_types, channel_names)
         else:
-            system.print_error("No Slack connection details found in connection.yml")
+            system.print_error(args, "No Slack connection details found in connection.yml")
     else:
-        system.print_error("No 'sources' section found in connection.yml")
+        system.print_error(args, "No 'sources' section found in connection.yml")
 
     return results

@@ -16,7 +16,7 @@ def connect_google_drive(credentials_file):
 
     try:
         fs = GDriveFileSystem("root", client_id=client_id, client_secret=client_secret, token=credentials_file)
-        system.print_debug("Connected to Google Drive")
+        system.print_debug(args, "Connected to Google Drive")
         drive = fs.client
         return drive
     except Exception as e:
@@ -53,7 +53,7 @@ def download_file(drive, file_obj, base_path):
         else:
             file_obj.GetContentFile(file_path)
 
-        system.print_debug(f"File downloaded to: {file_path}")
+        system.print_debug(args, f"File downloaded to: {file_path}")
     except Exception as e:
         print(f"Failed to download file: {e}")
 
@@ -68,7 +68,7 @@ def list_files(drive, folder_name=None):
 def execute(args):
     results = []
     should_download = True
-    connections = system.get_connection()
+    connections = system.get_connection(args)
     is_cache_enabled = False
     drive_config = None
 
@@ -76,7 +76,7 @@ def execute(args):
         sources_config = connections['sources']
         drive_config = sources_config.get('gdrive')
     else:
-        system.print_error("No 'sources' section found in connection.yml")
+        system.print_error(args, "No 'sources' section found in connection.yml")
 
     if drive_config:
         for key, config in drive_config.items():
@@ -113,14 +113,14 @@ def execute(args):
 
                     if config.get("cache") and os.path.exists(file_path):
                         should_download = False
-                        system.print_debug(f"File already exists in cache, using it.")
+                        system.print_debug(args, f"File already exists in cache, using it.")
                     else:
                         should_download = True
 
                     if should_download:
                         download_file(drive, file_obj, "data/google_drive")
 
-                    matches = system.read_match_strings(file_path, 'gdrive')
+                    matches = system.read_match_strings(args, file_path, 'gdrive')
                     if matches:
                         for match in matches:
                             results.append({
@@ -134,9 +134,9 @@ def execute(args):
                                 'data_source': 'gdrive'
                             })
             else:
-                system.print_error("Failed to connect to Google Drive")
+                system.print_error(args, "Failed to connect to Google Drive")
     else:
-        system.print_error("No Google Drive connection details found in connection file")
+        system.print_error(args, "No Google Drive connection details found in connection file")
 
     if not is_cache_enabled:
         os.system("rm -rf data/google_drive")

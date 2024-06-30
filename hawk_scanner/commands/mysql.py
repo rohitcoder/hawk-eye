@@ -14,10 +14,10 @@ def connect_mysql(host, port, user, password, database):
             database=database
         )
         if conn:
-            system.print_info(f"Connected to MySQL database at {host}")
+            system.print_info(args, f"Connected to MySQL database at {host}")
             return conn
     except Exception as e:
-        system.print_error(f"Failed to connect to MySQL database at {host} with error: {e}")
+        system.print_error(args, f"Failed to connect to MySQL database at {host} with error: {e}")
 
 def check_data_patterns(conn, patterns, profile_name, database_name, limit_start=0, limit_end=500, whitelisted_tables=None):
     cursor = conn.cursor()
@@ -42,7 +42,7 @@ def check_data_patterns(conn, patterns, profile_name, database_name, limit_start
             for column, value in zip(columns, row):
                 if value:
                     value_str = str(value)
-                    matches = system.match_strings(value_str)
+                    matches = system.match_strings(args, value_str)
                     if matches:
                         for match in matches:
                             results.append({
@@ -66,14 +66,14 @@ def check_data_patterns(conn, patterns, profile_name, database_name, limit_start
 
 def execute(args):
     results = []
-    system.print_info(f"Running Checks for MySQL Sources")
-    connections = system.get_connection()
+    system.print_info(args, f"Running Checks for MySQL Sources")
+    connections = system.get_connection(args)
     if 'sources' in connections:
         sources_config = connections['sources']
         mysql_config = sources_config.get('mysql')
 
         if mysql_config:
-            patterns = system.get_fingerprint_file()
+            patterns = system.get_fingerprint_file(args)
 
             for key, config in mysql_config.items():
                 host = config.get('host')
@@ -86,17 +86,17 @@ def execute(args):
                 tables = config.get('tables', [])
 
                 if host and user and database:
-                    system.print_info(f"Checking MySQL Profile {key} and database {database}")
+                    system.print_info(args, f"Checking MySQL Profile {key} and database {database}")
                     conn = connect_mysql(host, port, user, password, database)
                     if conn:
                         results += check_data_patterns(conn, patterns, key, database, limit_start=limit_start, limit_end=limit_end, whitelisted_tables=tables)
                         conn.close()
                 else:
-                    system.print_error(f"Incomplete MySQL configuration for key: {key}")
+                    system.print_error(args, f"Incomplete MySQL configuration for key: {key}")
         else:
-            system.print_error("No MySQL connection details found in connection.yml")
+            system.print_error(args, "No MySQL connection details found in connection.yml")
     else:
-        system.print_error("No 'sources' section found in connection.yml")
+        system.print_error(args, "No 'sources' section found in connection.yml")
     return results
 
 # Example usage

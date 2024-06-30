@@ -64,7 +64,7 @@ def download_file(drive, file_obj, base_path):
             except Exception as e:
                 print(f"Failed to write file: {e}")
 
-        system.print_debug(f"File downloaded to: {folder_path}")
+        system.print_debug(args, f"File downloaded to: {folder_path}")
     except Exception as e:
         print(f"Failed to download file: {e}")
 
@@ -83,14 +83,14 @@ def list_files(drive, impersonate_user=None):
 
 def execute(args):
     results = []
-    connections = system.get_connection()
+    connections = system.get_connection(args)
     is_cache_enabled = False
 
     if 'sources' in connections:
         sources_config = connections['sources']
         drive_config = sources_config.get('gdrive_workspace')
     else:
-        system.print_error("No 'sources' section found in connection.yml")
+        system.print_error(args, "No 'sources' section found in connection.yml")
 
     if drive_config:
         for key, config in drive_config.items():
@@ -121,14 +121,14 @@ def execute(args):
 
                         if config.get("cache") and os.path.exists(file_path):
                             is_cache_enabled = False
-                            system.print_debug(f"File already exists in cache, using it.")
+                            system.print_debug(args, f"File already exists in cache, using it.")
                         else:
                             is_cache_enabled = True
 
                         if is_cache_enabled:
                             download_file(drive, file_obj, "data/google_drive/")
 
-                        matches = system.read_match_strings(file_path, 'gdrive_workspace')
+                        matches = system.read_match_strings(args, file_path, 'gdrive_workspace')
                         file_name = file_name.replace('-runtime.pdf', '')
                         if matches:
                             for match in matches:
@@ -144,9 +144,9 @@ def execute(args):
                                     'data_source': 'gdrive_workspace'
                                 })
                 else:
-                    system.print_error("Failed to connect to Google Drive")
+                    system.print_error(args, "Failed to connect to Google Drive")
     else:
-        system.print_error("No Google Drive connection details found in connection file")
+        system.print_error(args, "No Google Drive connection details found in connection file")
 
     """if not is_cache_enabled:
         os.system("rm -rf data/google_drive")"""

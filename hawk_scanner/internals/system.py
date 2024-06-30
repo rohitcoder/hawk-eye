@@ -16,50 +16,41 @@ import tarfile
 data_sources = ['s3', 'mysql', 'redis', 'firebase', 'gcs', 'fs', 'postgresql', 'mongodb', 'slack', 'couchdb', 'gdrive', 'gdrive_workspace', 'text']
 data_sources_option = ['all'] + data_sources
 
-parser = argparse.ArgumentParser(description='🦅 A powerful scanner to scan your Filesystem, S3, MySQL, PostgreSQL, MongoDB, Redis, Google Cloud Storage and Firebase storage for PII and sensitive data.')
-parser.add_argument('command', nargs='?', choices=data_sources_option, help='Command to execute')
-parser.add_argument('--connection', action='store', help='YAML Connection file path')
-parser.add_argument('--connection-json', type=str, help='Connection details in JSON format, useful for passing connection info directly as CLI Input')
-parser.add_argument('--fingerprint', action='store', help='Override YAML fingerprint file path')
-parser.add_argument('--json', help='Save output to a json file')
-parser.add_argument('--stdout', action='store_true', help='Print output to stdout in JSON format')
-parser.add_argument('--quiet', action='store_true', help='Print only the results')
-parser.add_argument('--debug', action='store_true', help='Enable debug mode')
-parser.add_argument('--no-write', action='store_true', help='Do not write previous alerts to file, this may flood you with duplicate alerts')
-parser.add_argument('--shutup', action='store_true', help='Suppress the Hawk Eye banner 🫣', default=False)
-
-args = parser.parse_args()
-
-# Create a TinyDB instance for storing previous alert hashes
-db = None
-
-if not args.no_write:
-    db = TinyDB('previous_alerts.json')
-
-if args.quiet:
-    args.shutup = True
+def parse_args(args=None):
+    parser = argparse.ArgumentParser(description='🦅 A powerful scanner to scan your Filesystem, S3, MySQL, PostgreSQL, MongoDB, Redis, Google Cloud Storage and Firebase storage for PII and sensitive data.')
+    parser.add_argument('command', nargs='?', choices=data_sources_option, help='Command to execute')
+    parser.add_argument('--connection', action='store', help='YAML Connection file path')
+    parser.add_argument('--connection-json', type=str, help='Connection details in JSON format, useful for passing connection info directly as CLI Input')
+    parser.add_argument('--fingerprint', action='store', help='Override YAML fingerprint file path')
+    parser.add_argument('--json', help='Save output to a json file')
+    parser.add_argument('--stdout', action='store_true', help='Print output to stdout in JSON format')
+    parser.add_argument('--quiet', action='store_true', help='Print only the results')
+    parser.add_argument('--debug', action='store_true', help='Enable debug mode')
+    parser.add_argument('--no-write', action='store_true', help='Do not write previous alerts to file, this may flood you with duplicate alerts')
+    parser.add_argument('--shutup', action='store_true', help='Suppress the Hawk Eye banner 🫣', default=False)
+    return parser.parse_args(args)
     
 console = Console()
 
 def calculate_msg_hash(msg):
     return hashlib.sha256(msg.encode()).hexdigest()
 
-def print_info(message):
+def print_info(args, message):
     if not args.quiet:
         console.print(f"[yellow][INFO][/yellow] {str(message)}")
 
-def print_debug(message):
-    if args.debug and not args.quiet:
+def print_debug(args, message):
+    if args and type(args) == argparse.Namespace and args.debug and not args.quiet:
         try:
             console.print(f"[blue][DEBUG][/blue] {str(message)}")
         except Exception as e:
             pass
 
-def print_error(message):
+def print_error(args, message):
     if not args.quiet:
         console.print(f"[bold red]❌ {message}")
 
-def print_success(message):
+def print_success(args, message):
     if not args.quiet:
         console.print(f"[bold green]✅ {message}")
 
@@ -118,53 +109,57 @@ def RedactData(input_string):
 
     return redacted_string
 
-def get_connection():
+def get_connection(args):
     if args.connection:
         if os.path.exists(args.connection):
             with open(args.connection, 'r') as file:
                 connections = yaml.safe_load(file)
                 return connections
         else:
-            print_error(f"Connection file not found: {args.connection}")
+            print_error(args, f"Connection file not found: {args.connection}")
             exit(1)
     elif args.connection_json:
         try:
             connections = json.loads(args.connection_json)
             return connections
         except json.JSONDecodeError as e:
-            print_error(f"Error parsing JSON: {e}")
+            print_error(args, f"Error parsing JSON: {e}")
             exit(1)
     else:
-        print_error("Please provide a connection file using --connection flag or connection details using --connection-json flag")
+        print_error(args, "Please provide a connection file using --connection flag or connection details using --connection-json flag")
         exit(1)
 
-def get_fingerprint_file():
-    if args.fingerprint:
+def get_fingerprint_file(args=None):
+    if args and type(args) == argparse.Namespace and args.fingerprint:
         if os.path.exists(args.fingerprint):
             with open(args.fingerprint, 'r') as file:
                 return yaml.safe_load(file)
         else:
-            print_error(f"Fingerprint file not found: {args.fingerprint}")
+            if args:
+                print_error(args, f"Fingerprint file not found: {args.fingerprint}")
             exit(1)
+    elif args and type(args) == dict and 'fingerprint' in args:
+        return args['fingerprint']
     else:
         file_path = "https://github.com/rohitcoder/hawk-eye/raw/main/fingerprint.yml"
         try:
             response = requests.get(file_path, timeout=10)
-            print_info(f"Downloading default fingerprint.yml from {file_path}")
+            if args:
+                print_info(args, f"Downloading default fingerprint.yml from {file_path}")
             if response.status_code == 200:
                 with open('fingerprint.yml', 'wb') as file:
                     file.write(response.content)
                 return yaml.safe_load(response.content)
             else:
-                print_error(f"Unable to download default fingerprint.yml please provide your own fingerprint file using --fingerprint flag")
+                if args:
+                    print_error(args, f"Unable to download default fingerprint.yml please provide your own fingerprint file using --fingerprint flag")
                 exit(1)
         except Exception as e:
-            print_error(f"Unable to download default fingerprint.yml please provide your own fingerprint file using --fingerprint flag")
+            if args:
+                print_error(args, f"Unable to download default fingerprint.yml please provide your own fingerprint file using --fingerprint flag")
             exit(1)
 
-patterns = get_fingerprint_file()
-
-def print_banner():
+def print_banner(args):
     banner = r"""
                                 /T /I
                                 / |/ | .-~/
@@ -199,37 +194,42 @@ def print_banner():
                 (_/  /   | | j-"             ~^~^
                     ~-<_(_.^-~"
     """
+    if args.quiet:
+        args.shutup = True
     if not args.shutup:
         console.print(banner)
 
-connections = get_connection()
-
-def match_strings(content, source='text'):
+def match_strings(args, content, source='text'):
+    redacted = False
+    if args and 'connection' in args:
+        connections = get_connection(args)
+        if 'notify' in connections:
+            redacted: bool = connections.get('notify', {}).get('redacted', False)
+    
+    patterns = get_fingerprint_file(args)
     matched_strings = []
 
-    if 'notify' in connections:
-        redacted: bool = connections.get('notify', {}).get('redacted', False)
-    else:
-        redacted = False
-        
     for pattern_name, pattern_regex in patterns.items():
-        print_debug(f"Matching pattern: {pattern_name}")
+        if args:
+            print_debug(args, f"Matching pattern: {pattern_name}")
         found = {} 
         ## parse pattern_regex as Regex
         complied_regex = re.compile(pattern_regex, re.IGNORECASE)
-        print_debug(f"Regex: {complied_regex}")
-        print_debug(f"Content: {content}")
+        if args:
+            print_debug(args, f"Regex: {complied_regex}")
+            print_debug(args, f"Content: {content}")
         matches = re.findall(complied_regex, content)
-        print_debug(f"Matches: {matches}")
+        print_debug(args, f"Matches: {matches}")
         found['data_source'] = source
         if matches:
-            print_debug(f"Found {len(matches)} matches for pattern: {pattern_name}")
+            print_debug(args, f"Found {len(matches)} matches for pattern: {pattern_name}")
             found['pattern_name'] = pattern_name
             redacted_matches = []
             if redacted:
-                print_debug(f"Redacting matches for pattern: {pattern_name}")
+                if args:
+                    print_debug(args, f"Redacting matches for pattern: {pattern_name}")
                 for match in matches:
-                    print_debug(f"Redacting match: {match}")
+                    print_debug(args, f"Redacting match: {match}")
                     redacted_matches.append(RedactData(match))
                 found['matches'] = redacted_matches
             else:
@@ -241,18 +241,19 @@ def match_strings(content, source='text'):
                 found['sample_text'] = content[:50]
             
             matched_strings.append(found)
-    print_debug(f"Matched strings: {matched_strings}")
+    if args:
+        print_debug(args, f"Matched strings: {matched_strings}")
     return matched_strings
 
 def should_exclude_file(file_name, exclude_patterns):
     _, extension = os.path.splitext(file_name)
     if extension in exclude_patterns:
-        print_debug(f"Excluding file: {file_name} because of extension: {extension}")
+        print_debug(args, f"Excluding file: {file_name} because of extension: {extension}")
         return True
     
     for pattern in exclude_patterns:
         if pattern in file_name:
-            print_debug(f"Excluding file: {file_name} because of pattern: {pattern}")
+            print_debug(args, f"Excluding file: {file_name} because of pattern: {pattern}")
             return True
     return False
 
@@ -270,37 +271,40 @@ def list_all_files_iteratively(path, exclude_patterns):
             if not should_exclude_file(file, exclude_patterns):
                 yield os.path.join(root, file)
 
-def read_match_strings(file_path, source):
-    print_info(f"Scanning file: {file_path} for Source: {source}")
+def scan_file(file_path, args=None, source=None):
     content = ''
     is_archive = False
-    try:
-        # Check if the file is an image
-        if file_path.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.bmp')):
-            content = enhance_and_ocr(file_path)
-        # Check if the file is a PDF document
-        elif file_path.lower().endswith('.pdf'):
-            content = read_pdf(file_path)
-        # Check if the file is an office document (Word, Excel, PowerPoint)
-        elif file_path.lower().endswith(('.docx', '.xlsx', '.pptx')):
-            content = read_office_document(file_path)
-        # Check if the file is an archive (zip, rar, tar, tar.gz)
-        elif file_path.lower().endswith(('.zip', '.rar', '.tar', '.tar.gz')):
-            ## this is archive, so we need to extract it and find pii from it, and return matched_strings
-            matched_strings = find_pii_in_archive(file_path, source)
-            is_archive = True
-        else:
-            # For other file types, read content normally
-            with open(file_path, 'rb') as file:
-                # Attempt to decode using UTF-8, fallback to 'latin-1' if needed
-                content = file.read().decode('utf-8', errors='replace')
-    except Exception as e:
-        print_debug(f"Error in read_match_strings: {e}")
-        pass
-    
+    # Check if the file is an image
+    if file_path.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.bmp')):
+        content = enhance_and_ocr(file_path)
+    # Check if the file is a PDF document
+    elif file_path.lower().endswith('.pdf'):
+        content = read_pdf(file_path)
+    # Check if the file is an office document (Word, Excel, PowerPoint)
+    elif file_path.lower().endswith(('.docx', '.xlsx', '.pptx')):
+        content = read_office_document(file_path)
+    # Check if the file is an archive (zip, rar, tar, tar.gz)
+    elif file_path.lower().endswith(('.zip', '.rar', '.tar', '.tar.gz')):
+        ## this is archive, so we need to extract it and find pii from it, and return matched_strings
+        matched_strings = find_pii_in_archive(file_path, source)
+        is_archive = True
+    else:
+        # For other file types, read content normally
+        with open(file_path, 'rb') as file:
+            # Attempt to decode using UTF-8, fallback to 'latin-1' if needed
+            content = file.read().decode('utf-8', errors='replace')
+
     if not is_archive:
-        matched_strings = match_strings(content, source)
-        
+        matched_strings = match_strings(args, content, source)
+    return matched_strings
+
+def read_match_strings(args, file_path, source):
+    print_info(args, f"Scanning file: {file_path} for Source: {source}")
+    try:
+        matched_strings = scan_file(file_path, args, source)
+    except Exception as e:
+        print_debug(args, f"Error in read_match_strings: {e}")
+        matched_strings = []
     return matched_strings
 
 def read_pdf(file_path):
@@ -317,7 +321,7 @@ def read_pdf(file_path):
                     # Handle decoding errors by trying a different encoding
                     content += page.extract_text(encoding='latin-1')
     except Exception as e:
-        print_debug(f"Error in read_pdf: {e}")
+        print_debug(args, f"Error in read_pdf: {e}")
     return content
 
 
@@ -343,7 +347,7 @@ def read_office_document(file_path):
             # You can add specific logic for PowerPoint if needed
             pass
     except Exception as e:
-        print_debug(f"Error in read_office_document: {e}")
+        print_debug(args, f"Error in read_office_document: {e}")
     return content
 
 def find_pii_in_archive(file_path, source):
@@ -365,7 +369,7 @@ def find_pii_in_archive(file_path, source):
         for root, dirs, files in os.walk(tmp_dir):
             for file in files:
                 file_path = os.path.join(root, file)
-                data = read_match_strings(file_path, source)
+                data = read_match_strings(args, file_path, source)
                 for d in data:
                     content.append(d)
         # Clean up the temporary directory
@@ -399,7 +403,10 @@ def getFileData(file_path):
         return json.dumps({"error": str(e)})
 
 
-def SlackNotify(msg):
+def SlackNotify(msg, args):
+    connections = get_connection(args)
+    if not args.no_write:
+        db = TinyDB('previous_alerts.json')
     if 'notify' in connections:
         notify_config = connections['notify']
         # Check if suppress_duplicates is set to True
@@ -412,7 +419,7 @@ def SlackNotify(msg):
             # Check if the message hash already exists in the previous alerts database
             Alert = Query()
             if db.contains(Alert.msg_hash == msg_hash):
-                print_debug("Duplicate message detected. Skipping webhook trigger.")
+                print_info(args, "Duplicate message detected. Skipping webhook trigger.")
                 return
         
         slack_config = notify_config.get('slack', {})
@@ -429,7 +436,7 @@ def SlackNotify(msg):
                     # Store the message hash in the previous alerts database
                     db.insert({'msg_hash': msg_hash})
             except Exception as e:
-                print_error(f"An error occurred: {str(e)}")
+                print_error(args, f"An error occurred: {str(e)}")
 
 def enhance_and_ocr(image_path):
     # Load the image

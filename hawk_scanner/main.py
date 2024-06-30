@@ -16,10 +16,8 @@ def clear_screen():
 
 
 clear_screen()
-system.print_banner()
 
 console = Console()
-args = system.args
 def load_command_module(command):
     try:
         module = importlib.import_module(f"hawk_scanner.commands.{command}")
@@ -39,6 +37,8 @@ def execute_command(command, args):
 
 
 def main():
+    args = system.parse_args()
+    system.print_banner(args)
     results = []
     if args.command:
         if args.command == 'all':
@@ -49,8 +49,8 @@ def main():
         else:
             for data in execute_command(args.command, args):
                 results.append(data)
-    else:
-        system.print_error("Please provide a command to execute")
+    else: 
+        system.print_error(args, "Please provide a command to execute")
 
     ## GROUP results in grouped_results by datasource by key val
     grouped_results = {}
@@ -71,7 +71,7 @@ def main():
                 file.write(json.dumps(grouped_results, indent=4))
         else:
             print(json.dumps(grouped_results, indent=4))
-        system.print_success(f"Results saved to {args.json}")
+        system.print_success(args, f"Results saved to {args.json}")
         sys.exit(0)
     
     if args.stdout:
@@ -141,7 +141,7 @@ def main():
                     exposed_values=records_mini
                 )
                 
-                system.SlackNotify(AlertMsg)
+                system.SlackNotify(AlertMsg, args)
                 
             elif group == 'mysql':
                 table.add_row(
@@ -176,7 +176,7 @@ def main():
                     exposed_values=records_mini
                 )
                 
-                system.SlackNotify(AlertMsg)
+                system.SlackNotify(AlertMsg, args)
            
             elif group == 'mongodb':
                 table.add_row(
@@ -211,7 +211,7 @@ def main():
                     exposed_values=records_mini
                 )
 
-                system.SlackNotify(AlertMsg)
+                system.SlackNotify(AlertMsg, args)
             elif group == 'slack':
                 table.add_row(
                     str(i),
@@ -239,7 +239,7 @@ def main():
                     exposed_values=records_mini
                 )
                 
-                system.SlackNotify(AlertMsg)
+                system.SlackNotify(AlertMsg, args)
             elif group == 'postgresql':
                 table.add_row(
                     str(i),
@@ -273,7 +273,7 @@ def main():
                     exposed_values=records_mini
                 )
 
-                system.SlackNotify(AlertMsg)
+                system.SlackNotify(AlertMsg, args)
 
             elif group == 'redis':
                 table.add_row(
@@ -302,7 +302,7 @@ def main():
                     exposed_values=records_mini
                 )
                 
-                system.SlackNotify(AlertMsg)
+                system.SlackNotify(AlertMsg, args)
             elif group == 'firebase' or group == 'gcs':
                 table.add_row(
                     str(i),
@@ -332,7 +332,7 @@ def main():
                     exposed_values=records_mini
                 )
                 
-                system.SlackNotify(AlertMsg)
+                system.SlackNotify(AlertMsg, args)
                 
             elif group == 'fs':
                 table.add_row(
@@ -364,7 +364,7 @@ def main():
                     total_exposed=str(len(result['matches'])),
                     exposed_values=records_mini
                 )
-                system.SlackNotify(AlertMsg)
+                system.SlackNotify(AlertMsg, args)
             elif group == 'couchdb':
                 table.add_row(
                     str(i),
@@ -396,7 +396,7 @@ def main():
                     exposed_values=records_mini
                 )
                 
-                system.SlackNotify(AlertMsg)
+                system.SlackNotify(AlertMsg, args)
             elif group == 'gdrive':
                 table.add_row(
                     str(i),
@@ -422,7 +422,7 @@ def main():
                     exposed_values=records_mini
                 )
                 
-                system.SlackNotify(AlertMsg)
+                system.SlackNotify(AlertMsg, args)
             elif group == 'gdrive_workspace':
                 table.add_row(
                     str(i),
@@ -451,7 +451,7 @@ def main():
                     exposed_values=records_mini
                 )
                 
-                system.SlackNotify(AlertMsg)
+                system.SlackNotify(AlertMsg, args)
             elif group == 'text':
                 table.add_row(
                     str(i),
@@ -474,7 +474,7 @@ def main():
                     exposed_values=records_mini
                 )
                 
-                system.SlackNotify(AlertMsg)
+                system.SlackNotify(AlertMsg, args)
             else:
                 # Handle other cases or do nothing for unsupported groups
                 pass

@@ -40,14 +40,32 @@ See how this works on Youtube - https://youtu.be/LuPXE7UJKOY
    ```
 
 
-### Example working command (Use all/fs/s3/gcs etc...)
+### Examples
+1. Example working command (Use all/fs/s3/gcs etc...)
    ```bash
       hawk_scanner all --connection connection.yml --fingerprint fingerprint.yml --json output.json --debug
    ```
-
-### Pass connection data as CLI input in --connection-json flag, and output in json data (Helpful for CI/CD pipeline or automation)
+2. Pass connection data as CLI input in --connection-json flag, and output in json data (Helpful for CI/CD pipeline or automation)
    ```bash
      hawk_scanner fs --connection-json '{"sources": {"fs": {"fs1": {"quick_scan": true, "path": "/Users/rohitcoder/Downloads/data/KYC_PDF.pdf"}}}}' --stdout --quiet --fingerprint fingerprint.yml
+   ```
+
+3. You can also import Hawk-eye in your own python scripts and workflows, for better flexibility
+   ```python
+      from hawk_scanner.internals import system
+      pii = system.scan_file("/Users/kumarohit/Downloads/Resume.pdf")
+      print(pii)
+   ```
+
+4. You can also import Hawk-eye with custom fingerprints in your own python scripts like this
+```python
+   from hawk_scanner.internals import system
+   pii = system.scan_file("/Users/kumarohit/Downloads/Resume.pdf", {
+       "fingerprint": {
+         "Email": '[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}',
+      }
+   )
+   print(pii)
    ```
 
 ## Platform and arch-specific guidelines

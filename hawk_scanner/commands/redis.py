@@ -10,12 +10,12 @@ def connect_redis(host, port, password=None):
     try:
         r = redis.Redis(host=host, port=port, password=password)
         if r.ping():
-            system.print_info(f"Redis instance at {host}:{port} is accessible")
+            system.print_info(args, f"Redis instance at {host}:{port} is accessible")
             return r
         else:
-            system.print_error(f"Redis instance at {host}:{port} is not accessible")
+            system.print_error(args, f"Redis instance at {host}:{port} is not accessible")
     except Exception as e:
-        system.print_error(f"Redis instance at {host}:{port} is not accessible with error: {e}")
+        system.print_error(args, f"Redis instance at {host}:{port} is not accessible with error: {e}")
 
 def get_patterns_from_file(file_path):
     with open(file_path, 'r', encoding='utf-8') as file:
@@ -30,7 +30,7 @@ def check_data_patterns(redis_instance, patterns, profile_name, host):
         data = redis_instance.get(key)
         if data:
             data_str = data.decode('utf-8')
-            matches = system.match_strings(data_str)
+            matches = system.match_strings(args, data_str)
             if matches:
                 for match in matches:
                     results.append({
@@ -46,14 +46,14 @@ def check_data_patterns(redis_instance, patterns, profile_name, host):
 
 def execute(args):
     results = []
-    connections = system.get_connection()
+    connections = system.get_connection(args)
 
     if 'sources' in connections:
         sources_config = connections['sources']
         redis_config = sources_config.get('redis')
 
         if redis_config:
-            patterns = system.get_fingerprint_file()
+            patterns = system.get_fingerprint_file(args)
 
             for profile_name, config in redis_config.items():
                 host = config.get('host')
@@ -66,9 +66,9 @@ def execute(args):
                         results = check_data_patterns(redis_instance, patterns, profile_name, host)
                         redis_instance.close()
                 else:
-                    system.print_error(f"Incomplete Redis configuration for key: {profile_name}")
+                    system.print_error(args, f"Incomplete Redis configuration for key: {profile_name}")
         else:
-            system.print_error("No Redis connection details found in connection.yml")
+            system.print_error(args, "No Redis connection details found in connection.yml")
     else:
-        system.print_error("No 'sources' section found in connection.yml")
+        system.print_error(args, "No 'sources' section found in connection.yml")
     return results
