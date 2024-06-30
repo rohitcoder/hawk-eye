@@ -39,7 +39,11 @@ def execute(args):
                 
                 exclude_patterns = fs_config.get(key, {}).get('exclude_patterns', [])
                 start_time = time.time()
-                files = system.list_all_files_iteratively(path, exclude_patterns)
+                ## CHECK If file or directory
+                if os.path.isfile(path):
+                    files = [path]
+                else:
+                    files = system.list_all_files_iteratively(path, exclude_patterns)
                 
                 # Use ThreadPoolExecutor for parallel processing
                 file_count = 0

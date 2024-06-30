@@ -40,9 +40,14 @@ See how this works on Youtube - https://youtu.be/LuPXE7UJKOY
    ```
 
 
-## Example working command (Use all/fs/s3/gcs etc...)
+### Example working command (Use all/fs/s3/gcs etc...)
    ```bash
       hawk_scanner all --connection connection.yml --fingerprint fingerprint.yml --json output.json --debug
+   ```
+
+### Pass connection data as CLI input in --connection-json flag, and output in json data (Helpful for CI/CD pipeline or automation)
+   ```bash
+     hawk_scanner fs --connection-json '{"sources": {"fs": {"fs1": {"quick_scan": true, "path": "/Users/rohitcoder/Downloads/data/KYC_PDF.pdf"}}}}' --stdout --quiet --fingerprint fingerprint.yml
    ```
 
 ## Platform and arch-specific guidelines
@@ -183,6 +188,10 @@ Note: If you don't provide any command, it will run all commands (firebase, fs, 
       <tr>
          <td>--connection</td>
          <td>Provide a connection YAML local file path like --connection connection.yml, this file will contain all creds and configs for different sources and other configurations.</td>
+      </tr>
+      <tr>
+         <td>--connection-json</td>
+         <td>Provide a connection json as CLI Input, helpful when you want to run this tool in CI/CD pipeline or automation.</td>
       </tr>
       <tr>
          <td>--fingerprint</td>

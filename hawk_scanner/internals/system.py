@@ -19,9 +19,10 @@ data_sources_option = ['all'] + data_sources
 parser = argparse.ArgumentParser(description='🦅 A powerful scanner to scan your Filesystem, S3, MySQL, PostgreSQL, MongoDB, Redis, Google Cloud Storage and Firebase storage for PII and sensitive data.')
 parser.add_argument('command', nargs='?', choices=data_sources_option, help='Command to execute')
 parser.add_argument('--connection', action='store', help='YAML Connection file path')
+parser.add_argument('--connection-json', type=str, help='Connection details in JSON format, useful for passing connection info directly as CLI Input')
 parser.add_argument('--fingerprint', action='store', help='Override YAML fingerprint file path')
-parser.add_argument('--json', help='Save output to json file')
-parser.add_argument('--stdout', action='store_true', help='Print output to stdout')
+parser.add_argument('--json', help='Save output to a json file')
+parser.add_argument('--stdout', action='store_true', help='Print output to stdout in JSON format')
 parser.add_argument('--quiet', action='store_true', help='Print only the results')
 parser.add_argument('--debug', action='store_true', help='Enable debug mode')
 parser.add_argument('--no-write', action='store_true', help='Do not write previous alerts to file, this may flood you with duplicate alerts')
@@ -126,8 +127,15 @@ def get_connection():
         else:
             print_error(f"Connection file not found: {args.connection}")
             exit(1)
+    elif args.connection_json:
+        try:
+            connections = json.loads(args.connection_json)
+            return connections
+        except json.JSONDecodeError as e:
+            print_error(f"Error parsing JSON: {e}")
+            exit(1)
     else:
-        print_error(f"Please provide a connection file using --connection flag")
+        print_error("Please provide a connection file using --connection flag or connection details using --connection-json flag")
         exit(1)
 
 def get_fingerprint_file():
