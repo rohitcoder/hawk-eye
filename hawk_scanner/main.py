@@ -481,6 +481,12 @@ def main():
                 
             i += 1
         console.print(table)
+    
+    if args.hawk_thuu:
+        console.print("Hawk thuuu, Spitting on that thang!....")
+        os.system("rm -rf data/*")
+        time.sleep(2)
+        console.print("Cleaned hawk data! 🧹")
 
 
 if __name__ == '__main__':
