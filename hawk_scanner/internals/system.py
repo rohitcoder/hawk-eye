@@ -12,11 +12,13 @@ import tempfile
 import shutil
 import os, cv2
 import tarfile
+import pkg_resources
 
 data_sources = ['s3', 'mysql', 'redis', 'firebase', 'gcs', 'fs', 'postgresql', 'mongodb', 'slack', 'couchdb', 'gdrive', 'gdrive_workspace', 'text']
 data_sources_option = ['all'] + data_sources
 
 def parse_args(args=None):
+    version = pkg_resources.require("hawk_scanner")[0].version 
     parser = argparse.ArgumentParser(description='🦅 A powerful scanner to scan your Filesystem, S3, MySQL, PostgreSQL, MongoDB, Redis, Google Cloud Storage and Firebase storage for PII and sensitive data.')
     parser.add_argument('command', nargs='?', choices=data_sources_option, help='Command to execute')
     parser.add_argument('--connection', action='store', help='YAML Connection file path')
@@ -28,6 +30,7 @@ def parse_args(args=None):
     parser.add_argument('--debug', action='store_true', help='Enable debug mode')
     parser.add_argument('--no-write', action='store_true', help='Do not write previous alerts to file, this may flood you with duplicate alerts')
     parser.add_argument('--shutup', action='store_true', help='Suppress the Hawk Eye banner 🫣', default=False)
+    parser.add_argument('--version', action='version', version='%(prog)s v' + version) 
     parser.add_argument('--hawk-thuu', action='store_true', help="Delete all spitted files during testing phase forcefully")
     return parser.parse_args(args)
     
