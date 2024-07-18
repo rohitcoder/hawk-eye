@@ -4,7 +4,7 @@ from rich.console import Console
 
 console = Console()
 
-def connect_mysql(host, port, user, password, database):
+def connect_mysql(args, host, port, user, password, database):
     try:
         conn = pymysql.connect(
             host=host,
@@ -19,7 +19,7 @@ def connect_mysql(host, port, user, password, database):
     except Exception as e:
         system.print_error(args, f"Failed to connect to MySQL database at {host} with error: {e}")
 
-def check_data_patterns(conn, patterns, profile_name, database_name, limit_start=0, limit_end=500, whitelisted_tables=None):
+def check_data_patterns(args, conn, patterns, profile_name, database_name, limit_start=0, limit_end=500, whitelisted_tables=None, exclude_columns=None):
     cursor = conn.cursor()
     
     # Get the list of tables to scan
@@ -40,6 +40,8 @@ def check_data_patterns(conn, patterns, profile_name, database_name, limit_start
         data_count = 1
         for row in cursor.fetchall():
             for column, value in zip(columns, row):
+                if exclude_columns and column in exclude_columns:
+                    continue
                 if value:
                     value_str = str(value)
                     matches = system.match_strings(args, value_str)
@@ -84,12 +86,13 @@ def execute(args):
                 limit_start = config.get('limit_start', 0)
                 limit_end = config.get('limit_end', 500)
                 tables = config.get('tables', [])
+                exclude_columns = config.get('exclude_columns', [])
 
                 if host and user and database:
                     system.print_info(args, f"Checking MySQL Profile {key} and database {database}")
-                    conn = connect_mysql(host, port, user, password, database)
+                    conn = connect_mysql(args, host, port, user, password, database)
                     if conn:
-                        results += check_data_patterns(conn, patterns, key, database, limit_start=limit_start, limit_end=limit_end, whitelisted_tables=tables)
+                        results += check_data_patterns(args, conn, patterns, key, database, limit_start=limit_start, limit_end=limit_end, whitelisted_tables=tables, exclude_columns=exclude_columns)
                         conn.close()
                 else:
                     system.print_error(args, f"Incomplete MySQL configuration for key: {key}")

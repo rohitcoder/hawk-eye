@@ -3,7 +3,7 @@ from rich.console import Console
 
 console = Console()
 
-def check_data_patterns(value, patterns, profile_name):
+def check_data_patterns(args, value, patterns, profile_name):
     value_str = str(value)
     matches = system.match_strings(args, value_str)
     results = []
@@ -30,7 +30,7 @@ def execute(args):
         if text_config:
             for key, config in text_config.items():
                 text = config.get('text', None)
-                results += check_data_patterns(text, patterns, key)
+                results += check_data_patterns(args, text, patterns, key)
         else:
             system.print_error(args, "No text connection details found in connection.yml")
     else:

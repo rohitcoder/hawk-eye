@@ -4,7 +4,7 @@ from rich.console import Console
 
 console = Console()
 
-def connect_mongodb(host, port, username, password, database, uri=None):
+def connect_mongodb(args, host, port, username, password, database, uri=None):
     try:
         if uri:
             client = pymongo.MongoClient(uri)
@@ -23,7 +23,7 @@ def connect_mongodb(host, port, username, password, database, uri=None):
         return None
 
 
-def check_data_patterns(db, patterns, profile_name, database_name, limit_start=0, limit_end=500, whitelisted_collections=None):
+def check_data_patterns(args, db, patterns, profile_name, database_name, limit_start=0, limit_end=500, whitelisted_collections=None):
     results = []
     all_collections = db.list_collection_names()
 
@@ -34,7 +34,7 @@ def check_data_patterns(db, patterns, profile_name, database_name, limit_start=0
 
     for collection_name in collections_to_scan:
         if collection_name not in all_collections:
-            system.print_warning(f"Collection {collection_name} not found in the database. Skipping.")
+            system.print_error(args, f"Collection {collection_name} not found in the database. Skipping.")
             continue
 
         collection = db[collection_name]
@@ -92,7 +92,7 @@ def execute(args):
 
                 db = connect_mongodb(host, port, username, password, database, uri)
                 if db:
-                    results += check_data_patterns(db, patterns, key, database, limit_start=limit_start, limit_end=limit_end, whitelisted_collections=collections)
+                    results += check_data_patterns(args, db, patterns, key, database, limit_start=limit_start, limit_end=limit_end, whitelisted_collections=collections)
         else:
             system.print_error(args, "No MongoDB connection details found in connection.yml")
     else:

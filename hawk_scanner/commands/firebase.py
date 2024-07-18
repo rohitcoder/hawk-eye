@@ -5,7 +5,7 @@ from rich.console import Console
 from hawk_scanner.internals import system
 import os
 
-def connect_firebase(credentials_file, bucket_name):
+def connect_firebase(args, credentials_file, bucket_name):
     try:
         cred = credentials.Certificate(credentials_file)
         firebase_admin.initialize_app(cred)
@@ -31,7 +31,7 @@ def execute(args):
                 exclude_patterns = config.get(key, {}).get('exclude_patterns', [])
 
                 if credentials_file and bucket_name:
-                    bucket = connect_firebase(credentials_file, bucket_name)
+                    bucket = connect_firebase(args, credentials_file, bucket_name)
                     if bucket:
                         for blob in bucket.list_blobs():
                             file_name = blob.name

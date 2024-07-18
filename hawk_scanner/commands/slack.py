@@ -6,7 +6,7 @@ from rich.console import Console
 
 console = Console()
 
-def connect_slack(token):
+def connect_slack(args, token):
     try:
         client = WebClient(token=token)
         # Test the connection by making an API call
@@ -21,7 +21,7 @@ def connect_slack(token):
         system.print_error(args, f"Failed to connect to Slack with error: {e.response['error']}")
         return None
 
-def check_slack_messages(client, patterns, profile_name, channel_types, channel_names=None):
+def check_slack_messages(args, client, patterns, profile_name, channel_types, channel_names=None):
     results = []
     try:
         team_info = client.team_info()
@@ -90,9 +90,9 @@ def execute(args):
                     system.print_error(args, f"Incomplete Slack configuration for key: {key}")
                     continue
 
-                client = connect_slack(token)
+                client = connect_slack(args, token)
                 if client:
-                    results += check_slack_messages(client, patterns, key, channel_types, channel_names)
+                    results += check_slack_messages(args, client, patterns, key, channel_types, channel_names)
         else:
             system.print_error(args, "No Slack connection details found in connection.yml")
     else:

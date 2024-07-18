@@ -7,7 +7,7 @@ import re
 import time
 import yaml
 
-def connect_google_cloud(bucket_name, credentials_file):
+def connect_google_cloud(args, bucket_name, credentials_file):
     try:
         ## connect using credentials file
         os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = credentials_file
@@ -38,7 +38,7 @@ def execute(args):
                 credentials_file = config.get('credentials_file')
 
                 if bucket_name:
-                    bucket = connect_google_cloud(bucket_name, credentials_file)
+                    bucket = connect_google_cloud(args, bucket_name, credentials_file)
                     if bucket:
                         for blob in bucket.list_blobs():
                             file_name = blob.name

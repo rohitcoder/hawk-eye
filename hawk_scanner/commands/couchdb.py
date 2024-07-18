@@ -5,7 +5,7 @@ from rich.table import Table
 
 console = Console()
 
-def connect_couchdb(host, port, username, password, database):
+def connect_couchdb(args, host, port, username, password, database):
     try:
         server = couchdb.Server(f"http://{username}:{password}@{host}:{port}/")
         if database not in server:
@@ -67,7 +67,7 @@ def execute(args):
                     system.print_error(args, f"Incomplete CouchDB configuration for key: {key}")
                     continue
 
-                db = connect_couchdb(host, port, username, password, database)
+                db = connect_couchdb(args, host, port, username, password, database)
                 if db:
                     results += check_data_patterns(db, patterns, key, database)
         else:

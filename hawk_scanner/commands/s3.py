@@ -7,7 +7,7 @@ from rich.console import Console
 
 console = Console()
 
-def connect_s3(access_key, secret_key, bucket_name):
+def connect_s3(args, access_key, secret_key, bucket_name):
     try:
         session = boto3.Session(
             aws_access_key_id=access_key,
@@ -50,7 +50,7 @@ def execute(args):
                 system.print_info(args, f"Checking S3 profile: '{key}' with bucket '{bucket_name}'")
                 profile_name = key
                 if access_key and secret_key and bucket_name:
-                    bucket = connect_s3(access_key, secret_key, bucket_name)
+                    bucket = connect_s3(args, access_key, secret_key, bucket_name)
                     if bucket:
 
                         for obj in bucket.objects.all():

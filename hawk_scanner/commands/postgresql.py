@@ -4,7 +4,7 @@ from rich.console import Console
 
 console = Console()
 
-def connect_postgresql(host, port, user, password, database):
+def connect_postgresql(args, host, port, user, password, database):
     try:
         conn = psycopg2.connect(
             host=host,
@@ -19,7 +19,7 @@ def connect_postgresql(host, port, user, password, database):
     except Exception as e:
         system.print_error(args, f"Failed to connect to PostgreSQL database at {host} with error: {e}")
 
-def check_data_patterns(conn, patterns, profile_name, database_name, limit_start=0, limit_end=500, whitelisted_tables=None):
+def check_data_patterns(args, conn, patterns, profile_name, database_name, limit_start=0, limit_end=500, whitelisted_tables=None):
     cursor = conn.cursor()
     
     # Get the list of tables to scan
@@ -35,7 +35,7 @@ def check_data_patterns(conn, patterns, profile_name, database_name, limit_start
     results = []
     for table in tables_to_scan:
         if table not in all_tables:
-            system.print_warning(f"Table {table} not found in the database. Skipping.")
+            system.print_error(args, f"Table {table} not found in the database. Skipping.")
             continue
 
         cursor.execute(f"SELECT * FROM {table} LIMIT {limit_end} OFFSET {limit_start}")
@@ -92,9 +92,9 @@ def execute(args):
 
                 if host and user and password and database:
                     system.print_info(args, f"Checking PostgreSQL Profile {key}, database {database}")
-                    conn = connect_postgresql(host, port, user, password, database)
+                    conn = connect_postgresql(args, host, port, user, password, database)
                     if conn:
-                        results += check_data_patterns(conn, patterns, key, database, limit_start=limit_start, limit_end=limit_end, whitelisted_tables=tables)
+                        results += check_data_patterns(args, conn, patterns, key, database, limit_start=limit_start, limit_end=limit_end, whitelisted_tables=tables)
                         conn.close()
                 else:
                     system.print_error(args, f"Incomplete PostgreSQL configuration for key: {key}")

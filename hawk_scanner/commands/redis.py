@@ -6,7 +6,7 @@ from rich.console import Console
 
 console = Console()
 
-def connect_redis(host, port, password=None):
+def connect_redis(args, host, port, password=None):
     try:
         r = redis.Redis(host=host, port=port, password=password)
         if r.ping():
@@ -61,7 +61,7 @@ def execute(args):
                 password = config.get('password')
 
                 if host:
-                    redis_instance = connect_redis(host, port, password)
+                    redis_instance = connect_redis(args, host, port, password)
                     if redis_instance:
                         results = check_data_patterns(redis_instance, patterns, profile_name, host)
                         redis_instance.close()

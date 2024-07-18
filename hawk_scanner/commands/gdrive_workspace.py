@@ -22,7 +22,7 @@ def connect_google_drive(credentials_file, impersonate_user=None):
     except Exception as e:
         print(f"Failed to connect to Google Drive: {e}")
 
-def download_file(drive, file_obj, base_path):
+def download_file(args, drive, file_obj, base_path):
     print(f"Downloading file: {file_obj['name']} to {base_path}")
     try:
         file_name = file_obj['name']
@@ -47,7 +47,7 @@ def download_file(drive, file_obj, base_path):
                 os.makedirs(folder_path)
             folder_files = drive.files().list(q=f"'{file_id}' in parents").execute().get('files', [])
             for folder_file in folder_files:
-                download_file(drive, folder_file, folder_path)
+                download_file(args, drive, folder_file, folder_path)
         else:
             try:
                 # Check if the file is a Google Docs type
@@ -126,7 +126,7 @@ def execute(args):
                             is_cache_enabled = True
 
                         if is_cache_enabled:
-                            download_file(drive, file_obj, "data/google_drive/")
+                            download_file(args, drive, file_obj, "data/google_drive/")
 
                         matches = system.read_match_strings(args, file_path, 'gdrive_workspace')
                         file_name = file_name.replace('-runtime.pdf', '')
