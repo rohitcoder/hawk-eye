@@ -15,6 +15,7 @@ Pillow
 python-docx
 openpyxl
 PyPDF2
+setuptools
 patool
 pydrive2
 appdirs
