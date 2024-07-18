@@ -294,6 +294,9 @@ sources:
       tables:
         - table1
         - table2
+      exclude_columns:
+         - column1
+         - column2
   postgresql:
     postgresql_example:
       host: YOUR_POSTGRESQL_HOST
