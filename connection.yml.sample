@@ -43,6 +43,9 @@ sources:
       tables:
         - table1
         - table2
+      exclude_columns:
+        - column1
+        - column2
   text:
     profile1:
       text: "Hello World HHWPK6943Q"
