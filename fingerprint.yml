@@ -1,7 +1,7 @@
 Email: "\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}\\b"
 Phone Number: "^\\(\\+\\d{1,2}\\s\\)?\\(?\\d{3}\\)?[\\s.-]\\d{3}[\\s.-]\\d{4}$"
 Aadhar: "\\b\\d{4}[-.]?\\d{4}[-.]?\\d{4}\\b"
-PAN Number: "[A-Z]{5}[0-9]{4}[A-Z]{1}"
+PAN Number: "(?i)\b(?:panNumber:|PAN:|panNo=|pan:|<)?\s*[A-Z]{5}[0-9]{4}[A-Z]\s*(?:>)?\b"
 Amazon MWS Auth Token: "amzn\\.mws\\.[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
 Amazon SNS Topic Disclosure: "arn:aws:sns:[a-z0-9\\-]+:[0-9]+:[A-Za-z0-9\\-_]+"
 AWS Access Key ID Value: "(A3T[A-Z0-9]|AKIA|AGPA|AROA|AIPA|ANPA|ANVA|ASIA)[A-Z0-9]{16}"
