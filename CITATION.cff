@@ -1,0 +1,8 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below. Reminder to update the `version` and `date-released` as needed."
+title: "Hawk-Eye: Find PII & Secrets like never before across your entire infrastructure with same tool!"
+authors:
+  - given-names: "Rohit kumar"
+url: "https://github.com/rohitcoder/hawk-eye"
+version: 0.3.19
+date-released: 2024-07-18
