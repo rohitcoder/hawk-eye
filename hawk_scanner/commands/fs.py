@@ -43,7 +43,7 @@ def execute(args):
                 if os.path.isfile(path):
                     files = [path]
                 else:
-                    files = system.list_all_files_iteratively(path, exclude_patterns)
+                    files = system.list_all_files_iteratively(args, path, exclude_patterns)
                 
                 # Use ThreadPoolExecutor for parallel processing
                 file_count = 0

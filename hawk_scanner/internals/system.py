@@ -6,6 +6,7 @@ import pytesseract
 from PIL import Image, ImageEnhance
 from docx import Document
 from openpyxl import load_workbook
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import PyPDF2
 import patoolib
 import tempfile
@@ -13,6 +14,8 @@ import shutil
 import os, cv2
 import tarfile
 import pkg_resources
+from concurrent.futures import ProcessPoolExecutor
+
 
 data_sources = ['s3', 'mysql', 'redis', 'firebase', 'gcs', 'fs', 'postgresql', 'mongodb', 'slack', 'couchdb', 'gdrive', 'gdrive_workspace', 'text']
 data_sources_option = ['all'] + data_sources
@@ -245,13 +248,16 @@ def match_strings(args, content, source='text'):
                 found['sample_text'] = RedactData(content[:50])
             else:
                 found['sample_text'] = content[:50]
-            
+            if found['matches'] and len(found['matches']) > 0:
+                found['matches'] = [x.strip() for x in found['matches']]
+                found['matches'] = list(set(found['matches']))
             matched_strings.append(found)
     if args:
         print_debug(args, f"Matched strings: {matched_strings}")
+    ## remove duplicates from matches and return
     return matched_strings
 
-def should_exclude_file(file_name, exclude_patterns):
+def should_exclude_file(args, file_name, exclude_patterns):
     _, extension = os.path.splitext(file_name)
     if extension in exclude_patterns:
         print_debug(args, f"Excluding file: {file_name} because of extension: {extension}")
@@ -269,12 +275,12 @@ def should_exclude_folder(folder_name, exclude_patterns):
             return True
     return False
 
-def list_all_files_iteratively(path, exclude_patterns):
+def list_all_files_iteratively(args, path, exclude_patterns):
     for root, dirs, files in os.walk(path, topdown=True):
         dirs[:] = [d for d in dirs if not should_exclude_folder(os.path.join(root, d), exclude_patterns)]
 
         for file in files:
-            if not should_exclude_file(file, exclude_patterns):
+            if not should_exclude_file(args, file, exclude_patterns):
                 yield os.path.join(root, file)
 
 def scan_file(file_path, args=None, source=None):
@@ -285,14 +291,16 @@ def scan_file(file_path, args=None, source=None):
         content = enhance_and_ocr(file_path)
     # Check if the file is a PDF document
     elif file_path.lower().endswith('.pdf'):
-        content = read_pdf(file_path)
+        content = read_pdf(args, file_path)
     # Check if the file is an office document (Word, Excel, PowerPoint)
     elif file_path.lower().endswith(('.docx', '.xlsx', '.pptx')):
-        content = read_office_document(file_path)
+        content = read_office_document(args, file_path)
     # Check if the file is an archive (zip, rar, tar, tar.gz)
+    elif file_path.lower().endswith(('.mp4', '.avi', '.mov', '.mkv')):
+        content = read_video(args, file_path)
     elif file_path.lower().endswith(('.zip', '.rar', '.tar', '.tar.gz')):
         ## this is archive, so we need to extract it and find pii from it, and return matched_strings
-        matched_strings = find_pii_in_archive(file_path, source)
+        matched_strings = find_pii_in_archive(args, file_path, source)
         is_archive = True
     else:
         # For other file types, read content normally
@@ -313,7 +321,7 @@ def read_match_strings(args, file_path, source):
         matched_strings = []
     return matched_strings
 
-def read_pdf(file_path):
+def read_pdf(args, file_path):
     content = ''
     try:
         # Read content from PDF document
@@ -330,8 +338,96 @@ def read_pdf(file_path):
         print_debug(args, f"Error in read_pdf: {e}")
     return content
 
+def process_frame(frame, frame_num, args):
+    """
+    Process a single frame: convert it to grayscale and run OCR.
 
-def read_office_document(file_path):
+    :param frame: The video frame to process.
+    :param frame_num: The frame number (for debugging).
+    :param args: Arguments for debugging or additional settings.
+    :return: Extracted text from the frame.
+    """
+    try:
+        gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+        # Resize for faster OCR if resolution is not critical
+        small_frame = cv2.resize(gray_frame, (gray_frame.shape[1] // 2, gray_frame.shape[0] // 2))
+
+        # Apply thresholding (optional, improves OCR on some images)
+        _, thresh_frame = cv2.threshold(small_frame, 150, 255, cv2.THRESH_BINARY)
+
+        # Perform OCR with optimized configuration
+        custom_config = r'--oem 3'  # PSM 6 for uniform block of text
+        text = pytesseract.image_to_string(thresh_frame, config=custom_config)
+
+        if args.debug:
+            print(f"Processed frame {frame_num}")
+        
+        return text.strip()
+    except Exception as e:
+        if args.debug:
+            print(f"Error processing frame {frame_num}: {e}")
+        return ""
+
+def process_frames_parallel(frames, args):
+    with ProcessPoolExecutor(max_workers=4) as executor:  # Use multiple processes
+        futures = [executor.submit(process_frame, frame, i, args) for i, frame in enumerate(frames)]
+        return [future.result() for future in futures]
+
+def read_video(args, file_path, frame_interval=30, max_workers=10):
+    """
+    Extract text from a video file by applying OCR on its frames.
+
+    :param args: Arguments for debugging or additional settings.
+    :param file_path: Path to the video file.
+    :param frame_interval: Interval to capture frames (default is every 30 frames).
+    :param max_workers: Number of parallel workers (default is 4).
+    :return: Extracted text content from video frames.
+    """
+    content = ''
+    try:
+        # Open the video file
+        cap = cv2.VideoCapture(file_path)
+
+        if not cap.isOpened():
+            raise ValueError(f"Cannot open video file: {file_path}")
+
+        frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+        frame_rate = cap.get(cv2.CAP_PROP_FPS)
+        print_debug(args, f"Processing {frame_count} frames at {frame_rate} FPS")
+
+        futures = []
+        processed_frames = 0
+
+        # Create a ThreadPoolExecutor for parallel processing
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            for frame_num in range(frame_count):
+                ret, frame = cap.read()
+                if not ret:
+                    break
+
+                # Process only every `frame_interval`-th frame
+                if frame_num % frame_interval == 0:
+                    print_debug(args, f"Submitting frame {frame_num}/{frame_count} for processing")
+                    # Submit the frame to the thread pool for processing
+                    futures.append(executor.submit(process_frame, frame, frame_num, args))
+                    processed_frames += 1
+
+            # Wait for all submitted frames to complete and gather the results
+            for future in as_completed(futures):
+                text = future.result()
+                content += text + '\n'
+
+        cap.release()
+        print_debug(args, f"Processed {processed_frames} frames out of {frame_count}")
+
+    except Exception as e:
+        print_debug(args, f"Error in read_video: {e}")
+
+    return content
+
+
+def read_office_document(args, file_path):
     content = ''
     try:
         # Check the file type and read content accordingly
@@ -356,7 +452,7 @@ def read_office_document(file_path):
         print_debug(args, f"Error in read_office_document: {e}")
     return content
 
-def find_pii_in_archive(file_path, source):
+def find_pii_in_archive(args, file_path, source):
     content = []
     # Create a temporary directory to extract the contents of the archive
     with tempfile.TemporaryDirectory() as tmp_dir:

@@ -39,7 +39,7 @@ def execute(args):
                             remote_etag = blob.etag
                             system.print_debug(args, f"Remote etag: {remote_etag}")
 
-                            if system.should_exclude_file(file_name, exclude_patterns):
+                            if system.should_exclude_file(args, file_name, exclude_patterns):
                                 continue
 
                             file_path = f"data/firebase/{remote_etag}-{file_name}"

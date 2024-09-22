@@ -57,7 +57,7 @@ def execute(args):
                             remote_etag = obj.e_tag.replace('"', '')
                             system.print_debug(args, f"Remote etag: {remote_etag}")
                             file_name = obj.key
-                            if system.should_exclude_file(file_name, exclude_patterns):
+                            if system.should_exclude_file(args, file_name, exclude_patterns):
                                 continue
 
                             file_path = f"data/s3/{remote_etag}-{file_name}"

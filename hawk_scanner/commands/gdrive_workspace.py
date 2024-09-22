@@ -116,7 +116,7 @@ def execute(args):
 
                         file_path = os.path.join(folder_path, file_name)
 
-                        if system.should_exclude_file(file_name, exclude_patterns):
+                        if system.should_exclude_file(args, file_name, exclude_patterns):
                             continue
 
                         if config.get("cache") and os.path.exists(file_path):
