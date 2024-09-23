@@ -8,7 +8,7 @@ firebase-admin
 slack-sdk
 google-cloud-core
 google-cloud-storage
-pymongo==3.13.0
+pymongo==4.6.3
 tinydb==4.8.0
 pytesseract
 Pillow
