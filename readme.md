@@ -24,6 +24,9 @@ HAWK Eye is a powerful and versatile CLI (Command-Line Interface) tool designed 
 The name "HAWK Eye" captures the essence of a Highly Advanced Watchful Keeper. Like the keen vision of a hawk, this tool enables you to monitor and safeguard your data with precision and accuracy, ensuring data privacy and security.
 </div>
 
+## Commercial Support
+For commercial support and help with HAWK Eye, please contact us at [LinkedIn](https://linkedin.com/in/rohitcoder) or [Twitter](https://twitter.com/rohitcoder).
+
 ## HAWK Eye in Action
 
 See how this works on Youtube - https://youtu.be/LuPXE7UJKOY
