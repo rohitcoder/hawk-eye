@@ -12,16 +12,15 @@
 <img alt="Static Badge" src="https://img.shields.io/badge/Supports-On Prem-black?logo=amazonec2">
 </p>
 
-![HAWK Eye](assets/banner.png)
 <div id="description">
 
-### 🦅 HAWK Eye - Highly Advanced Watchful Keeper Eye
+### 🦅 HAWK Eye - Uncover Secrets and PII Across All Platforms in Minutes!
 
-HAWK Eye is a powerful and versatile CLI (Command-Line Interface) tool designed to be your vigilant watchkeeper, guarding against potential data breaches and cyber threats across various platforms. Inspired by the precision and vision of majestic birds of prey, HAWK Eye swiftly scans multiple data sources, including S3, MySQL, PostgreSQL, MongoDB, CouchDB, Google Drive, Slack, Redis, Firebase, filesystem, and Google Cloud buckets (GCS), for Personally Identifiable Information (PII) and secrets. It uses text analysis and OCR techniques to go throug most of the documents, database and different file types like  docx, xlsx, pptx, pdf, jpg, png, gif, zip, tar, rar, etc.
+HAWK Eye is a robust, command-line tool built to safeguard against data breaches and cyber threats. Much like the sharp vision of a hawk, it quickly scans multiple data sources—S3, MySQL, PostgreSQL, MongoDB, CouchDB, Google Drive, Slack, Redis, Firebase, file systems, and Google Cloud buckets (GCS)—for Personally Identifiable Information (PII) and secrets. Using advanced text analysis and OCR techniques, HAWK Eye delves into various document formats like docx, xlsx, pptx, pdf, images (jpg, png, gif), compressed files (zip, tar, rar), and even video files to ensure comprehensive protection across platforms.
 
 
 ### Why "HAWK Eye"?
-The name "HAWK Eye" captures the essence of a Highly Advanced Watchful Keeper. Like the keen vision of a hawk, this tool enables you to monitor and safeguard your data with precision and accuracy, ensuring data privacy and security.
+Like the keen vision of a hawk, this tool enables you to monitor and safeguard your data with precision and accuracy, ensuring data privacy and security.
 </div>
 
 ## Commercial Support
