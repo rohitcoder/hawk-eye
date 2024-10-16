@@ -9,7 +9,7 @@ slack-sdk
 google-cloud-core
 google-cloud-storage
 pymongo==4.6.3
-tinydb==4.8.0
+tinydb==4.8.2
 pytesseract
 Pillow
 python-docx
