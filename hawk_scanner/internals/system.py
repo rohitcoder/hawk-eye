@@ -2,6 +2,7 @@ from rich.console import Console
 from rich.table import Table
 import json, requests, argparse, yaml, re, datetime, os, subprocess, platform, hashlib
 from tinydb import TinyDB, Query
+import numpy as np
 import pytesseract
 from PIL import Image, ImageEnhance
 from docx import Document
