@@ -11,6 +11,10 @@ from rich.text import Text
 from collections import defaultdict
 from hawk_scanner.internals import system
 from rich import print
+import ssl
+
+# Disable SSL verification globally
+ssl._create_default_https_context = ssl._create_unverified_context
 
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
