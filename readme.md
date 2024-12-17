@@ -360,12 +360,12 @@ sources:
       text: "Hello World HHWPK6943Q"
   slack:
     slack_example:
-      token: xoxp-XXXXXXXXXXXXXXXXXXXXXXXXX # get your slack app these permissiosn https://api.slack.com/methods/team.info and https://api.slack.com/methods/conversations.list
       channel_types: "public_channel,private_channel"
-      # Optional: List of channel names to check
-      # channel_names:
-      #   - general
-      #   - random
+      token: xoxp-XXXXXXXXXXXXXXXXXXXXXXXXX
+      channel_types: "public_channel,private_channel"
+      limit_mins: 15 ## By default 60 mins
+      channel_ids:
+      - XXXXXXXX
 ```
 
 You can add or remove profiles from the connection.yml file as needed. You can also configure only one or two data sources if you don't need to scan all of them.
