@@ -357,7 +357,7 @@ sources:
         - .docx
   text:
     profile1:
-      text: "Hello World HHWPK6943Q"
+      text: "Hello World HHXXXXX"
   slack:
     slack_example:
       channel_types: "public_channel,private_channel"
