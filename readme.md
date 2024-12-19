@@ -41,8 +41,19 @@ See how this works on Youtube - https://youtu.be/LuPXE7UJKOY
       pip3 install hawk-scanner
    ```
 
+## How to use hawk-eye?
+### Using Docker hub (Fastest & Easiest approach)
+```
+docker run --rm \
+  --platform linux/amd64 \
+  -v /Users/kumarohit/Desktop/Projects/hawk-eye/connection.yml:/app/connection.yml \
+  -v /Users/kumarohit/Desktop/Projects/hawk-eye/fingerprint.yml:/app/fingerprint.yml \
+  rohitcoder/hawk-eye \
+  slack --connection /app/connection.yml --fingerprint /app/fingerprint.yml
+```
+Just mount connection.yml and fingerprint.yml file in the container and run the command you want to run.
 
-### Examples
+### Using hawk-eye binaries
 1. Example working command (Use all/fs/s3/gcs etc...)
    ```bash
       hawk_scanner all --connection connection.yml --fingerprint fingerprint.yml --json output.json --debug
