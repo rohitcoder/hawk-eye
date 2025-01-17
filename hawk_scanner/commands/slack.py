@@ -42,7 +42,7 @@ def check_slack_messages(args, client, patterns, profile_name, channel_types, ch
         # Get all channels of specified types
         channels = []
         if not channel_ids:
-            system.print_info("Getting all channels because no channel_ids provided")
+            system.print_info(args, "Getting all channels because no channel_ids provided")
             channels = client.conversations_list(types=channel_types)["channels"]
         else:
             system.print_info(args, "Getting channels by channel_ids")
