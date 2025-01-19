@@ -553,6 +553,8 @@ def enhance_and_ocr(image_path):
 
     # Perform OCR on the enhanced image
     ocr_text = perform_ocr(enhanced_image)
+    ## delete the enhanced image
+    os.remove("enhanced_image.png")
 
     return ocr_text
 
