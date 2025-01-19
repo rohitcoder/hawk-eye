@@ -1,4 +1,4 @@
-import time
+import time, os, requests
 from datetime import datetime
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
@@ -63,12 +63,31 @@ def check_slack_messages(args, client, patterns, profile_name, channel_types, ch
             # Get messages from the channel within the time range
             system.print_info(args, f"Checking messages in channel {channel_name} ({channel_id})")
             messages = client.conversations_history(channel=channel_id, oldest=oldest_time)["messages"]
-
             for message in messages:
                 user = message.get("user", "")
                 text = message.get("text")
                 message_ts = message.get("ts")
-
+                files = message.get("files", [])
+                for file in files:
+                    folder_path = f"data/slack/"
+                    file_addr = download_file(args, client, file, folder_path)
+                    if file_addr:
+                        system.print_debug(args, f"Checking file: {file_addr}")
+                        matches = system.read_match_strings(args, file_addr, 'slack')   
+                        if matches:
+                            for match in matches:
+                                results.append({
+                                    'channel_id': channel_id,
+                                    'channel_name': channel_name,
+                                    'user': user,
+                                    'pattern_name': match['pattern_name'],
+                                    'matches': list(set(match['matches'])),
+                                    'sample_text': match['sample_text'],
+                                    'profile': profile_name,
+                                    'message_link': workspace_url + f"/archives/{channel_id}/p{message_ts.replace('.', '')}",
+                                    'data_source': 'slack'
+                                })
+                
                 # Check main message for matches
                 if text:
                     matches = system.match_strings(args, text)
@@ -86,19 +105,35 @@ def check_slack_messages(args, client, patterns, profile_name, channel_types, ch
                                 'data_source': 'slack'
                             })
 
-                # Check for replies (threads)
                 if "thread_ts" in message:
                     thread_ts = message["thread_ts"]
-
-                    # Fetch replies for the thread
                     replies = client.conversations_replies(channel=channel_id, ts=thread_ts, oldest=oldest_time)["messages"]
-
-                    # Exclude parent message and check replies
                     for reply in replies:
                         if reply["ts"] != thread_ts:  # Skip the parent message
                             reply_user = reply.get("user", "")
                             reply_text = reply.get("text")
                             reply_ts = reply.get("ts")
+
+                            reply_files = reply.get("files", [])
+                            for file in reply_files:
+                                folder_path = f"data/slack/"
+                                file_addr = download_file(args, client, file, folder_path)
+                                if file_addr:
+                                    system.print_debug(args, f"Checking file: {file_addr}")
+                                    matches = system.read_match_strings(args, file_addr, 'slack')   
+                                    if matches:
+                                        for match in matches:
+                                            results.append({
+                                                'channel_id': channel_id,
+                                                'channel_name': channel_name,
+                                                'user': reply_user,
+                                                'pattern_name': match['pattern_name'],
+                                                'matches': list(set(match['matches'])),
+                                                'sample_text': match['sample_text'],
+                                                'profile': profile_name,
+                                                'message_link': workspace_url + f"/archives/{channel_id}/p{reply_ts.replace('.', '')}",
+                                                'data_source': 'slack'
+                                            })
 
                             if reply_text:
                                 reply_matches = system.match_strings(args, reply_text)
@@ -119,8 +154,45 @@ def check_slack_messages(args, client, patterns, profile_name, channel_types, ch
         return results
 
     except SlackApiError as e:
-        system.print_error(args, f"Failed to fetch messages from Slack with error: {e.response['error']}")
+        system.print_error(args, f"Failed to fetch messages from Slack with error: {e}")
         return results
+
+
+
+def download_file(args, client, file_info, folder_path) -> str:
+    try:
+        # Ensure the folder exists
+        os.makedirs(folder_path, exist_ok=True)
+
+        # Use the Slack client to get file info
+        file_url = file_info['url_private_download']
+        file_name = file_info['name']
+
+        # Create the full path to save the file
+        file_path = os.path.join(folder_path, file_name)
+
+        # Send a GET request to download the file
+        system.print_debug(args, f"Downloading file: {file_url}")
+        response = requests.get(file_url, headers={f'Authorization': f"Bearer {client.token}"})
+        if response.status_code == 200:
+            with open(file_path, 'wb') as f:
+                f.write(response.content)
+            return file_path
+        else:
+            # Log error if the status code is not 200
+            system.print_error(args, f"Failed to download file with status code: {response.status_code}")
+            return None
+
+    except SlackApiError as e:
+        # Handle Slack API-specific errors
+        system.print_error(args, f"Failed to download file with error: {e.response['error']}")
+        return None
+
+    except Exception as e:
+        # Handle any other exceptions
+        system.print_error(args, f"An unexpected error occurred: {str(e)}")
+        return None
+
 
 def execute(args):
     results = []
