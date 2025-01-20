@@ -373,7 +373,7 @@ sources:
     slack_example:
       channel_types: "public_channel,private_channel"
       token: xoxp-XXXXXXXXXXXXXXXXXXXXXXXXX
-      channel_types: "public_channel,private_channel"
+      archived_channels: True ## By default False, set to True if you want to scan archived channels also
       limit_mins: 15 ## By default 60 mins
       channel_ids:
       - XXXXXXXX
