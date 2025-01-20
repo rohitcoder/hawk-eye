@@ -1,11 +1,19 @@
-“Commons Clause” License Condition v1.1
-The Software is provided to you by the Licensor under the License, as defined below, subject to the following condition.
+"Commons Clause” License Condition v1.1"
+The Software is provided to you by the Licensor under the License, as defined below, subject to the following condition.  
 
-Without limiting other conditions in the License, the grant of rights under the License will not include, and the License does not grant to you, the right to Sell the Software or build a product on top of it for commercial gains.
+Without limiting other conditions in the License, the grant of rights under the License will not include, and the License does not grant to you, the right to Sell the Software or build a product on top of it for commercial gains without explicit written consent from the Licensor.  
 
-For purposes of the foregoing, “Sell” means practicing any or all of the rights granted to you under the License to provide to third parties, for a fee or other consideration (including without limitation fees for hosting or consulting/support services related to the Software), a product or service whose value derives, entirely or substantially, from the functionality of the Software.
+For purposes of the foregoing:  
+- "Sell" means practicing any or all of the rights granted to you under the License to provide to third parties, for a fee or other consideration (including without limitation fees for hosting or consulting/support services related to the Software), a product or service whose value derives, entirely or substantially, from the functionality of the Software.  
 
-You are, however, permitted to use the Software for your own organization or for individual use without commercial intent, provided that such use does not involve distributing, reselling, or commercializing a product or service based on the Software.
+You are, however, permitted to use the Software:  
+- For your own organization’s internal purposes or individual use without commercial intent.  
+- As part of paid engagements, audits, or other work performed for your clients, provided that such use does not involve distributing, reselling, or commercializing a product or service based on the Software.  
+
+However, you are not permitted to:  
+- Distribute, resell, or commercialize a product or service based on the Software, unless you obtain prior written consent from the Licensor.  
+- Act as a vendor selling a product derived from or built on top of the Software in any form, including but not limited to SaaS, on-premises, or embedded software models, without explicit authorization.  
+
 
 Any license notice or attribution required by the License must also include this Commons Clause License Condition notice.
 
