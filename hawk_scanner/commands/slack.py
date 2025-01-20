@@ -22,6 +22,7 @@ def connect_slack(args, token):
         system.print_error(args, f"Failed to connect to Slack with error: {e.response['error']}")
         return None
 
+
 def check_slack_messages(args, client, patterns, profile_name, channel_types, channel_ids=None, limit_mins=60, archived_channels=False):
     results = []
     try:
@@ -39,12 +40,26 @@ def check_slack_messages(args, client, patterns, profile_name, channel_types, ch
         system.print_info(args, f"Current Time: {current_time_readable}")
         system.print_info(args, f"Fetching messages from the last {limit_mins} minutes (Oldest Time: {oldest_time_readable}, Unix: {int(oldest_time)})")
 
+        # Helper function to handle rate limits
+        hawk_args = args
+        def rate_limit_retry(func, *args, **kwargs):
+            while True:
+                try:
+                    return func(*args, **kwargs)
+                except SlackApiError as e:
+                    if e.response["error"] == "ratelimited":
+                        retry_after = int(e.response.headers.get("Retry-After", 1))
+                        system.print_info(hawk_args, f"Rate limited. Retrying after {retry_after} seconds...")
+                        time.sleep(retry_after)
+                    else:
+                        raise
+
         # Get all channels of specified types
         channels = []
 
         if not channel_ids:
             system.print_info(args, "Getting all channels because no channel_ids provided")
-            
+
             # Pagination logic to fetch all non-archived channels
             cursor = None
             while True:
@@ -53,17 +68,19 @@ def check_slack_messages(args, client, patterns, profile_name, channel_types, ch
                         system.print_debug(args, f"Considering archived channels, you may want to set archived_channels to False")
                     else:
                         system.print_debug(args, f"Skipping archived channels, you may want to set archived_channels to True")
-                    response = client.conversations_list(
-                        types=channel_types, 
-                        limit=1000, 
-                        cursor=cursor, 
+
+                    response = rate_limit_retry(
+                        client.conversations_list,
+                        types=channel_types,
+                        limit=1000,
+                        cursor=cursor,
                         exclude_archived=not archived_channels
                     )
                     channels.extend(response.get("channels", []))
-                    
+
                     # Update the cursor for the next batch
                     cursor = response.get("response_metadata", {}).get("next_cursor")
-                    
+
                     if not cursor:  # Break the loop if there are no more channels to fetch
                         break
                 except SlackApiError as e:
@@ -73,14 +90,11 @@ def check_slack_messages(args, client, patterns, profile_name, channel_types, ch
             system.print_info(args, "Getting channels by channel_ids")
             for channel_id in channel_ids:
                 try:
-                    channel = client.conversations_info(channel=channel_id)["channel"]
-                    ## if archived_channels is set to True, include archived channels
+                    channel = rate_limit_retry(client.conversations_info, channel=channel_id)["channel"]
                     if archived_channels or not channel.get("is_archived"):
-                        system.print_debug(args, f"Considering archived channels, you may want to set archived_channels to False")
                         channels.append(channel)
                     else:
                         system.print_debug(args, f"Skipping archived channel: {channel_id}")
-                    
                 except SlackApiError as e:
                     system.print_error(args, f"Failed to fetch channel with id {channel_id} with error: {e.response['error']}")
 
@@ -95,7 +109,7 @@ def check_slack_messages(args, client, patterns, profile_name, channel_types, ch
 
             # Get messages from the channel within the time range
             system.print_info(args, f"Checking messages in channel {channel_name} ({channel_id})")
-            messages = client.conversations_history(channel=channel_id, oldest=oldest_time)["messages"]
+            messages = rate_limit_retry(client.conversations_history, channel=channel_id, oldest=oldest_time)["messages"]
             for message in messages:
                 user = message.get("user", "")
                 text = message.get("text")
@@ -106,7 +120,7 @@ def check_slack_messages(args, client, patterns, profile_name, channel_types, ch
                     file_addr = download_file(args, client, file, folder_path)
                     if file_addr:
                         system.print_debug(args, f"Checking file: {file_addr}")
-                        matches = system.read_match_strings(args, file_addr, 'slack')   
+                        matches = system.read_match_strings(args, file_addr, 'slack')
                         if matches:
                             for match in matches:
                                 results.append({
@@ -120,7 +134,7 @@ def check_slack_messages(args, client, patterns, profile_name, channel_types, ch
                                     'message_link': workspace_url + f"/archives/{channel_id}/p{message_ts.replace('.', '')}",
                                     'data_source': 'slack'
                                 })
-                
+
                 # Check main message for matches
                 if text:
                     matches = system.match_strings(args, text)
@@ -140,7 +154,7 @@ def check_slack_messages(args, client, patterns, profile_name, channel_types, ch
 
                 if "thread_ts" in message:
                     thread_ts = message["thread_ts"]
-                    replies = client.conversations_replies(channel=channel_id, ts=thread_ts, oldest=oldest_time)["messages"]
+                    replies = rate_limit_retry(client.conversations_replies, channel=channel_id, ts=thread_ts, oldest=oldest_time)["messages"]
                     for reply in replies:
                         if reply["ts"] != thread_ts:  # Skip the parent message
                             reply_user = reply.get("user", "")
@@ -153,7 +167,7 @@ def check_slack_messages(args, client, patterns, profile_name, channel_types, ch
                                 file_addr = download_file(args, client, file, folder_path)
                                 if file_addr:
                                     system.print_debug(args, f"Checking file: {file_addr}")
-                                    matches = system.read_match_strings(args, file_addr, 'slack')   
+                                    matches = system.read_match_strings(args, file_addr, 'slack')
                                     if matches:
                                         for match in matches:
                                             results.append({
@@ -189,6 +203,7 @@ def check_slack_messages(args, client, patterns, profile_name, channel_types, ch
     except SlackApiError as e:
         system.print_error(args, f"Failed to fetch messages from Slack with error: {e}")
         return results
+
 
 
 
