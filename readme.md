@@ -3,7 +3,7 @@
 <p align="center">
 <a href="#description">Description</a> • <a href="#installation">Installation</a> • <a href="#features">Features</a> • <a href="#config">Configuration</a> • <a href="#acknowledgements">Acknowledgements</a><br><br>
    
-[![Publish to PyPI.org](https://github.com/rohitcoder/hawk-eye/actions/workflows/pypi.yml/badge.svg)](https://github.com/rohitcoder/hawk-eye/actions/workflows/pypi.yml) 
+
 <img alt="Static Badge" src="https://img.shields.io/badge/Supports-S3-yellow?logo=amazons3">
 <img alt="Static Badge" src="https://img.shields.io/badge/Supports-GCP-red?logo=googlecloud">
 <img alt="Static Badge" src="https://img.shields.io/badge/Supports-MysQL-green?logo=mysql">
@@ -12,11 +12,18 @@
 <img alt="Static Badge" src="https://img.shields.io/badge/Supports-On Prem-black?logo=amazonec2">
 </p>
 
+
+Join our Slack community for support, discussions, or to contribute!
+
+<a href="https://join.slack.com/t/hawkeyecommunity/shared_invite/zt-2xz0qbo8n-KQQ9UQ1KW2QfaMVDmCWYrw" target="_blank">
+    <img src="https://i.imgur.com/BUtBFwE.png" alt="Join Slack Community" width="150" />
+</a>
+
 <div id="description">
 
-### 🦅 HAWK Eye - Uncover Secrets and PII Across All Platforms in Minutes!
+### 🦅 Hawk Eye - Uncover Secrets and PII Across All Platforms in Minutes!
 
-HAWK Eye is a robust, command-line tool built to safeguard against data breaches and cyber threats. Much like the sharp vision of a hawk, it quickly scans multiple data sources—S3, MySQL, PostgreSQL, MongoDB, CouchDB, Google Drive, Slack, Redis, Firebase, file systems, and Google Cloud buckets (GCS)—for Personally Identifiable Information (PII) and secrets. Using advanced text analysis and OCR techniques, HAWK Eye delves into various document formats like docx, xlsx, pptx, pdf, images (jpg, png, gif), compressed files (zip, tar, rar), and even video files to ensure comprehensive protection across platforms.
+Hawk Eye is a robust, command-line tool built to safeguard against data breaches and cyber threats. Much like the sharp vision of a hawk, it quickly scans multiple data sources—S3, MySQL, PostgreSQL, MongoDB, CouchDB, Google Drive, Slack, Redis, Firebase, file systems, and Google Cloud buckets (GCS)—for Personally Identifiable Information (PII) and secrets. Using advanced text analysis and OCR techniques, HAWK Eye delves into various document formats like docx, xlsx, pptx, pdf, images (jpg, png, gif), compressed files (zip, tar, rar), and even video files to ensure comprehensive protection across platforms.
 
 
 ### Why "HAWK Eye"?
@@ -24,7 +31,10 @@ Like the keen vision of a hawk, this tool enables you to monitor and safeguard y
 </div>
 
 ## Commercial Support
-For commercial support and help with HAWK Eye, please contact us at [LinkedIn](https://linkedin.com/in/rohitcoder) or [Twitter](https://twitter.com/rohitcoder).
+
+For commercial support and help with HAWK Eye, please contact us on [LinkedIn](https://linkedin.com/in/rohitcoder) or [Twitter](https://twitter.com/rohitcoder).
+
+Alternatively, you can reach out to us in our Slack community.
 
 ## HAWK Eye in Action
 
@@ -373,7 +383,7 @@ sources:
     slack_example:
       channel_types: "public_channel,private_channel"
       token: xoxp-XXXXXXXXXXXXXXXXXXXXXXXXX
-      channel_types: "public_channel,private_channel"
+      archived_channels: True ## By default False, set to True if you want to scan archived channels also
       limit_mins: 15 ## By default 60 mins
       channel_ids:
       - XXXXXXXX
