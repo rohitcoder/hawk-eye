@@ -22,7 +22,7 @@ def connect_slack(args, token):
         system.print_error(args, f"Failed to connect to Slack with error: {e.response['error']}")
         return None
 
-def check_slack_messages(args, client, patterns, profile_name, channel_types, channel_ids=None, limit_mins=60):
+def check_slack_messages(args, client, patterns, profile_name, channel_types, channel_ids=None, limit_mins=60, archived_channels=False):
     results = []
     try:
         team_info = client.team_info()
@@ -41,20 +41,53 @@ def check_slack_messages(args, client, patterns, profile_name, channel_types, ch
 
         # Get all channels of specified types
         channels = []
+
         if not channel_ids:
             system.print_info(args, "Getting all channels because no channel_ids provided")
-            channels = client.conversations_list(types=channel_types)["channels"]
+            
+            # Pagination logic to fetch all non-archived channels
+            cursor = None
+            while True:
+                try:
+                    if archived_channels:
+                        system.print_debug(args, f"Considering archived channels, you may want to set archived_channels to False")
+                    else:
+                        system.print_debug(args, f"Skipping archived channels, you may want to set archived_channels to True")
+                    response = client.conversations_list(
+                        types=channel_types, 
+                        limit=1000, 
+                        cursor=cursor, 
+                        exclude_archived=not archived_channels
+                    )
+                    channels.extend(response.get("channels", []))
+                    
+                    # Update the cursor for the next batch
+                    cursor = response.get("response_metadata", {}).get("next_cursor")
+                    
+                    if not cursor:  # Break the loop if there are no more channels to fetch
+                        break
+                except SlackApiError as e:
+                    system.print_error(args, f"Failed to fetch channels: {e.response['error']}")
+                    break
         else:
             system.print_info(args, "Getting channels by channel_ids")
             for channel_id in channel_ids:
                 try:
                     channel = client.conversations_info(channel=channel_id)["channel"]
-                    channels.append(channel)
+                    ## if archived_channels is set to True, include archived channels
+                    if archived_channels or not channel.get("is_archived"):
+                        system.print_debug(args, f"Considering archived channels, you may want to set archived_channels to False")
+                        channels.append(channel)
+                    else:
+                        system.print_debug(args, f"Skipping archived channel: {channel_id}")
+                    
                 except SlackApiError as e:
                     system.print_error(args, f"Failed to fetch channel with id {channel_id} with error: {e.response['error']}")
 
+        # Optional: Print or log the total number of channels fetched
+        system.print_info(args, f"Total channels fetched: {len(channels)}")
         system.print_info(args, f"Found {len(channels)} channels of type {channel_types}")
-        system.print_info(args, f"Checking messages in channels: {', '.join([channel['name'] for channel in channels])}")
+        system.print_debug(args, f"Checking messages in channels: {', '.join([channel['name'] for channel in channels])}")
 
         for channel in channels:
             channel_name = channel["name"]
@@ -211,6 +244,7 @@ def execute(args):
                 channel_types = config.get('channel_types', "public_channel,private_channel")
                 channel_ids = config.get('channel_ids', [])
                 limit_mins = config.get('limit_mins', 60)
+                archived_channels = config.get('archived_channels', False)
 
                 if token:
                     system.print_info(args, f"Checking Slack Profile {key}")
@@ -220,7 +254,7 @@ def execute(args):
 
                 client = connect_slack(args, token)
                 if client:
-                    results += check_slack_messages(args, client, patterns, key, channel_types, channel_ids, limit_mins)
+                    results += check_slack_messages(args, client, patterns, key, channel_types, channel_ids, limit_mins, archived_channels)
         else:
             system.print_error(args, "No Slack connection details found in connection.yml")
     else:
