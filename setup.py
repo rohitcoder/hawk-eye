@@ -1,4 +1,4 @@
-VERSION = "0.3.26-ratelimit-fix"
+VERSION = "0.3.27"
 
 from setuptools import setup, find_packages
 
