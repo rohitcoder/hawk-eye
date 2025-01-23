@@ -1,3 +1,4 @@
+import jmespath
 from rich.console import Console 
 from rich.table import Table
 import json, requests, argparse, yaml, re, datetime, os, subprocess, platform, hashlib
@@ -540,6 +541,40 @@ def SlackNotify(msg, args):
                     db.insert({'msg_hash': msg_hash})
             except Exception as e:
                 print_error(args, f"An error occurred: {str(e)}")
+
+def evaluate_severity(json_data, rules):
+    if 'severity_rules' not in rules:
+        rules = {
+            'severity_rules': {
+                'critical': [
+                    {'query': "length(matches) > `20`", 'description': "Detected more than 20 PII or Secrets"},
+                ],
+                'high': [
+                    {'query': "length(matches) > `10` && length(matches) <= `20`", 'description': "Detected more than 10 PII or Secrets"},
+                ],
+                'medium': [
+                    {'query': "length(matches) > `5` && length(matches) <= `10`", 'description': "Detected more than 5 PII or Secrets"},
+                ],
+                'low': [
+                    {'query': "length(matches) <= `5`", 'description': "Detected less than 5 PII or Secrets"},
+                ],
+            }
+        }
+    
+    for severity, conditions in rules['severity_rules'].items():
+        for condition in conditions:
+            query = condition['query']
+            description = condition['description']
+            if jmespath.search(query, json_data):
+                # Add severity details to the JSON data
+                json_data['severity'] = severity
+                json_data['severity_description'] = description
+                return json_data
+
+    # If no match, add default severity
+    json_data['severity'] = "unknown"
+    json_data['severity_description'] = "No matching rule found."
+    return json_data
 
 def enhance_and_ocr(image_path):
     # Load the image

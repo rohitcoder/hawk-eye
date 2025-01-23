@@ -3,7 +3,34 @@ notify:
   suppress_duplicates: True
   slack:
     webhook_url: https://hooks.slack.com/services/T0XXXXXXXXXXX/BXXXXXXXX/1CIyXXXXXXXXXXXXXXX
-
+  jira:
+    username: "amce@org.com"
+    server_url: "https://amce.atlassian.net"
+    api_token: "JIRA_API_TOKEN_HERE"
+    project: "SEC"
+    issue_type: "Task"
+    labels:
+      - "hawk-eye"
+    assignee: "soc-team@amce.com"
+    issue_fields:
+      summary_prefix: "[Hawk-eye] PII Exposed - "
+      description_template: |
+        A Data Security issue has been identified:
+        
+        {details}
+severity_rules:
+  critical:
+    - query: "length(matches) > `10` && contains(['EMAIL', 'PAN'], pattern_name)"
+      description: "Detected more than 10 Email or Pan exposed"
+  high:
+    - query: "length(matches) > `10` && contains(['EMAIL', 'PAN'], pattern_name) && data_source == 'slack'"
+      description: "Detected more than 10 Email or Pan exposed in Slack"
+  medium:
+    - query: "length(matches) > `5` && length(matches) <= `10` && contains(['EMAIL', 'PAN'], pattern_name) && data_source == 'slack' && profile == 'customer_support'"
+      description: "Detected more than 5 and less than 10 Email or Pan exposed in Customer support Slack workspace"
+  low:
+    - query: "length(matches) <= `5`"
+      description: "Detected less than 5 PII or Secrets"
 sources:
   redis:
     redis_example:

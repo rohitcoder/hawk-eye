@@ -269,7 +269,9 @@ Note: If you don't provide any command, it will run all commands (firebase, fs, 
 HAWK Eye uses a YAML file to store connection profiles for various data sources. The connection.yml file is located in the config directory. You can add new profiles to this file to enable HAWK Eye to scan additional data sources. The following sections describe the process for adding new profiles to the connection.yml file.
 
 
-### Your connection fille will look like this
+### Your connection file will look like this
+
+For the full connection schema, have a look at [connection.yml.sample](connection.yml.sample).
 
 ```yaml
 notify:
