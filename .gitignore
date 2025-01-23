@@ -2,6 +2,7 @@ connection.yml
 .DS_Store
 data/
 previous_alerts.json
+user_ids.json
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
