@@ -530,7 +530,7 @@ def SlackNotify(msg, args):
         if webhook_url and webhook_url.startswith('https://hooks.slack.com/services/'):
             try:
                 payload = {
-                    'blocks': msg,
+                    'text': msg,
                 }
                 headers = {'Content-Type': 'application/json'}
                 requests.post(webhook_url, data=json.dumps(payload), headers=headers)

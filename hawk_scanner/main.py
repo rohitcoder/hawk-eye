@@ -261,7 +261,7 @@ def main():
             slack_message = format_slack_message(group, result, records_mini)
             if slack_message:
                 system.create_jira_ticket(args, result, slack_message)
-                ##system.SlackNotify(slack_message, args)
+                system.SlackNotify(slack_message, args)
 
             if group == 's3':
                 table.add_row(str(i), result['profile'], f"{result['bucket']} > {result['file_path']}",
