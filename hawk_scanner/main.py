@@ -38,9 +38,11 @@ def execute_command(command, args):
     return module.execute(args)
 
 
-def group_results(results):
+def group_results(args, results):
     grouped_results = defaultdict(list)
     for result in results:
+        connection = system.get_connection(args)
+        result = system.evaluate_severity(result, connection)
         grouped_results[result['data_source']].append(result)
     return grouped_results
 
@@ -231,8 +233,7 @@ def main():
         system.print_error(args, "Please provide a command to execute")
         sys.exit(1)
 
-    grouped_results = group_results(results)
-
+    grouped_results = group_results(args, results)
     if args.json:
         if args.json:
             with open(args.json, 'w') as file:

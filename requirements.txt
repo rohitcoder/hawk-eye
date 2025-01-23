@@ -1,5 +1,6 @@
 boto3
 PyYAML
+jmespath
 rich
 mysql-connector-python
 pymysql
