@@ -581,3 +581,92 @@ def perform_ocr(image):
     ocr_text = pytesseract.image_to_string(image)
 
     return ocr_text
+
+def get_jira_accId(args, email):
+    config = get_connection(args)
+    jira_config = config.get('notify', {}).get('jira', {})
+    server_url = jira_config.get('server_url')
+    username = jira_config.get('username')
+    api_token = jira_config.get('api_token')
+    db = TinyDB('user_ids.json')
+    user_query = Query()
+
+    # Check if the accountId is already cached
+    cached_user = db.search(user_query.email == email)
+    if cached_user:
+        print_debug(args, f"Using cached accountId for {email}: {cached_user[0]['accountId']}")
+        return cached_user[0]['accountId']
+
+    # Fetch accountId from Jira
+    url = f"{server_url}/rest/api/2/user/search?query={email}"
+    auth = (username, api_token)
+    headers = {"Content-Type": "application/json"}
+
+    response = requests.get(url, auth=auth, headers=headers)
+    if response.status_code == 200:
+        data = response.json()
+        if len(data):
+            account_id = data[0]['accountId']
+            print_debug(args, f"Found accountId for {email}: {account_id}")
+
+            # Cache the accountId
+            db.insert({"email": email, "accountId": account_id})
+            return account_id
+        else:
+            print_debug(args, f"No accountId found for {email}.")
+            return None
+    else:
+        print_debug(args, f"Failed to fetch accountId for {email}: {response.status_code}, {response.text}")
+        return None
+    
+def create_jira_ticket(args, issue_data, message):
+    config = get_connection(args)
+    """Creates a Jira ticket using the provided configuration and issue data."""
+    jira_config = config.get('notify', {}).get('jira', {})
+
+    # Check if Jira is enabled
+    if not jira_config.get('username') or jira_config.get('username') == '':
+        print_debug(args, "Jira ticket creation is disabled in the configuration.")
+        return
+
+    # Extract Jira config details
+    server_url = jira_config.get('server_url')
+    username = jira_config.get('username')
+    api_token = jira_config.get('api_token')
+    project = jira_config.get('project')
+    default_issue_type = jira_config.get('issue_type')
+    issue_fields = jira_config.get('issue_fields', {})
+    total_matches = len(issue_data.get('matches', []))
+    summary = "Found " + str(total_matches) + " " + issue_data.get('pattern_name') + " in " + issue_data.get('data_source')
+    summary = issue_fields.get('summary_prefix', '') + summary
+    description_template = issue_fields.get('description_template', '')
+    description = description_template.format(details=message, **issue_data)
+
+    payload = {
+        "fields": {
+            "project": {"key": project},
+            "summary": summary,
+            "description": description,
+            "issuetype": {"name": default_issue_type}
+        }
+    }
+    
+    # Check if the assignee is specified in the configuration
+    assignee = jira_config.get('assignee')
+    if assignee:
+        payload['fields']['assignee'] = {"accountId": get_jira_accId(args, assignee)}
+    
+    labels = jira_config.get('labels')
+    if labels:
+        payload['fields']['labels'] = labels
+
+    # Send request to Jira API
+    url = f"{server_url}/rest/api/latest/issue"
+    auth = (username, api_token)
+    headers = {"Content-Type": "application/json"}
+
+    response = requests.post(url, json=payload, auth=auth, headers=headers)
+    if response.status_code == 201:
+        print_debug(args, f"Jira ticket created successfully: {response.json().get('key')}")
+    else:
+        print_debug(args, f"Failed to create Jira ticket: {response.status_code} - {response.text}")

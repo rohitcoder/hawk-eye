@@ -260,6 +260,7 @@ def main():
             records_mini = ', '.join(result['matches']) if len(result['matches']) < 25 else ', '.join(result['matches'][:25]) + f" + {len(result['matches']) - 25} more"
             slack_message = format_slack_message(group, result, records_mini)
             if slack_message:
+                system.create_jira_ticket(args, result, slack_message)
                 system.SlackNotify(slack_message, args)
 
             if group == 's3':
