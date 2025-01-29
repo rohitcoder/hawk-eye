@@ -511,18 +511,24 @@ def SlackNotify(msg, args):
     connections = get_connection(args)
     if not args.no_write:
         db = TinyDB('previous_alerts.json')
+   
     if 'notify' in connections:
         notify_config = connections['notify']
         # Check if suppress_duplicates is set to True
         suppress_duplicates = notify_config.get('suppress_duplicates', False)
-        
+        original_msg = msg
         if suppress_duplicates and not args.no_write:
             # Calculate the hash of the message
-            msg_hash = calculate_msg_hash(msg)
+            ## check if "msg" has "Message Link" in any line, then remove that complete line
+            if "Message Link" in msg:
+                msg = msg.split("\n")
+                msg = [line for line in msg if "Message Link" not in line]
+                msg = "\n".join(msg)
             
+            msg_hash = calculate_msg_hash(msg)
             # Check if the message hash already exists in the previous alerts database
-            Alert = Query()
-            if db.contains(Alert.msg_hash == msg_hash):
+            alert_query = Query()
+            if db.search(alert_query['msg_hash'] == msg_hash):
                 print_info(args, "Duplicate message detected. Skipping webhook trigger.")
                 return
         
@@ -531,11 +537,10 @@ def SlackNotify(msg, args):
         if webhook_url and webhook_url.startswith('https://hooks.slack.com/services/'):
             try:
                 payload = {
-                    'text': msg,
+                    'text': original_msg,
                 }
                 headers = {'Content-Type': 'application/json'}
                 requests.post(webhook_url, data=json.dumps(payload), headers=headers)
-                
                 if suppress_duplicates and not args.no_write:
                     # Store the message hash in the previous alerts database
                     db.insert({'msg_hash': msg_hash})
@@ -655,7 +660,29 @@ def get_jira_accId(args, email):
         return None
     
 def create_jira_ticket(args, issue_data, message):
+    orig_msg = message
     config = get_connection(args)
+    if not args.no_write:
+        db = TinyDB('previous_alerts.json')
+        if 'notify' in config:
+            notify_config = config['notify']
+            # Check if suppress_duplicates is set to True
+            suppress_duplicates = notify_config.get('suppress_duplicates', False)
+            if suppress_duplicates and not args.no_write:
+                # Calculate the hash of the message
+                ## check if "msg" has "Message Link" in any line, then remove that complete line
+                if "Message Link" in message:
+                    message = message.split("\n")
+                    message = [line for line in message if "Message Link" not in line]
+                    message = "\n".join(message)
+                
+                msg_hash = calculate_msg_hash(message)
+                # Check if the message hash already exists in the previous alerts database
+                alert_query = Query()
+                if db.search(alert_query['msg_hash'] == msg_hash):
+                    print_info(args, "Duplicate message detected. Skipping ticket creation")
+                    return
+
     """Creates a Jira ticket using the provided configuration and issue data."""
     jira_config = config.get('notify', {}).get('jira', {})
 
@@ -675,7 +702,7 @@ def create_jira_ticket(args, issue_data, message):
     summary = "Found " + str(total_matches) + " " + issue_data.get('pattern_name') + " in " + issue_data.get('data_source')
     summary = issue_fields.get('summary_prefix', '') + summary
     description_template = issue_fields.get('description_template', '')
-    description = description_template.format(details=message, **issue_data)
+    description = description_template.format(details=orig_msg, **issue_data)
 
     payload = {
         "fields": {
