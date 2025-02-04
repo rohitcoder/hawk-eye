@@ -2,7 +2,6 @@
 <p align="center"><b>Find PII & Secrets like never before across your entire infrastructure with same tool!</b></p>
 <p align="center">
 <a href="#description">Description</a> • <a href="#installation">Installation</a> • <a href="#features">Features</a> • <a href="#config">Configuration</a> • <a href="#acknowledgements">Acknowledgements</a><br><br>
-   
 
 <img alt="Static Badge" src="https://img.shields.io/badge/Supports-S3-yellow?logo=amazons3">
 <img alt="Static Badge" src="https://img.shields.io/badge/Supports-GCP-red?logo=googlecloud">
@@ -433,6 +432,8 @@ Black Hat Middle East and Africa 2023 [Arsenal]</a></li>
 <li><a href="https://www.blackhat.com/eu-23/arsenal/schedule/index.html#hawk-eye---pii--secret-detection-tool-for-your-servers-database-filesystems-cloud-storage-services-35711" target="_blank">
 Black Hat Europe 2023 [Arsenal]</a></li>
 </ul>
+
+[![Star History Chart](https://api.star-history.com/svg?repos=rohitcoder/hawk-eye&type=Date)](https://star-history.com/#rohitcoder/hawk-eye&Date)
 
 ## 💪 Contributors
 We extend our heartfelt appreciation to all contributors who continuously improve this tool! Your efforts are essential in strengthening the security landscape. 🙏
