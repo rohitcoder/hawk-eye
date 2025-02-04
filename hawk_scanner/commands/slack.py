@@ -194,7 +194,7 @@ def check_slack_messages(args, client, patterns, profile_name, channel_types, ch
                                             'matches': list(set(match['matches'])),
                                             'sample_text': match['sample_text'],
                                             'profile': profile_name,
-                                            'message_link': workspace_url + f"/archives/{channel_id}/p{reply_ts.replace('.', '')}",
+                                            'message_link': workspace_url + f"/archives/{channel_id}/p{reply_ts.replace('.', '')}?thread_ts={thread_ts}&cid={channel_id}",
                                             'data_source': 'slack'
                                         })
 

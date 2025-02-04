@@ -255,7 +255,6 @@ def main():
                       title=f"[bold blue]Total {len(group_data)} findings in {group}[/bold blue]")
         table.add_column("Sl. No.")
         table.add_column("Vulnerable Profile")
-        print(group_data)
         add_columns_to_table(group, table)
         for i, result in enumerate(group_data, 1):
             records_mini = ', '.join(result['matches']) if len(result['matches']) < 25 else ', '.join(result['matches'][:25]) + f" + {len(result['matches']) - 25} more"
