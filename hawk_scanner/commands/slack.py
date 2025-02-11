@@ -22,24 +22,11 @@ def connect_slack(args, token):
         system.print_error(args, f"Failed to connect to Slack with error: {e.response['error']}")
         return None
 
-
-def check_slack_messages(args, client, patterns, profile_name, channel_types, channel_ids=None, limit_mins=60, archived_channels=False):
+def check_slack_messages(args, client, patterns, profile_name, channel_types, read_from, channel_ids=None, limit_mins=60, archived_channels=False):
     results = []
     try:
         team_info = client.team_info()
         workspace_url = team_info["team"]["url"].rstrip('/')
-
-        # Get the Unix timestamp for 'limit_mins' minutes ago
-        current_time = time.time()
-        oldest_time = current_time - (limit_mins * 60)
-
-        # Convert to human-readable time for debugging
-        current_time_readable = datetime.fromtimestamp(current_time).strftime('%Y-%m-%d %H:%M:%S')
-        oldest_time_readable = datetime.fromtimestamp(oldest_time).strftime('%Y-%m-%d %H:%M:%S')
-
-        system.print_info(args, f"Current Time: {current_time_readable}")
-        system.print_info(args, f"Fetching messages from the last {limit_mins} minutes (Oldest Time: {oldest_time_readable}, Unix: {int(oldest_time)})")
-
         # Helper function to handle rate limits
         hawk_args = args
         def rate_limit_retry(func, *args, **kwargs):
@@ -77,7 +64,6 @@ def check_slack_messages(args, client, patterns, profile_name, channel_types, ch
                         exclude_archived=not archived_channels
                     )
                     channels.extend(response.get("channels", []))
-
                     # Update the cursor for the next batch
                     cursor = response.get("response_metadata", {}).get("next_cursor")
 
@@ -106,10 +92,32 @@ def check_slack_messages(args, client, patterns, profile_name, channel_types, ch
         for channel in channels:
             channel_name = channel["name"]
             channel_id = channel["id"]
+            latest_time = int(time.time())
 
+            if read_from == 'last_message':
+                system.print_info(args, "Fetching messages from the last message in the channel")
+                last_msg = get_last_msg(args, client, channel_id)
+                if last_msg:
+                    latest_time = float(last_msg['timestamp'])
+                    # Add 1 second to the latest time to get latest message along with it
+                    latest_time += 1
+            elif read_from:
+                try:
+                    read_from = int(read_from)
+                    latest_time = read_from
+                    # Add 1 second to the latest time to get latest message along with it
+                    latest_time += 1
+                except ValueError:
+                    system.print_error(args, "Invalid value for read_from in Slack configuration. It should be either 'last_message' or a valid Unix timestamp")
+                    exit(1)
+            else:
+                latest_time = int(time.time())
+            oldest_time = latest_time - (limit_mins * 60)
             # Get messages from the channel within the time range
             system.print_info(args, f"Checking messages in channel {channel_name} ({channel_id})")
-            messages = rate_limit_retry(client.conversations_history, channel=channel_id, oldest=oldest_time)["messages"]
+            system.print_info(args, f"Fetching messages from {time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(oldest_time))} to {time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(latest_time))}")
+            messages = rate_limit_retry(client.conversations_history, channel=channel_id, oldest=oldest_time, latest=latest_time)["messages"]
+            print(f"Found {len(messages)} messages in channel {channel_name} ({channel_id})")
             for message in messages:
                 user = message.get("user", "")
                 text = message.get("text")
@@ -205,8 +213,6 @@ def check_slack_messages(args, client, patterns, profile_name, channel_types, ch
         return results
 
 
-
-
 def download_file(args, client, file_info, folder_path) -> str:
     try:
         # Ensure the folder exists
@@ -241,6 +247,44 @@ def download_file(args, client, file_info, folder_path) -> str:
         system.print_error(args, f"An unexpected error occurred: {str(e)}")
         return None
 
+def get_last_msg(args, client, channel_id):
+    """
+    Fetches the last message from the specified Slack channel.
+    Handles rate limits and retries if necessary.
+    """
+    try:
+        def rate_limit_retry(func, *args, **kwargs):
+            while True:
+                try:
+                    return func(*args, **kwargs)
+                except SlackApiError as e:
+                    if e.response["error"] == "ratelimited":
+                        retry_after = int(e.response.headers.get("Retry-After", 1))
+                        system.print_info(args, f"Rate limited. Retrying after {retry_after} seconds...")
+                        time.sleep(retry_after)
+                    else:
+                        raise
+        
+        system.print_info(args, f"Fetching last message from channel {channel_id}")
+        response = rate_limit_retry(client.conversations_history, channel=channel_id, limit=1)
+        messages = response.get("messages", [])
+        
+        if messages:
+            last_message = messages[0]  # Get the latest message
+            return {
+                'user': last_message.get("user", "Unknown"),
+                'text': last_message.get("text", ""),
+                'timestamp': last_message.get("ts", ""),
+                'message_link': f"https://slack.com/archives/{channel_id}/p{last_message.get('ts', '').replace('.', '')}",
+            }
+        else:
+            system.print_info(args, f"No messages found in channel {channel_id}")
+            return None
+    
+    except SlackApiError as e:
+        system.print_error(args, f"Failed to fetch last message from channel {channel_id} with error: {e.response['error']}")
+        return None
+
 
 def execute(args):
     results = []
@@ -255,6 +299,8 @@ def execute(args):
             patterns = system.get_fingerprint_file(args)
 
             for key, config in slack_config.items():
+                current_unix_timestamp = int(time.time())
+                read_from = config.get('read_from', current_unix_timestamp)
                 token = config.get('token')
                 channel_types = config.get('channel_types', "public_channel,private_channel")
                 channel_ids = config.get('channel_ids', [])
@@ -269,7 +315,7 @@ def execute(args):
 
                 client = connect_slack(args, token)
                 if client:
-                    results += check_slack_messages(args, client, patterns, key, channel_types, channel_ids, limit_mins, archived_channels)
+                    results += check_slack_messages(args, client, patterns, key, channel_types, read_from, channel_ids, limit_mins, archived_channels)
         else:
             system.print_error(args, "No Slack connection details found in connection.yml")
     else:
