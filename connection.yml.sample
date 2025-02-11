@@ -19,16 +19,16 @@ notify:
         
         {details}
 severity_rules:
-  critical:
+  Highest:
     - query: "length(matches) > `10` && contains(['EMAIL', 'PAN'], pattern_name)"
       description: "Detected more than 10 Email or Pan exposed"
-  high:
+  High:
     - query: "length(matches) > `10` && contains(['EMAIL', 'PAN'], pattern_name) && data_source == 'slack'"
       description: "Detected more than 10 Email or Pan exposed in Slack"
-  medium:
+  Medium:
     - query: "length(matches) > `5` && length(matches) <= `10` && contains(['EMAIL', 'PAN'], pattern_name) && data_source == 'slack' && profile == 'customer_support'"
       description: "Detected more than 5 and less than 10 Email or Pan exposed in Customer support Slack workspace"
-  low:
+  Low:
     - query: "length(matches) <= `5`"
       description: "Detected less than 5 PII or Secrets"
 sources:

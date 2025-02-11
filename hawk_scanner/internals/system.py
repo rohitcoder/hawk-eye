@@ -551,16 +551,16 @@ def evaluate_severity(json_data, rules):
     if 'severity_rules' not in rules:
         rules = {
             'severity_rules': {
-                'critical': [
+                'Highest': [
                     {'query': "length(matches) > `20`", 'description': "Detected more than 20 PII or Secrets"},
                 ],
-                'high': [
+                'High': [
                     {'query': "length(matches) > `10` && length(matches) <= `20`", 'description': "Detected more than 10 PII or Secrets"},
                 ],
-                'medium': [
+                'Medium': [
                     {'query': "length(matches) > `5` && length(matches) <= `10`", 'description': "Detected more than 5 PII or Secrets"},
                 ],
-                'low': [
+                'Low': [
                     {'query': "length(matches) <= `5`", 'description': "Detected less than 5 PII or Secrets"},
                 ],
             }
@@ -693,6 +693,9 @@ def create_jira_ticket(args, issue_data, message):
 
     # Extract Jira config details
     server_url = jira_config.get('server_url')
+    evaluated_result = evaluate_severity(issue_data, config)
+    severity = evaluated_result.get('severity')
+    severity_description = evaluated_result.get('severity_description')
     username = jira_config.get('username')
     api_token = jira_config.get('api_token')
     project = jira_config.get('project')
@@ -700,16 +703,16 @@ def create_jira_ticket(args, issue_data, message):
     issue_fields = jira_config.get('issue_fields', {})
     total_matches = len(issue_data.get('matches', []))
     summary = "Found " + str(total_matches) + " " + issue_data.get('pattern_name') + " in " + issue_data.get('data_source')
-    summary = issue_fields.get('summary_prefix', '') + summary
     description_template = issue_fields.get('description_template', '')
+    orig_msg = orig_msg + "\n\n" + "Severity: " + severity + "\n" + "Severity Description: " + severity_description
     description = description_template.format(details=orig_msg, **issue_data)
-
     payload = {
         "fields": {
             "project": {"key": project},
             "summary": summary,
             "description": description,
-            "issuetype": {"name": default_issue_type}
+            "issuetype": {"name": default_issue_type},
+            "priority": {"name": severity},
         }
     }
     
