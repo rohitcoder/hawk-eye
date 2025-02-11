@@ -138,6 +138,7 @@ sources:
       token: xoxp-XXXXXXXXXXXXXXXXXXXXXXXXX
       archived_channels: True ## By default False, set to True if you want to scan archived channels also
       limit_mins: 15 ## By default 60 mins
-      limit_from: last_message ## By default current Unix timestamp, available options - UNIX Timestamp (e..g: 1737354387), last_message
+      read_from: last_message ## By default current Unix timestamp, available options - UNIX Timestamp (e..g: 1737354387), last_message
+      isExternal: True ## By default None (Scan everything even if its external or not external), set to True if you want to scan external channels only
       channel_ids:
       - XXXXXXXX

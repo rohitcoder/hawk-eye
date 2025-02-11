@@ -22,7 +22,7 @@ def connect_slack(args, token):
         system.print_error(args, f"Failed to connect to Slack with error: {e.response['error']}")
         return None
 
-def check_slack_messages(args, client, patterns, profile_name, channel_types, read_from, channel_ids=None, limit_mins=60, archived_channels=False):
+def check_slack_messages(args, client, patterns, profile_name, channel_types, isExternal, read_from, channel_ids=None, limit_mins=60, archived_channels=False):
     results = []
     try:
         team_info = client.team_info()
@@ -83,9 +83,27 @@ def check_slack_messages(args, client, patterns, profile_name, channel_types, re
                         system.print_debug(args, f"Skipping archived channel: {channel_id}")
                 except SlackApiError as e:
                     system.print_error(args, f"Failed to fetch channel with id {channel_id} with error: {e.response['error']}")
+        system.print_info(args, f"Found {len(channels)} channels")
+        filtered_channels = []
+        for channel in channels:
+            channel_is_external = channel.get("is_ext_shared")
+            
+            if isExternal is not None:
+                if isExternal and not channel_is_external:
+                    system.print_debug(args, f"Skipping non-external channel: {channel['name']}")
+                    continue  # Skip this channel
+                elif not isExternal and channel_is_external:
+                    system.print_debug(args, f"Skipping external channel: {channel['name']}")
+                    continue  # Skip this channel
 
+            if isExternal and channel_is_external:
+                system.print_info(args, f"Found external channel: {channel['name']}")
+
+            filtered_channels.append(channel)  # Add the channel if it wasn't skipped
+        if filtered_channels.__len__() > 0:
+            channels = filtered_channels  # Update the original list
         # Optional: Print or log the total number of channels fetched
-        system.print_info(args, f"Total channels fetched: {len(channels)}")
+        system.print_info(args, f"Total channels to scan after filteration: {len(channels)}")
         system.print_info(args, f"Found {len(channels)} channels of type {channel_types}")
         system.print_debug(args, f"Checking messages in channels: {', '.join([channel['name'] for channel in channels])}")
 
@@ -95,7 +113,7 @@ def check_slack_messages(args, client, patterns, profile_name, channel_types, re
             latest_time = int(time.time())
 
             if read_from == 'last_message':
-                system.print_info(args, "Fetching messages from the last message in the channel")
+                system.print_info(args, "Fetching messages from the last message in the channel " + channel_name)
                 last_msg = get_last_msg(args, client, channel_id)
                 if last_msg:
                     latest_time = float(last_msg['timestamp'])
@@ -117,7 +135,7 @@ def check_slack_messages(args, client, patterns, profile_name, channel_types, re
             system.print_info(args, f"Checking messages in channel {channel_name} ({channel_id})")
             system.print_info(args, f"Fetching messages from {time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(oldest_time))} to {time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(latest_time))}")
             messages = rate_limit_retry(client.conversations_history, channel=channel_id, oldest=oldest_time, latest=latest_time)["messages"]
-            print(f"Found {len(messages)} messages in channel {channel_name} ({channel_id})")
+            system.print_debug(args, f"Found {len(messages)} messages in channel {channel_name} ({channel_id})")
             for message in messages:
                 user = message.get("user", "")
                 text = message.get("text")
@@ -305,6 +323,7 @@ def execute(args):
                 channel_types = config.get('channel_types', "public_channel,private_channel")
                 channel_ids = config.get('channel_ids', [])
                 limit_mins = config.get('limit_mins', 60)
+                isExternal = config.get('isExternal', None)
                 archived_channels = config.get('archived_channels', False)
 
                 if token:
@@ -315,7 +334,7 @@ def execute(args):
 
                 client = connect_slack(args, token)
                 if client:
-                    results += check_slack_messages(args, client, patterns, key, channel_types, read_from, channel_ids, limit_mins, archived_channels)
+                    results += check_slack_messages(args, client, patterns, key, channel_types, isExternal, read_from, channel_ids, limit_mins, archived_channels)
         else:
             system.print_error(args, "No Slack connection details found in connection.yml")
     else:
