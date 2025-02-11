@@ -1,4 +1,4 @@
-VERSION = "0.3.30"
+VERSION = "0.3.31"
 
 from setuptools import setup, find_packages
 
