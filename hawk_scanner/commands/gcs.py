@@ -1,11 +1,7 @@
-import argparse
 from google.cloud import storage
 from rich.console import Console
 from hawk_scanner.internals import system
 import os
-import re
-import time
-import yaml
 
 def connect_google_cloud(args, bucket_name, credentials_file):
     try:
@@ -27,6 +23,13 @@ def execute(args):
     shouldDownload = True
     connections = system.get_connection(args)
 
+    options = connections.get('options', {})
+    quick_exit = options.get('quick_exit', False)
+    max_matches = None
+    if quick_exit:
+        max_matches = options.get('max_matches', 1)
+        system.print_info(args, f"Quick exit enabled with max_matches: {max_matches}")
+
     if 'sources' in connections:
         sources_config = connections['sources']
         gcs_config = sources_config.get('gcs')
@@ -41,6 +44,10 @@ def execute(args):
                     bucket = connect_google_cloud(args, bucket_name, credentials_file)
                     if bucket:
                         for blob in bucket.list_blobs():
+                            if quick_exit and len(results) >= max_matches:
+                                system.print_info(args, f"Quick exit: Found {max_matches} matches, exiting...")
+                                break
+                            
                             file_name = blob.name
                             ## get unique etag or hash of file
                             remote_etag = get_last_update_time(blob)

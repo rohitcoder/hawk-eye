@@ -36,6 +36,13 @@ def execute(args):
     shouldDownload = True
     system.print_info(args, f"Running Checks for S3 Sources")
     connections = system.get_connection(args)
+    options = connections.get('options', {})
+    quick_exit = options.get('quick_exit', False)
+    max_matches = None
+    if quick_exit:
+        max_matches = options.get('max_matches', 1)
+        system.print_info(args, f"Quick exit enabled with max_matches: {max_matches}")
+
     if 'sources' in connections:
         sources_config = connections['sources']
         s3_config = sources_config.get('s3')
@@ -52,8 +59,11 @@ def execute(args):
                 if access_key and secret_key and bucket_name:
                     bucket = connect_s3(args, access_key, secret_key, bucket_name)
                     if bucket:
-
                         for obj in bucket.objects.all():
+                            if quick_exit and len(results) >= max_matches:
+                                system.print_info(args, f"Quick exit: Found {max_matches} matches, exiting...")
+                                break
+                            
                             remote_etag = obj.e_tag.replace('"', '')
                             system.print_debug(args, f"Remote etag: {remote_etag}")
                             file_name = obj.key

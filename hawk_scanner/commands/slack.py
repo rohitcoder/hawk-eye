@@ -25,6 +25,14 @@ def connect_slack(args, token):
 def check_slack_messages(args, client, patterns, profile_name, channel_types, isExternal, read_from, channel_ids=None, limit_mins=60, archived_channels=False):
     results = []
     try:
+        connection = system.get_connection(args)
+        options = connection.get('options', {})
+        quick_exit = options.get('quick_exit', False)
+        max_matches = None
+        if quick_exit:
+            max_matches = options.get('max_matches', 1)
+            system.print_info(args, f"Quick exit enabled with max_matches: {max_matches}")
+
         team_info = client.team_info()
         workspace_url = team_info["team"]["url"].rstrip('/')
         # Helper function to handle rate limits
@@ -137,6 +145,9 @@ def check_slack_messages(args, client, patterns, profile_name, channel_types, is
             messages = rate_limit_retry(client.conversations_history, channel=channel_id, oldest=oldest_time, latest=latest_time)["messages"]
             system.print_debug(args, f"Found {len(messages)} messages in channel {channel_name} ({channel_id})")
             for message in messages:
+                if quick_exit and len(results) >= max_matches:
+                    system.print_info(args, f"Quick exit enabled. Found {max_matches} matches. Exiting...")
+                    return results
                 user = message.get("user", "")
                 text = message.get("text")
                 message_ts = message.get("ts")

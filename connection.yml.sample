@@ -31,6 +31,9 @@ severity_rules:
   Low:
     - query: "length(matches) <= `5`"
       description: "Detected less than 5 PII or Secrets"
+options:
+  quick_exit: True
+  max_matches: 5 ## Default is 1
 sources:
   redis:
     redis_example:
