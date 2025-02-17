@@ -116,6 +116,7 @@ def check_slack_messages(args, client, patterns, profile_name, channel_types, is
         system.print_debug(args, f"Checking messages in channels: {', '.join([channel['name'] for channel in channels])}")
 
         for channel in channels:
+            total_results = 0
             channel_name = channel["name"]
             channel_id = channel["id"]
             latest_time = int(time.time())
@@ -142,12 +143,28 @@ def check_slack_messages(args, client, patterns, profile_name, channel_types, is
             # Get messages from the channel within the time range
             system.print_info(args, f"Checking messages in channel {channel_name} ({channel_id})")
             system.print_info(args, f"Fetching messages from {time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(oldest_time))} to {time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(latest_time))}")
-            messages = rate_limit_retry(client.conversations_history, channel=channel_id, oldest=oldest_time, latest=latest_time)["messages"]
-            system.print_debug(args, f"Found {len(messages)} messages in channel {channel_name} ({channel_id})")
+            messages = []
+            cursor = None  # Start without a cursor
+
+            while True:
+                response = rate_limit_retry(client.conversations_history, 
+                                            channel=channel_id, 
+                                            oldest=oldest_time, 
+                                            latest=latest_time,
+                                            limit=200,
+                                            cursor=cursor)  
+
+                messages.extend(response.get("messages", []))
+
+                cursor = response.get("response_metadata", {}).get("next_cursor")
+                if not cursor:  
+                    break  # Stop if there's no more data
+
+            system.print_debug(args, f"Fetched {len(messages)} messages from {channel_name} ({channel_id})")
             for message in messages:
-                if quick_exit and len(results) >= max_matches:
+                if quick_exit and total_results >= max_matches:
                     system.print_info(args, f"Quick exit enabled. Found {max_matches} matches. Exiting...")
-                    return results
+                    break
                 user = message.get("user", "")
                 text = message.get("text")
                 message_ts = message.get("ts")
@@ -160,6 +177,7 @@ def check_slack_messages(args, client, patterns, profile_name, channel_types, is
                         matches = system.read_match_strings(args, file_addr, 'slack')
                         if matches:
                             for match in matches:
+                                total_results += 1
                                 results.append({
                                     'channel_id': channel_id,
                                     'channel_name': channel_name,
@@ -177,6 +195,7 @@ def check_slack_messages(args, client, patterns, profile_name, channel_types, is
                     matches = system.match_strings(args, text)
                     if matches:
                         for match in matches:
+                            total_results += 1
                             results.append({
                                 'channel_id': channel_id,
                                 'channel_name': channel_name,
@@ -207,6 +226,7 @@ def check_slack_messages(args, client, patterns, profile_name, channel_types, is
                                     matches = system.read_match_strings(args, file_addr, 'slack')
                                     if matches:
                                         for match in matches:
+                                            total_results += 1
                                             results.append({
                                                 'channel_id': channel_id,
                                                 'channel_name': channel_name,
@@ -223,6 +243,7 @@ def check_slack_messages(args, client, patterns, profile_name, channel_types, is
                                 reply_matches = system.match_strings(args, reply_text)
                                 if reply_matches:
                                     for match in reply_matches:
+                                        total_results += 1
                                         results.append({
                                             'channel_id': channel_id,
                                             'channel_name': channel_name,
@@ -250,7 +271,6 @@ def download_file(args, client, file_info, folder_path) -> str:
         # Use the Slack client to get file info
         file_url = file_info['url_private_download']
         file_name = file_info['name']
-
         # Create the full path to save the file
         file_path = os.path.join(folder_path, file_name)
 
