@@ -22,7 +22,7 @@ def connect_slack(args, token):
         system.print_error(args, f"Failed to connect to Slack with error: {e.response['error']}")
         return None
 
-def check_slack_messages(args, client, patterns, profile_name, channel_types, isExternal, read_from, channel_ids=None, limit_mins=60, archived_channels=False):
+def check_slack_messages(args, client, patterns, profile_name, channel_types, isExternal, read_from, channel_ids=None, limit_mins=60, archived_channels=False, onlyArchived=False):
     results = []
     try:
         connection = system.get_connection(args)
@@ -59,6 +59,8 @@ def check_slack_messages(args, client, patterns, profile_name, channel_types, is
             cursor = None
             while True:
                 try:
+                    if onlyArchived:
+                        archived_channels = True
                     if archived_channels:
                         system.print_debug(args, f"Considering archived channels, you may want to set archived_channels to False")
                     else:
@@ -71,7 +73,11 @@ def check_slack_messages(args, client, patterns, profile_name, channel_types, is
                         cursor=cursor,
                         exclude_archived=not archived_channels
                     )
-                    channels.extend(response.get("channels", []))
+                    if onlyArchived:
+                        system.print_info(args, "Getting only archived channels....")
+                        channels.extend([channel for channel in response.get("channels", []) if channel.get("is_archived")])
+                    else:
+                        channels.extend(response.get("channels", []))
                     # Update the cursor for the next batch
                     cursor = response.get("response_metadata", {}).get("next_cursor")
 
@@ -355,8 +361,9 @@ def execute(args):
                 channel_ids = config.get('channel_ids', [])
                 limit_mins = config.get('limit_mins', 60)
                 isExternal = config.get('isExternal', None)
+                onlyArchived = config.get('onlyArchived', False)
                 archived_channels = config.get('archived_channels', False)
-
+    
                 if token:
                     system.print_info(args, f"Checking Slack Profile {key}")
                 else:
@@ -365,7 +372,7 @@ def execute(args):
 
                 client = connect_slack(args, token)
                 if client:
-                    results += check_slack_messages(args, client, patterns, key, channel_types, isExternal, read_from, channel_ids, limit_mins, archived_channels)
+                    results += check_slack_messages(args, client, patterns, key, channel_types, isExternal, read_from, channel_ids, limit_mins, archived_channels, onlyArchived)
         else:
             system.print_error(args, "No Slack connection details found in connection.yml")
     else:

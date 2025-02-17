@@ -139,6 +139,7 @@ sources:
     slack_example:
       channel_types: "public_channel,private_channel"
       token: xoxp-XXXXXXXXXXXXXXXXXXXXXXXXX
+      onlyArchived: False ## By default False, set to True if you want to scan archived channels only
       archived_channels: True ## By default False, set to True if you want to scan archived channels also
       limit_mins: 15 ## By default 60 mins
       read_from: last_message ## By default current Unix timestamp, available options - UNIX Timestamp (e..g: 1737354387), last_message
