@@ -359,10 +359,16 @@ def execute(args):
                 token = config.get('token')
                 channel_types = config.get('channel_types', "public_channel,private_channel")
                 channel_ids = config.get('channel_ids', [])
+                blacklisted_channel_ids = config.get('blacklisted_channel_ids', [])
                 limit_mins = config.get('limit_mins', 60)
                 isExternal = config.get('isExternal', None)
                 onlyArchived = config.get('onlyArchived', False)
                 archived_channels = config.get('archived_channels', False)
+
+                # check if channel_ids has blacklisted channel ids, then remove them
+                for blacklisted_channel_id in blacklisted_channel_ids:
+                    if blacklisted_channel_id in channel_ids:
+                        channel_ids.remove(blacklisted_channel_id)
     
                 if token:
                     system.print_info(args, f"Checking Slack Profile {key}")

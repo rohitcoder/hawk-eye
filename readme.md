@@ -11,13 +11,6 @@
 <img alt="Static Badge" src="https://img.shields.io/badge/Supports-On Prem-black?logo=amazonec2">
 </p>
 
-
-Join our Slack community for support, discussions, or to contribute!
-
-<a href="https://join.slack.com/t/hawkeyecommunity/shared_invite/zt-2xz0qbo8n-KQQ9UQ1KW2QfaMVDmCWYrw" target="_blank">
-    <img src="https://i.imgur.com/BUtBFwE.png" alt="Join Slack Community" width="150" />
-</a>
-
 <div id="description">
 
 ### 🦅 Hawk Eye - Uncover Secrets and PII Across All Platforms in Minutes!

@@ -146,3 +146,5 @@ sources:
       isExternal: True ## By default None (Scan everything even if its external or not external), set to True if you want to scan external channels only
       channel_ids:
       - XXXXXXXX
+      blacklisted_channel_ids:
+      - XXXXXXXX

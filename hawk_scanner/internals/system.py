@@ -706,6 +706,7 @@ def create_jira_ticket(args, issue_data, message):
     description_template = issue_fields.get('description_template', '')
     orig_msg = orig_msg + "\n\n" + "Severity: " + severity + "\n" + "Severity Description: " + severity_description
     description = description_template.format(details=orig_msg, **issue_data)
+    print("severity - ", severity)
     payload = {
         "fields": {
             "project": {"key": project},
