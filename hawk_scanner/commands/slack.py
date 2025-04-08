@@ -22,7 +22,7 @@ def connect_slack(args, token):
         system.print_error(args, f"Failed to connect to Slack with error: {e.response['error']}")
         return None
 
-def check_slack_messages(args, client, patterns, profile_name, channel_types, isExternal, read_from, channel_ids=None, limit_mins=60, archived_channels=False, onlyArchived=False):
+def check_slack_messages(args, client, patterns, profile_name, channel_types, isExternal, read_from, channel_ids=None, limit_mins=60, archived_channels=False, onlyArchived=False, blacklisted_channel_ids=None):
     results = []
     try:
         connection = system.get_connection(args)
@@ -35,6 +35,11 @@ def check_slack_messages(args, client, patterns, profile_name, channel_types, is
 
         team_info = client.team_info()
         workspace_url = team_info["team"]["url"].rstrip('/')
+
+        # Initalize blacklisted_channel_ids if not provided
+        if blacklisted_channel_ids is None:
+            blacklisted_channel_ids = []
+            
         # Helper function to handle rate limits
         hawk_args = args
         def rate_limit_retry(func, *args, **kwargs):
@@ -89,6 +94,9 @@ def check_slack_messages(args, client, patterns, profile_name, channel_types, is
         else:
             system.print_info(args, "Getting channels by channel_ids")
             for channel_id in channel_ids:
+                if channel_id in blacklisted_channel_ids:
+                    system.print_debug(args, f"Skipping blacklisted channel: {channel_id}")
+                    continue
                 try:
                     channel = rate_limit_retry(client.conversations_info, channel=channel_id)["channel"]
                     if archived_channels or not channel.get("is_archived"):
@@ -365,10 +373,11 @@ def execute(args):
                 onlyArchived = config.get('onlyArchived', False)
                 archived_channels = config.get('archived_channels', False)
 
-                # check if channel_ids has blacklisted channel ids, then remove them
-                for blacklisted_channel_id in blacklisted_channel_ids:
-                    if blacklisted_channel_id in channel_ids:
-                        channel_ids.remove(blacklisted_channel_id)
+                # Filter out blacklisted channels, If specific channels are specified
+                if channel_ids:
+                    system.print_info(args, f"Filtering out blacklisted channels from {channel_ids}")
+                    channel_ids = [channel_id for channel_id in channel_ids if channel_id not in blacklisted_channel_ids]
+                    system.print_info(args, f"Filtered channel IDs after blacklist removal: {channel_ids}")
     
                 if token:
                     system.print_info(args, f"Checking Slack Profile {key}")
@@ -378,7 +387,7 @@ def execute(args):
 
                 client = connect_slack(args, token)
                 if client:
-                    results += check_slack_messages(args, client, patterns, key, channel_types, isExternal, read_from, channel_ids, limit_mins, archived_channels, onlyArchived)
+                    results += check_slack_messages(args, client, patterns, key, channel_types, isExternal, read_from, channel_ids, limit_mins, archived_channels, onlyArchived, blacklisted_channel_ids)
         else:
             system.print_error(args, "No Slack connection details found in connection.yml")
     else:
