@@ -23,7 +23,13 @@ def connect_slack(args, token):
         return None
 
 def check_slack_messages(args, client, patterns, profile_name, channel_types, isExternal, read_from, channel_ids=None, limit_mins=60, archived_channels=False, onlyArchived=False, blacklisted_channel_ids=None):
+    
     results = []
+
+    # Initalize blacklisted_channel_ids if not provided
+    if blacklisted_channel_ids is None:
+        blacklisted_channel_ids = []
+        
     try:
         connection = system.get_connection(args)
         options = connection.get('options', {})
@@ -35,10 +41,6 @@ def check_slack_messages(args, client, patterns, profile_name, channel_types, is
 
         team_info = client.team_info()
         workspace_url = team_info["team"]["url"].rstrip('/')
-
-        # Initalize blacklisted_channel_ids if not provided
-        if blacklisted_channel_ids is None:
-            blacklisted_channel_ids = []
             
         # Helper function to handle rate limits
         hawk_args = args
@@ -59,11 +61,32 @@ def check_slack_messages(args, client, patterns, profile_name, channel_types, is
 
         if not channel_ids:
             system.print_info(args, "Getting all channels because no channel_ids provided")
+            system.print_info(args, f"Active blacklist: {blacklisted_channel_ids}")
 
             # Pagination logic to fetch all non-archived channels
             cursor = None
             while True:
                 try:
+                    response = rate_limit_retry(
+                        client.conversations_list,
+                        types=channel_types,
+                        limit=1000,
+                        cursor=cursor,
+                        exclude_archived=not archived_channels
+                        )
+                    
+                    # Filter blacklisted channels immediately
+                    batch_channels = response.get("channels", [])
+                    filtered_batch = [
+                        ch for ch in batch_channels 
+                        if ch['id'] not in blacklisted_channel_ids
+                    ]
+
+                    # Log filtering results
+                    system.print_debug(args, 
+                        f"Batch: {len(batch_channels)} channels before filtering, "
+                        f"{len(filtered_batch)} after blacklist")
+
                     if onlyArchived:
                         archived_channels = True
                     if archived_channels:
@@ -71,18 +94,12 @@ def check_slack_messages(args, client, patterns, profile_name, channel_types, is
                     else:
                         system.print_debug(args, f"Skipping archived channels, you may want to set archived_channels to True")
 
-                    response = rate_limit_retry(
-                        client.conversations_list,
-                        types=channel_types,
-                        limit=1000,
-                        cursor=cursor,
-                        exclude_archived=not archived_channels
-                    )
+
                     if onlyArchived:
                         system.print_info(args, "Getting only archived channels....")
-                        channels.extend([channel for channel in response.get("channels", []) if channel.get("is_archived")])
+                        channels.extend([ch for ch in batch_channels if ch.get("is_archived")])
                     else:
-                        channels.extend(response.get("channels", []))
+                        channels.extend(filtered_batch)
                     # Update the cursor for the next batch
                     cursor = response.get("response_metadata", {}).get("next_cursor")
 
@@ -106,6 +123,7 @@ def check_slack_messages(args, client, patterns, profile_name, channel_types, is
                 except SlackApiError as e:
                     system.print_error(args, f"Failed to fetch channel with id {channel_id} with error: {e.response['error']}")
         system.print_info(args, f"Found {len(channels)} channels")
+
         filtered_channels = []
         for channel in channels:
             channel_is_external = channel.get("is_ext_shared")
@@ -372,6 +390,22 @@ def execute(args):
                 isExternal = config.get('isExternal', None)
                 onlyArchived = config.get('onlyArchived', False)
                 archived_channels = config.get('archived_channels', False)
+
+                # Always apply blacklist, regardless of channel_ids
+                if blacklisted_channel_ids:
+                    system.print_info(args, f"Filtering out blacklisted channels from {blacklisted_channel_ids}")
+                    # If specific channels are specified, filter them
+                    if channel_ids:
+                        original_count = len(channel_ids)
+                        channel_ids = [
+                            cid for cid in channel_ids 
+                            if cid not in blacklisted_channel_ids
+                        ]
+                        removed = original_count - len(channel_ids)
+                        system.print_info(args,
+                            f"Filtered {removed} blacklisted channels from explicit list. "
+                            f"Remaining: {channel_ids}")
+
 
                 # Filter out blacklisted channels, If specific channels are specified
                 if channel_ids:
