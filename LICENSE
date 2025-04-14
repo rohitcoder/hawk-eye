@@ -1,36 +1,22 @@
-Business Source License 1.1
+"Commons Clause” License Condition v1.1"
+The Software is provided to you by the Licensor under the License, as defined below, subject to the following condition.  
 
-Parameters
-Licensor: Rohit Kumar (https://github.com/rohitcoder)
+Without limiting other conditions in the License, the grant of rights under the License will not include, and the License does not grant to you, the right to Sell the Software or build a product on top of it for commercial gains without explicit written consent from the Licensor.  
+
+For purposes of the foregoing:  
+- "Sell" means practicing any or all of the rights granted to you under the License to provide to third parties, for a fee or other consideration (including without limitation fees for hosting or consulting/support services related to the Software), a product or service whose value derives, entirely or substantially, from the functionality of the Software.  
+
+You are, however, permitted to use the Software:  
+- For your own organization’s internal purposes or individual use without commercial intent.  
+- As part of paid engagements, audits, or other work performed for your clients, provided that such use does not involve distributing, reselling, or commercializing a product or service based on the Software.  
+
+However, you are not permitted to:  
+- Distribute, resell, or commercialize a product or service based on the Software, unless you obtain prior written consent from the Licensor.  
+- Act as a vendor selling a product derived from or built on top of the Software in any form, including but not limited to SaaS, on-premises, or embedded software models, without explicit authorization.  
+
+
+Any license notice or attribution required by the License must also include this Commons Clause License Condition notice.
+
 Software: hawk-eye
-Licensed Work: The software provided in this repository
-Change Date: 2028-01-01
-Change License: GNU General Public License v2.0 or later
-
-Terms
-
-The Licensor grants you the right to use, copy, modify, create derivative works, and distribute the Licensed Work, subject to the following limitations and conditions.
-
-Use Limitation:
-Use of the Licensed Work is permitted for non-commercial purposes only. Any form of commercial use — including but not limited to providing the software as a service, selling it, embedding it in a commercial offering, or offering paid support — is **not allowed without the Licensor's explicit written permission**.
-
-Definition of Commercial Use:
-"Commercial Use" includes any use for which you or others receive direct or indirect compensation, including hosting, consulting, resale, or integration into commercial products or services.
-
-Change Date:
-After the Change Date, the Licensed Work will be governed by the Change License, allowing unrestricted use under those terms.
-
-Additional Condition (Commons Clause-style restriction):
-This license does not grant you the right to Sell the Software or build a product on top of it for commercial gains without explicit written consent from the Licensor. This includes:
-- Providing paid hosting or services where the software is a core component.
-- Building SaaS or on-prem products based on the Licensed Work.
-- Redistributing modified or unmodified copies as part of a product or service for a fee.
-
-Internal Use Exception:
-You are allowed to use this software within your organization or for individual non-commercial use, including:
-- Academic, research, or personal hobby projects.
-- Consulting or audits where the software is not being redistributed or productized.
-
-This license notice and the Commons Clause-style restriction must be included with all copies or substantial portions of the Licensed Work.
-
-For inquiries, contact the Licensor at: https://github.com/rohitcoder
+License: LGPL 2.1 (GNU Lesser General Public License, Version 2.1)
+Licensor: Rohit Kumar (https://github.com/rohitcoder)
