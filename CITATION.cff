@@ -1,4 +1,4 @@
-cff-version: 1.2.0
+cff-version: 1.2.1
 message: "If you use this software, please cite it as below. Reminder to update the `version` and `date-released` as needed."
 title: "Hawk-Eye: Find PII & Secrets like never before across your entire infrastructure with same tool!"
 authors:
