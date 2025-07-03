@@ -382,6 +382,8 @@ sources:
       limit_from: last_message ## By default current Unix timestamp, available options - UNIX Timestamp (e..g: 1737354387 last_message
       channel_ids:
       - XXXXXXXX
+      blacklisted_channel_ids:
+      - XXXXXXXX
 ```
 
 You can add or remove profiles from the connection.yml file as needed. You can also configure only one or two data sources if you don't need to scan all of them.
