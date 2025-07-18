@@ -387,6 +387,29 @@ sources:
 ```
 
 You can add or remove profiles from the connection.yml file as needed. You can also configure only one or two data sources if you don't need to scan all of them.
+
+## Slack Bot Mentions and Workflow Integration
+
+Hawk-eye now supports customizable Slack mentions in alert messages, allowing you to trigger internal Slack bot workflows (such as archiving the channel, etc) automatically.
+
+### How to Configure Slack Mentions
+
+In your `connection.yml`, under the `notify.slack` section, add a `mention` key. This value should be the Slack user ID of your bot in the format `<@USERID>`. Using the display name (e.g., `@DataScanBot`) will not trigger a real mention—Slack requires the user ID format.
+
+**Example:**
+```yaml
+notify:
+  slack:
+    webhook_url: https://hooks.slack.com/services/...
+    mention: "<@U12345678>"  # Replace with your bot's actual user ID
+```
+
+When Hawk-eye sends a Slack alert, the message will begin with this mention, ensuring your bot is properly notified and any associated workflows are triggered.
+
+**Tip:** To find your bot's user ID, click on the bot's profile in Slack and look for the ID in the URL (e.g., `/team/U12345678`).
+
+```
+
 </div>
 
 ## Adding New Commands
