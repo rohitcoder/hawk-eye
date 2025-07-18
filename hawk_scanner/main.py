@@ -47,7 +47,7 @@ def group_results(args, results):
     return grouped_results
 
 
-def format_slack_message(group, result, records_mini):
+def format_slack_message(group, result, records_mini, mention):
     template_map = {
         's3': """
         *** PII Or Secret Found ***
@@ -171,7 +171,7 @@ def format_slack_message(group, result, records_mini):
         Exposed Values: {exposed_values}
         """
     }
-    return template_map.get(group, "").format(
+    return f"{mention} " + template_map.get(group, "").format(
         vulnerable_profile=result['profile'],
         bucket=result.get('bucket', ''),
         file_path=result.get('file_path', ''),
@@ -258,7 +258,9 @@ def main():
         add_columns_to_table(group, table)
         for i, result in enumerate(group_data, 1):
             records_mini = ', '.join(result['matches']) if len(result['matches']) < 25 else ', '.join(result['matches'][:25]) + f" + {len(result['matches']) - 25} more"
-            slack_message = format_slack_message(group, result, records_mini)
+            connection = system.get_connection(args)
+            mention = connection.get('notify', {}).get('slack', {}).get('mention', '')
+            slack_message = format_slack_message(group, result, records_mini, mention)
             if slack_message:
                 system.create_jira_ticket(args, result, slack_message)
                 system.SlackNotify(slack_message, args)
