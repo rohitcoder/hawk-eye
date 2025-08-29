@@ -3,6 +3,7 @@ notify:
   suppress_duplicates: True
   slack:
     webhook_url: https://hooks.slack.com/services/T0XXXXXXXXXXX/BXXXXXXXX/1CIyXXXXXXXXXXXXXXX
+    mention: "<@U013BDEFABC>"
   jira:
     username: "amce@org.com"
     server_url: "https://amce.atlassian.net"
