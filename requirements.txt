@@ -24,3 +24,4 @@ tqdm
 funcy
 fsspec
 opencv-python
+cryptography>=46.0.5 # not directly required, pinned by Snyk to avoid a vulnerability
