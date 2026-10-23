@@ -86,9 +86,11 @@ sources:
       database: YOUR_POSTGRESQL_DATABASE_NAME
       limit_start: 0   # Specify the starting limit for the range
       limit_end: 500   # Specify the ending limit for the range
-      tables:
-        - table1
-        - table2
+      tables:          # Optional, scans every non-system schema when omitted
+        - table1       # matched in any schema
+        - billing.invoices  # or qualify it as schema.table
+      exclude_columns: # Optional, skip these columns
+        - password_hash
   mongodb:
     mongodb_example:
       uri: YOUR_MONGODB_URI
