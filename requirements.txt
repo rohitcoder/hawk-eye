@@ -24,3 +24,4 @@ tqdm
 funcy
 fsspec
 opencv-python
+psycopg2-binary

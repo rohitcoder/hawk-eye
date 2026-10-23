@@ -118,11 +118,19 @@ def RedactData(input_string):
 
     return redacted_string
 
+_FINGERPRINT_CACHE = {}
+_CONNECTION_CACHE = {}
+
+
 def get_connection(args):
     if args.connection:
         if os.path.exists(args.connection):
+            cached = _CONNECTION_CACHE.get(args.connection)
+            if cached is not None:
+                return cached
             with open(args.connection, 'r') as file:
                 connections = yaml.safe_load(file)
+                _CONNECTION_CACHE[args.connection] = connections
                 return connections
         else:
             print_error(args, f"Connection file not found: {args.connection}")
@@ -138,7 +146,30 @@ def get_connection(args):
         print_error(args, "Please provide a connection file using --connection flag or connection details using --connection-json flag")
         exit(1)
 
+def _fingerprint_cache_key(args):
+    if args and type(args) == argparse.Namespace and args.fingerprint:
+        return ('file', args.fingerprint)
+    if args and type(args) == dict and 'fingerprint' in args:
+        return None  # caller supplied the patterns inline, nothing to cache
+    return ('default',)
+
+
 def get_fingerprint_file(args=None):
+    # The patterns are identical for every value scanned, so resolve them once
+    # per run. Without this the default path re-downloads fingerprint.yml for
+    # each cell/file inspected.
+    cache_key = _fingerprint_cache_key(args)
+    if cache_key is not None and cache_key in _FINGERPRINT_CACHE:
+        return _FINGERPRINT_CACHE[cache_key]
+
+    patterns = _load_fingerprint_file(args)
+
+    if cache_key is not None:
+        _FINGERPRINT_CACHE[cache_key] = patterns
+    return patterns
+
+
+def _load_fingerprint_file(args=None):
     if args and type(args) == argparse.Namespace and args.fingerprint:
         if os.path.exists(args.fingerprint):
             with open(args.fingerprint, 'r') as file:
@@ -210,6 +241,18 @@ def print_banner(args):
     if not args.shutup:
         console.print(banner)
 
+_COMPILED_PATTERNS = {}
+
+
+def _compiled_pattern(pattern_regex):
+    # Compiling is cached so a scan does not rebuild every regex per value.
+    compiled = _COMPILED_PATTERNS.get(pattern_regex)
+    if compiled is None:
+        compiled = re.compile(pattern_regex, re.IGNORECASE)
+        _COMPILED_PATTERNS[pattern_regex] = compiled
+    return compiled
+
+
 def match_strings(args, content, source='text'):
     redacted = False
     if args and 'connection' in args:
@@ -225,7 +268,7 @@ def match_strings(args, content, source='text'):
             print_debug(args, f"Matching pattern: {pattern_name}")
         found = {} 
         ## parse pattern_regex as Regex
-        complied_regex = re.compile(pattern_regex, re.IGNORECASE)
+        complied_regex = _compiled_pattern(pattern_regex)
         if args:
             print_debug(args, f"Regex: {complied_regex}")
             print_debug(args, f"Content: {content}")
