@@ -408,8 +408,6 @@ When Hawk-eye sends a Slack alert, the message will begin with this mention, ens
 
 **Tip:** To find your bot's user ID, click on the bot's profile in Slack and look for the ID in the URL (e.g., `/team/U12345678`).
 
-```
-
 </div>
 
 ## Adding New Commands
